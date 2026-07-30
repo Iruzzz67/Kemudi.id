@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Blend",
+    "\\components",
+    "\\components\\kursus",
+    "\\components\\simulation",
+    "\\components\\simulation\\vehicles",
+    "\\prisma\\migrations",
+    "\\prisma\\migrations\\20260723031650_rename_cone_hits_to_violations",
+    "\\public",
+    "\\public\\models"
+  ],
+  "SelectedNode": "\\package.json",
+  "PreviewInSolutionExplorer": false
+}

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(NODE_PATH=\"/c/Users/user/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules\" node -e \"require\\('playwright'\\); console.log\\('ok'\\)\")"
+    ]
+  }
+}

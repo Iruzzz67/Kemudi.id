@@ -1,0 +1,189 @@
+"use client";
+
+import { RefObject, useEffect, useMemo } from "react";
+import * as THREE from "three";
+import { useGLTF } from "@react-three/drei";
+import { VehicleConfig, VehicleType, pivotHeightOf } from "@/lib/vehicles";
+
+const MODEL_URL: Record<VehicleType, string> = {
+  MOTOR: "/models/motor.glb",
+  MOBIL: "/models/mobil.glb",
+  TRUK: "/models/truck.glb",
+};
+
+// A standard glTF export already faces -Z (the sim's forward direction), so
+// no base flip is needed. Tweak per vehicle here (e.g. Math.PI) if a
+// particular export was authored facing some other way — instead of
+// re-exporting the .blend file.
+const EXTRA_ROTATION_Y: Record<VehicleType, number> = {
+  MOTOR: 0,
+  MOBIL: 0,
+  TRUK: 0,
+};
+
+// Some exports carry a leftover ground/backdrop plane (and sometimes a
+// camera) from whatever tool produced the .glb — these aren't part of the
+// vehicle and badly skew the auto-fit bounding box below if left in.
+const HELPER_NAME_PATTERN = /^(plane\d*|ground[_-]?plane\d*|backdrop\d*)$/i;
+
+function stripHelperObjects(root: THREE.Object3D) {
+  const toRemove: THREE.Object3D[] = [];
+  root.traverse((obj) => {
+    const isCamera = (obj as THREE.Camera).isCamera;
+    const isHelperMesh = (obj as THREE.Mesh).isMesh && HELPER_NAME_PATTERN.test(obj.name);
+    if (isCamera || isHelperMesh) toRemove.push(obj);
+  });
+  toRemove.forEach((obj) => obj.parent?.remove(obj));
+}
+
+// Node names (by source glTF node name, not mesh name) that make up each
+// independently-steerable assembly — everything physically bolted to the
+// front fork/axle, so it swivels as one rigid piece with the wheel/handlebar
+// instead of the tire spinning away from a fork that stays put. Each inner
+// array shares a single pivot; separate arrays (e.g. the truck's two front
+// wheels) get their own pivot so they swivel in place instead of arcing
+// around a shared center between them.
+//
+// MOBIL has no entry: that source model is a single fused mesh with no
+// separate wheel/steering geometry, so there's nothing to rotate — it would
+// need a re-export with the wheels as distinct objects to support this.
+const STEER_GROUPS: Partial<Record<VehicleType, string[][]>> = {
+  MOTOR: [["ban_depan", "shock_depan", "spakbor_depan", "rem_depan", "handlebars", "rem_tangan", "kopling"]],
+  TRUK: [["Llantas_delantera_derecha"], ["Llantas_delantera_Izquierda"]],
+};
+
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Blender exports commonly have several objects sharing one name (e.g. a
+// wheel's tire/rim/hub) — GLTFLoader disambiguates collisions by appending
+// "_1", "_2", ... to the name, so match the whole family, not just the bare
+// name (which would only catch one of the three and leave the rest behind).
+function buildNameMatcher(baseNames: string[]) {
+  const pattern = new RegExp(`^(?:${baseNames.map(escapeRegExp).join("|")})(?:_\\d+)?$`);
+  return (name: string) => pattern.test(name);
+}
+
+function buildSteerGroups(model: THREE.Object3D, groups: string[][] | undefined): THREE.Object3D[] {
+  if (!groups || groups.length === 0) return [];
+  model.updateMatrixWorld(true);
+
+  const pivots: THREE.Object3D[] = [];
+  for (const baseNames of groups) {
+    const matches = buildNameMatcher(baseNames);
+    const matched: THREE.Object3D[] = [];
+    model.traverse((obj) => {
+      if (matches(obj.name)) matched.push(obj);
+    });
+    if (matched.length === 0) continue;
+
+    // Pivot at the assembly's own bounding-box center — a reasonable stand-in
+    // for the real steering axis without needing per-model axle metadata.
+    const box = new THREE.Box3();
+    matched.forEach((obj) => box.expandByObject(obj));
+    const center = box.getCenter(new THREE.Vector3());
+
+    const pivot = new THREE.Group();
+    pivot.position.copy(center);
+    model.add(pivot);
+    // attach() (not add()) reparents while preserving each part's current
+    // world transform, so nothing jumps even though these parts may be
+    // nested several levels deep in the original hierarchy.
+    matched.forEach((obj) => pivot.attach(obj));
+    pivots.push(pivot);
+  }
+  return pivots;
+}
+
+export function GltfVehicleMesh({
+  config,
+  leanRef,
+  steerRef,
+}: {
+  config: VehicleConfig;
+  leanRef: RefObject<THREE.Group | null>;
+  steerRef: RefObject<THREE.Object3D[]>;
+}) {
+  const { scene } = useGLTF(MODEL_URL[config.type]);
+
+  // Clone so re-selecting a vehicle (unmount/remount) doesn't reuse — and
+  // mutate in place — the single scene graph useGLTF caches per URL.
+  const { model, steerGroups } = useMemo(() => {
+    const clone = scene.clone(true);
+    stripHelperObjects(clone);
+    const groups = buildSteerGroups(clone, STEER_GROUPS[config.type]);
+    return { model: clone, steerGroups: groups };
+  }, [scene, config.type]);
+
+  useEffect(() => {
+    steerRef.current = steerGroups;
+  }, [steerGroups, steerRef]);
+
+  useEffect(() => {
+    model.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+  }, [model]);
+
+  // Auto-fit the model into the vehicle's physics/collider bounding box
+  // (lib/vehicles.ts) so the exported .blend's own scale/units don't matter.
+  // Which horizontal axis is "length" varies per export (some face -Z, some
+  // face -X), so pick whichever of the model's raw x/z is longer — a vehicle
+  // is always longer than it is wide — rather than assuming z is length, and
+  // add the matching 90° correction so it still ends up facing -Z.
+  const { scale, offset, rotationY } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+
+    const zIsLength = size.z >= size.x;
+    const modelWidth = zIsLength ? size.x : size.z;
+    const modelLength = zIsLength ? size.z : size.x;
+    const autoRotationY = zIsLength ? 0 : Math.PI / 2;
+
+    const s = Math.min(
+      config.dimensions.width / Math.max(modelWidth, 1e-4),
+      config.dimensions.height / Math.max(size.y, 1e-4),
+      config.dimensions.length / Math.max(modelLength, 1e-4)
+    );
+
+    // Translation is applied after rotation in Object3D's local transform, so
+    // to land the model centered at the origin post-rotation, rotate the
+    // (scaled) center first and cancel that out — instead of the center in
+    // the model's own unrotated axes, which would land wrong once rotated.
+    const totalRotationY = autoRotationY + EXTRA_ROTATION_Y[config.type];
+    const scaledCenter = center.clone().multiplyScalar(s);
+    scaledCenter.applyAxisAngle(new THREE.Vector3(0, 1, 0), totalRotationY);
+
+    return {
+      scale: s,
+      offset: new THREE.Vector3(-scaledCenter.x, -box.min.y * s, -scaledCenter.z),
+      rotationY: totalRotationY,
+    };
+  }, [model, config.dimensions, config.type]);
+
+  const pivotHeight = pivotHeightOf(config);
+
+  return (
+    <group ref={leanRef} position={[0, pivotHeight, 0]}>
+      <group position={[0, -pivotHeight, 0]}>
+        <primitive
+          object={model}
+          scale={scale}
+          position={[offset.x, offset.y, offset.z]}
+          rotation={[0, rotationY, 0]}
+        />
+      </group>
+    </group>
+  );
+}
+
+useGLTF.preload("/models/motor.glb");
+useGLTF.preload("/models/mobil.glb");
+useGLTF.preload("/models/truck.glb");
