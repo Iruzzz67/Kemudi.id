@@ -101,7 +101,7 @@ export default async function MentorPortfolioPage({
         href={`/kursus/personal?mentor=${mentor.id}`}
         className="mt-10 inline-block rounded-full bg-blue-600 px-6 py-2.5 font-semibold text-white hover:bg-blue-700"
       >
-        Daftar Kursus dengan {mentor.name.split(" ")[0]}
+        Lanjutkan Pendaftaran
       </Link>
     </div>
   );
