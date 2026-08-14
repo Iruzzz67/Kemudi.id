@@ -9,11 +9,12 @@ import {
   buildRibbonGeometry,
   getSampleNearZ,
   PEDESTRIAN_CROSSING_ZS,
-  TRAFFIC_LIGHT_Z,
+  TRAFFIC_LIGHT_ZS,
 } from "@/lib/track";
 import { CrosswalkMarkings } from "./CrosswalkMarkings";
 import { Pedestrian } from "./Pedestrian";
 import { TrafficLight } from "./TrafficLight";
+import { Scenery } from "./Scenery";
 
 export function Track() {
   const roadGeometry = useMemo(
@@ -28,12 +29,24 @@ export function Track() {
     () => buildRibbonGeometry({ offset: ROAD_HALF_WIDTH, width: 0.2, y: 0.01 }),
     []
   );
+  // Trotoar / bahu jalan di kedua sisi — memberi kesan jalan perkotaan.
+  const leftSidewalkGeometry = useMemo(
+    () => buildRibbonGeometry({ offset: -(ROAD_HALF_WIDTH + 1.0), width: 2.0, y: 0.02 }),
+    []
+  );
+  const rightSidewalkGeometry = useMemo(
+    () => buildRibbonGeometry({ offset: ROAD_HALF_WIDTH + 1.0, width: 2.0, y: 0.02 }),
+    []
+  );
 
   const crossingSamples = useMemo(
     () => PEDESTRIAN_CROSSING_ZS.map((z) => getSampleNearZ(z)),
     []
   );
-  const trafficLightSample = useMemo(() => getSampleNearZ(TRAFFIC_LIGHT_Z), []);
+  const trafficLightSamples = useMemo(
+    () => TRAFFIC_LIGHT_ZS.map((z) => getSampleNearZ(z)),
+    []
+  );
 
   return (
     <group>
@@ -46,12 +59,19 @@ export function Track() {
       <mesh geometry={rightEdgeGeometry}>
         <meshStandardMaterial color="#facc15" />
       </mesh>
+      <mesh geometry={leftSidewalkGeometry}>
+        <meshStandardMaterial color="#9ca3af" />
+      </mesh>
+      <mesh geometry={rightSidewalkGeometry}>
+        <meshStandardMaterial color="#9ca3af" />
+      </mesh>
 
+      {/* Rumput memanjang menutupi seluruh trek (±916 m) + area start. */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -0.05, (START_Z + FINISH_Z) / 2 - 10]}
+        position={[0, -0.05, (START_Z + FINISH_Z) / 2]}
       >
-        <planeGeometry args={[600, 600]} />
+        <planeGeometry args={[2200, 980]} />
         <meshStandardMaterial color="#4d7c0f" />
       </mesh>
 
@@ -60,6 +80,10 @@ export function Track() {
         <meshStandardMaterial color="#e5e5e5" />
       </mesh>
 
+      {/* Aset lingkungan & rintangan (cone, barrier, kendaraan parkir, pohon,
+          rumah, halte, lampu jalan, ...) — konfigurasi di lib/scenery.ts. */}
+      <Scenery />
+
       {crossingSamples.map((sample, i) => (
         <group key={i}>
           <CrosswalkMarkings sample={sample} />
@@ -67,7 +91,9 @@ export function Track() {
         </group>
       ))}
 
-      <TrafficLight sample={trafficLightSample} />
+      {trafficLightSamples.map((sample, i) => (
+        <TrafficLight key={i} sample={sample} id={`traffic-light-${i}`} />
+      ))}
     </group>
   );
 }

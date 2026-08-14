@@ -1,0 +1,170 @@
+@page "/kursus/personal"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<div class="section-head">
+    <div>
+        <h1 class="section-title">Data Diri &amp; Pembayaran</h1>
+        <p class="section-sub">Lengkapi data diri Anda dan pilih metode pembayaran untuk melanjutkan pendaftaran.</p>
+    </div>
+</div>
+
+<div class="two-col mt-2">
+    <form class="form form-wide card" @onsubmit="SubmitAsync" @onsubmit:preventDefault>
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="error-box">@_error</div>
+        }
+
+        <div class="grid grid-2">
+            <div class="field">
+                <label>Nama Lengkap</label>
+                <input type="text" @bind="_name" />
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" required @bind="_email" />
+            </div>
+        </div>
+
+        <div class="grid grid-2">
+            <div class="field">
+                <label>No. Telepon (opsional)</label>
+                <input type="tel" @bind="_phone" />
+            </div>
+            <div class="field">
+                <label>NIK</label>
+                <input type="text" @bind="_nik" />
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Alamat</label>
+            <textarea rows="3" @bind="_address"></textarea>
+        </div>
+
+        <div class="field">
+            <label>Mentor</label>
+            <select @bind="_mentorId">
+                <option value="">Pilih mentor...</option>
+                @foreach (var m in _mentors)
+                {
+                    <option value="@m.Id">@m.Name — @m.Title</option>
+                }
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Paket Kursus</label>
+            <select @bind="_packageSlug">
+                <option value="">Pilih paket...</option>
+                @foreach (var p in _packages)
+                {
+                    <option value="@p.Id">@p.Label — Rp @p.Price.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</option>
+                }
+            </select>
+        </div>
+
+        <div class="flex-between">
+            <button type="button" class="btn btn-outline" @onclick="GoBack">Batal</button>
+            <button type="submit" class="btn btn-primary" disabled="@_busy">@(_busy ? "Memproses..." : "Lanjutkan Pendaftaran")</button>
+        </div>
+    </form>
+
+    <div>
+        <div class="card">
+            <h3>Ringkasan Pendaftaran</h3>
+            <div class="list-item"><span class="muted">Mentor</span><br /><strong>@_mentors.FirstOrDefault(m => m.Id == _mentorId)?.Name ?? "Belum dipilih"</strong></div>
+            <div class="list-item"><span class="muted">Paket</span><br /><strong>@_packages.FirstOrDefault(p => p.Id == _packageSlug)?.Label ?? "Belum dipilih"</strong></div>
+            <div class="list-item"><span class="muted">Status</span><br /><strong>Menunggu pembayaran</strong></div>
+        </div>
+
+        <div class="card mt-2">
+            <h3>Metode Pembayaran</h3>
+            <div class="flex" style="flex-direction:column;align-items:stretch">
+                <label class="radio-option @(_method == "transfer" ? "selected" : "")">
+                    <input type="radio" name="method" value="transfer" checked="@(_method == "transfer")" @onchange="OnMethodChange" />
+                    <span>
+                        <span class="label">Transfer Bank</span>
+                        <span class="desc">Transfer ke rekening resmi Kemudi.id</span>
+                    </span>
+                </label>
+                <label class="radio-option @(_method == "e-wallet" ? "selected" : "")">
+                    <input type="radio" name="method" value="e-wallet" checked="@(_method == "e-wallet")" @onchange="OnMethodChange" />
+                    <span>
+                        <span class="label">E-Wallet</span>
+                        <span class="desc">Dana, OVO, atau GoPay</span>
+                    </span>
+                </label>
+                <label class="radio-option @(_method == "cash" ? "selected" : "")">
+                    <input type="radio" name="method" value="cash" checked="@(_method == "cash")" @onchange="OnMethodChange" />
+                    <span>
+                        <span class="label">Bayar di Tempat</span>
+                        <span class="desc">Pembayaran langsung saat verifikasi</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _name = "";
+    private string _email = "";
+    private string _phone = "";
+    private string _nik = "";
+    private string _address = "";
+    private string _mentorId = "";
+    private string _packageSlug = "";
+    private string _method = "transfer";
+    private string? _error;
+    private bool _busy;
+
+    private List<MentorDto> _mentors = new();
+    private List<CoursePackageDto> _packages = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _mentors = await Api.GetAsync<List<MentorDto>>("/api/mentors") ?? new();
+        _packages = await Api.GetAsync<List<CoursePackageDto>>("/api/courses") ?? new();
+    }
+
+    private void GoBack() => Nav.NavigateTo("/kursus");
+
+    private void OnMethodChange(Microsoft.AspNetCore.Components.ChangeEventArgs e)
+        => _method = e.Value?.ToString() ?? "transfer";
+
+    private async Task SubmitAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_name) || string.IsNullOrWhiteSpace(_email) ||
+                string.IsNullOrWhiteSpace(_nik) || string.IsNullOrWhiteSpace(_address) ||
+                string.IsNullOrWhiteSpace(_mentorId) || string.IsNullOrWhiteSpace(_packageSlug))
+            {
+                _error = "Nama, email, NIK, alamat, mentor, dan paket wajib diisi.";
+                return;
+            }
+
+            var result = await Api.PostAsync<CourseRegistrationRequest, CourseRegistrationDto>(
+                "/api/course-registration",
+                new CourseRegistrationRequest(_mentorId, _packageSlug, _name, _email, _phone, _nik, _address, _method));
+
+            if (result is null)
+            {
+                _error = "Pendaftaran gagal. Silakan coba lagi.";
+                return;
+            }
+
+            Nav.NavigateTo($"/kursus/payment?registration={result.Id}&method={_method}");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

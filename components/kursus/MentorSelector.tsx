@@ -106,7 +106,7 @@ export function MentorSelector({ mentors }: { mentors: Mentor[] }) {
           <div className="text-sm text-neutral-500">Pilih salah satu mentor di atas untuk melanjutkan pendaftaran.</div>
         )}
         <Link
-          href={selected ? `/register?mentor=${selected.id}` : "#"}
+          href={selected ? `/kursus/personal?mentor=${selected.id}` : "#"}
           aria-disabled={!selected}
           className={`rounded-full px-6 py-2.5 font-semibold text-white transition ${
             selected ? "bg-blue-600 hover:bg-blue-700" : "pointer-events-none bg-neutral-300 dark:bg-neutral-700"

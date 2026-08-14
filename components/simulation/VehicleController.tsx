@@ -2,25 +2,60 @@
 
 import { CuboidCollider, RigidBody, RapierRigidBody } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
-import { VehicleConfig, pivotHeightOf } from "@/lib/vehicles";
+import { RectObstacle, rectCollides, removeObstacle, setObstacle } from "@/lib/obstacles";
+import { VehicleConfig, pivotHeightOf, defaultVariant } from "@/lib/vehicles";
 import { VehicleMesh } from "./VehicleMesh";
-import { useKeyboard } from "./useKeyboard";
+import { VehicleLights } from "./VehicleLights";
+import { vehicleGearEdges } from "./inputEdges";
 import { useSimStore } from "@/store/simStore";
-import { FINISH_Z, ROAD_HALF_WIDTH, START_Z, distanceToRoadCenterline } from "@/lib/track";
+import { FINISH_Z, PAR_TIME_S, ROAD_HALF_WIDTH, distanceToRoadCenterline } from "@/lib/track";
+import { isInPotholeZone, isInRefuelZone } from "@/lib/scenery";
+import { speedLimitAt, SPEED_TOLERANCE_KMH, WRONG_WAY_THRESHOLD_M } from "@/lib/rules";
+import { WEATHERS } from "@/lib/weather";
+import { loadFinishedVehicles, saveFinishedVehicles } from "@/lib/achievements";
 import { VehicleTransform } from "./transform";
 import { vehicleAudio } from "./audio/vehicleAudio";
 import { REVERSE, NEUTRAL, topSpeedInGear, accelInGear, autoGearFor } from "@/lib/transmission";
 import { createSteeringState, updateSteering, createYawState, stepYaw } from "@/lib/vehicleDynamics";
 
+// Sistem kerusakan: damage naik saat menabrak objek solid, makin cepat makin
+// parah; merusak performa dan bisa menggagalkan latihan.
+const DAMAGE_SOLID_PER_HIT = 14;
+const DAMAGE_FAIL_THRESHOLD = 100;
+const DAMAGE_SPEED_PENALTY = 0.5; // hingga -50% top speed di damage penuh
+const DAMAGE_WARN_COOLDOWN_MS = 3000;
+const FUEL_EMPTY_COOLDOWN_MS = 4000;
+const REFUEL_RATE = 0.25; // per detik saat berada di zona SPBU
 const OFF_ROAD_FRICTION_MULT = 2.2;
 const OFF_ROAD_MAX_SPEED_MULT = 0.4;
+// Zona lubang/area jalan rusak: kecepatan & handling terganggu (bukan stop).
+const POTHOLE_SPEED_MULT = 0.55;
+const POTHOLE_FRICTION_MULT = 1.7;
 const OVER_REV_SHIFT_TOLERANCE = 1.08;
 const STOP_THRESHOLD = 0.5; // m/s, "basically stopped" for gear-direction changes
 const ANTI_ROLL_BASELINE = 5000; // reference point where antiRollForce has no extra effect
 const HANDBRAKE_DAMP_RATE = 6; // 1/s, how hard the handbrake fights any speed
 const HANDBRAKE_WARN_COOLDOWN_MS = 2500;
+// Solid-collision stepping: the vehicle is kinematic, so Rapier never pushes
+// it back — the per-frame move is walked in substeps and the vehicle stops
+// flush against the first solid obstacle (pedestrian, pole, ...). Eight
+// substeps keep the maximum one-frame overshoot under ~5cm at top speed.
+const COLLISION_SUBSTEPS = 8;
+const SELF_OBSTACLE_ID = "player-vehicle";
+
+function vehicleRect(config: VehicleConfig, x: number, z: number, yaw: number): RectObstacle {
+  return {
+    shape: "rect",
+    kind: "vehicle",
+    x,
+    z,
+    yaw,
+    halfW: config.dimensions.width / 2,
+    halfL: config.dimensions.length / 2,
+  };
+}
 
 export function VehicleController({
   config,
@@ -29,7 +64,6 @@ export function VehicleController({
   config: VehicleConfig;
   transform: VehicleTransform;
 }) {
-  const { keys, consumeEdge } = useKeyboard();
   const rigidBody = useRef<RapierRigidBody>(null);
   const visualRoot = useRef<THREE.Group>(null);
   const visualGroup = useRef<THREE.Group>(null);
@@ -50,10 +84,36 @@ export function VehicleController({
   const handbrakeLastWarnAt = useRef(0);
   const wasOffRoad = useRef(false);
   const hasFinished = useRef(false);
+  const hasHitPedestrian = useRef(false);
+  // Rintangan yang sudah dihitung sebagai hit (satu kali per objek per run)
+  // — cone/barrier/kendaraan parkir tidak boleh menambah skor berulang kali
+  // selama kendaraan masih menempel di objek yang sama.
+  const hitObstacleIds = useRef(new Set<string>());
+  // Pelanggaran kecepatan: akumulasi waktu di atas batas sebelum dicatat.
+  const overSpeedMs = useRef(0);
+  const speedViolationCooldown = useRef(0);
+  // Melawan arus: akumulasi jarak mundur (bukan posisi, tapi kecepatan +Z).
+  const wrongWayAccum = useRef(0);
+  const wrongWayCooldown = useRef(0);
+  const damageWarnAt = useRef(0);
+  const fuelWarnAt = useRef(0);
+
+  // Unregister this vehicle's solid obstacle whenever it unmounts (phase
+  // flips to finished/failed) so the registry never holds a stale rect, and
+  // cut any still-honking horn so it can't linger after the drive.
+  useEffect(
+    () => () => {
+      removeObstacle(SELF_OBSTACLE_ID);
+      vehicleAudio.setHorn(false);
+    },
+    []
+  );
 
   const setSpeedKmh = useSimStore((s) => s.setSpeedKmh);
   const setIsOffRoad = useSimStore((s) => s.setIsOffRoad);
   const registerOffRoadEvent = useSimStore((s) => s.registerOffRoadEvent);
+  const registerObstacleHit = useSimStore((s) => s.registerObstacleHit);
+  const registerViolation = useSimStore((s) => s.registerViolation);
   const tickElapsed = useSimStore((s) => s.tickElapsed);
   const finish = useSimStore((s) => s.finish);
   const phase = useSimStore((s) => s.phase);
@@ -67,36 +127,80 @@ export function VehicleController({
   const registerClutchMistake = useSimStore((s) => s.registerClutchMistake);
   const stallEngine = useSimStore((s) => s.stallEngine);
   const raiseWarning = useSimStore((s) => s.raiseWarning);
+  const failSimulation = useSimStore((s) => s.failSimulation);
+  const addDamage = useSimStore((s) => s.addDamage);
+  const setRefueling = useSimStore((s) => s.setRefueling);
+  const consumeFuel = useSimStore((s) => s.consumeFuel);
+  const recordTrip = useSimStore((s) => s.recordTrip);
+  const addFuel = useSimStore((s) => s.addFuel);
+  const setPlayerPos = useSimStore((s) => s.setPlayerPos);
+  const setSpeedLimit = useSimStore((s) => s.setSpeedLimit);
+  const unlockAchievement = useSimStore((s) => s.unlockAchievement);
+  // Varian kendaraan — hanya 1 varian default per kendaraan.
+  const vehicleType = useSimStore((s) => s.vehicle);
+  const variant = defaultVariant(vehicleType);
 
   useFrame((_, rawDelta) => {
+    // Keep the registry's copy of this vehicle's rect in sync every frame so
+    // pedestrians (and any other solid object) stop against it instead of
+    // walking through — the vehicle blocks them, and they block it back.
+    setObstacle(SELF_OBSTACLE_ID, vehicleRect(config, transform.position.x, transform.position.z, yaw.current));
+
     const body = rigidBody.current;
     if (!body || phase !== "driving") {
       vehicleAudio.silence();
+      vehicleAudio.setHorn(false);
+      vehicleGearEdges.clear();
+      return;
+    }
+
+    // The merged input snapshot published by InputManager each frame — the
+    // single source of truth whether the driver is on keyboard, VR controller,
+    // or a desktop gamepad.
+    const state = useSimStore.getState();
+    const vi = state.vehicleInput;
+
+    // Pause freezes the whole drive loop: no movement, no timer, no warnings.
+    if (state.paused) {
+      vehicleAudio.silence();
+      vehicleAudio.setHorn(false);
+      vehicleGearEdges.clear();
       return;
     }
 
     // Engine off (still in ignition ACC/ON/START, or stalled): the car is a
     // stationary shell — no movement, no timer, no engine note — until the
     // player actually starts it. Matches "mesin harus menyala dulu" in spec.
+    // The horn still works here (it runs off the battery, like a real car).
     if (!engineRunning) {
       vehicleAudio.silence();
+      vehicleAudio.setHorn(vi.horn);
       return;
     }
 
     const delta = Math.min(rawDelta, 0.05);
-    const k = keys.current;
-    const throttle = k.forward ? 1 : 0;
+    const throttle = vi.throttle;
     const throttleOn = throttle > 0;
-    const brakePedal = k.brake;
+    const brakePedal = vi.brake > 0.1;
+    const isClutchHeld = vi.clutch;
+    vehicleAudio.setHorn(vi.horn);
+
+    // Cuaca: hujan menurunkan grip ban & membuat rem kurang efektif.
+    const weather = WEATHERS[state.weather];
+    const gripMultiplier = weather.gripMultiplier;
+    // Air brake (truk): rem jauh lebih kuat saat diaktifkan (md "Air Brake").
+    const effectiveBraking = state.airBrakeOn
+      ? config.braking * 1.6
+      : config.braking * (0.9 + 0.1 * gripMultiplier);
 
     // Clutch bookkeeping (manual only): ticks the checklist the first time
     // it's pressed, and — on release — stalls the engine if the driver let it
     // out fully, in gear, at a standstill, with no gas ("kopling dilepas
     // terlalu cepat saat mulai berjalan").
     if (transmissionMode === "manual") {
-      if (k.clutch) markClutchedOnce();
-      const justReleased = clutchWasHeld.current && !k.clutch;
-      clutchWasHeld.current = k.clutch;
+      if (isClutchHeld) markClutchedOnce();
+      const justReleased = clutchWasHeld.current && !isClutchHeld;
+      clutchWasHeld.current = isClutchHeld;
       if (justReleased && gear.current >= 0 && Math.abs(speed.current) < STOP_THRESHOLD && !throttleOn) {
         stallEngine("Mesin mati! Kopling dilepas terlalu cepat tanpa gas.");
         vehicleAudio.stallThud();
@@ -104,11 +208,15 @@ export function VehicleController({
         return;
       }
     } else {
-      clutchWasHeld.current = k.clutch;
+      clutchWasHeld.current = isClutchHeld;
     }
 
     const currentPos = transform.position;
+    // Posisi pemain untuk minimap/GPS (dibaca AI untuk memberi jalan).
+    setPlayerPos(currentPos.x, currentPos.z);
     const offRoad = distanceToRoadCenterline(currentPos.x, currentPos.z) > ROAD_HALF_WIDTH;
+    // Zona lubang/jalan rusak (visual + efek handling di lib/scenery.ts).
+    const inPothole = isInPotholeZone(currentPos.x, currentPos.z);
 
     if (offRoad && !wasOffRoad.current) {
       registerOffRoadEvent();
@@ -116,8 +224,18 @@ export function VehicleController({
     wasOffRoad.current = offRoad;
     setIsOffRoad(offRoad);
 
-    const maxSpeed = offRoad ? config.maxSpeed * OFF_ROAD_MAX_SPEED_MULT : config.maxSpeed;
-    const friction = offRoad ? config.friction * OFF_ROAD_FRICTION_MULT : config.friction;
+    // Kerusakan mengurangi kecepatan maksimum (semakin rusak semakin lambat).
+    const damageMult = 1 - (state.damage / DAMAGE_FAIL_THRESHOLD) * DAMAGE_SPEED_PENALTY;
+    const maxSpeed = (offRoad
+      ? config.maxSpeed * OFF_ROAD_MAX_SPEED_MULT
+      : inPothole
+        ? config.maxSpeed * POTHOLE_SPEED_MULT
+        : config.maxSpeed) * damageMult;
+    const friction = offRoad
+      ? config.friction * OFF_ROAD_FRICTION_MULT
+      : inPothole
+        ? config.friction * POTHOLE_FRICTION_MULT
+        : config.friction * weather.frictionMultiplier;
 
     let accelInput = 0;
     let rpmRatio = 0;
@@ -135,13 +253,15 @@ export function VehicleController({
       else vehicleAudio.stallThud();
     };
 
-    if (transmissionMode === "manual") {
-      const wantsShiftUp = consumeEdge("shiftUp");
-      const wantsShiftDown = consumeEdge("shiftDown");
-      const wantsReverse = consumeEdge("reverse");
+    // Gear edges are shared across modes — consume them once, up front.
+    const wantsShiftUp = vehicleGearEdges.delete("gearUp");
+    const wantsShiftDown = vehicleGearEdges.delete("gearDown");
+    const wantsReverse = vehicleGearEdges.delete("reverse");
+    const wantsNeutral = vehicleGearEdges.delete("neutral");
 
+    if (transmissionMode === "manual") {
       if (wantsShiftUp || wantsShiftDown) {
-        if (!k.clutch) {
+        if (!isClutchHeld) {
           rejectUngatedShift();
         } else {
           const dir = wantsShiftUp ? 1 : -1;
@@ -163,19 +283,33 @@ export function VehicleController({
         const canRequestReverse =
           (gear.current === NEUTRAL || gear.current === 0) && Math.abs(speed.current) < STOP_THRESHOLD;
         if (canRequestReverse) {
-          if (!k.clutch) rejectUngatedShift();
+          if (!isClutchHeld) rejectUngatedShift();
           else gear.current = REVERSE;
+        }
+      } else if (wantsNeutral) {
+        // Netral (N): only while basically stopped, still clutch-gated.
+        if (!isClutchHeld) {
+          rejectUngatedShift();
+        } else if (Math.abs(speed.current) < STOP_THRESHOLD) {
+          gear.current = NEUTRAL;
         }
       }
 
       if (gear.current === REVERSE) {
-        if (throttleOn) {
+        // Kopling ditekan = tenaga MUTUS: gas tidak diteruskan ke roda,
+        // kendaraan meluncur bebas (coast) tanpa rem mesin. Gigi R hanya
+        // "siap", baru mundur saat kopling dilepas + gas.
+        if (throttleOn && !isClutchHeld) {
           accelInput = -config.acceleration;
           speed.current = Math.max(-config.reverseMaxSpeed, speed.current - config.acceleration * delta);
+        } else if (isClutchHeld) {
+          speed.current = THREE.MathUtils.damp(speed.current, 0, friction * 0.35, delta);
         } else {
           speed.current = Math.min(0, speed.current + friction * delta);
         }
-        rpmRatio = Math.min(1, Math.abs(speed.current) / config.reverseMaxSpeed);
+        rpmRatio = isClutchHeld && throttleOn
+          ? Math.min(1, 0.55 + throttle * 0.4) // mesin rev bebas (kopling masuk)
+          : Math.min(1, Math.abs(speed.current) / config.reverseMaxSpeed);
       } else if (gear.current === NEUTRAL) {
         speed.current = THREE.MathUtils.damp(speed.current, 0, friction, delta);
         rpmRatio = throttleOn ? 0.55 : 0.15;
@@ -183,21 +317,28 @@ export function VehicleController({
         const ratio = config.gearRatios[gear.current];
         const gearCeiling = topSpeedInGear(maxSpeed, ratio);
         const gearAccel = accelInGear(config.acceleration, ratio);
-        if (throttleOn) {
+        if (throttleOn && !isClutchHeld) {
           accelInput = gearAccel;
           speed.current = Math.min(gearCeiling, speed.current + gearAccel * delta);
+        } else if (isClutchHeld) {
+          // Kopling masuk: tidak ada tenaga ke roda — meluncur bebas tanpa
+          // rem mesin (coast), gas hanya memutar mesin (rev).
+          accelInput = 0;
+          speed.current = THREE.MathUtils.damp(speed.current, 0, friction * 0.35, delta);
         } else {
           speed.current -= friction * delta;
         }
         speed.current = THREE.MathUtils.clamp(speed.current, 0, gearCeiling);
-        rpmRatio = Math.min(1, speed.current / Math.max(0.01, gearCeiling));
+        rpmRatio = isClutchHeld && throttleOn
+          ? Math.min(1, 0.55 + throttle * 0.4) // rev bebas saat kopling ditekan
+          : Math.min(1, speed.current / Math.max(0.01, gearCeiling));
       }
     } else {
       // Automatic: no clutch, no player gear selection. [R] just flips a
       // forward/reverse drivetrain direction (like a PRND selector) while
       // nearly stopped; gear.current is mirrored to REVERSE purely so the
       // HUD's gearLabel() can show "R" the same way it does in manual mode.
-      if (consumeEdge("reverse") && Math.abs(speed.current) < STOP_THRESHOLD) {
+      if (wantsReverse && Math.abs(speed.current) < STOP_THRESHOLD) {
         reverseGearAuto.current = !reverseGearAuto.current;
       }
 
@@ -228,11 +369,11 @@ export function VehicleController({
     // always fights whatever direction the car is currently moving in.
     if (brakePedal && speed.current !== 0) {
       if (speed.current > 0) {
-        speed.current = Math.max(0, speed.current - config.braking * delta);
+        speed.current = Math.max(0, speed.current - effectiveBraking * delta);
       } else {
-        speed.current = Math.min(0, speed.current + config.braking * delta);
+        speed.current = Math.min(0, speed.current + effectiveBraking * delta);
       }
-      accelInput = speed.current > 0 ? -config.braking : speed.current < 0 ? config.braking : 0;
+      accelInput = speed.current > 0 ? -effectiveBraking : speed.current < 0 ? effectiveBraking : 0;
     }
 
     // Handbrake: not a hard block, but a strong extra drag that makes the
@@ -252,8 +393,7 @@ export function VehicleController({
     // while easing back toward center), then extra-smoothed — see
     // lib/vehicleDynamics.ts. Speed already makes the available angle
     // shrink (heavier at speed); downforce keeps more of it available.
-    const steerInput = (k.left ? 1 : 0) - (k.right ? 1 : 0);
-    const smoothedSteerAngle = updateSteering(steering.current, steerInput, speed.current, config, delta);
+    const smoothedSteerAngle = updateSteering(steering.current, vi.steer, speed.current, config, delta);
 
     // Visually turn the handlebar/front-wheel assembly (see GltfVehicleMesh)
     // to match — reusing the already-damped angle keeps it in lockstep with
@@ -264,9 +404,10 @@ export function VehicleController({
 
     // Kinematic bicycle model with a tire-grip ceiling: pure no-slip
     // geometric turning (v/wheelbase * tan(angle)) up to what the tires can
-    // actually hold, understeering — not sliding — beyond that. See
-    // lib/vehicleDynamics.ts for the full derivation.
-    const yawStep = stepYaw(yawDynamics.current, speed.current, smoothedSteerAngle, config, delta);
+    // actually hold, understeering — not sliding — beyond that. Cuaca hujan
+    // menurunkan ceiling (tireGrip) sehingga understeer muncul lebih cepat.
+    const wetConfig = gripMultiplier < 1 ? { ...config, tireGrip: config.tireGrip * gripMultiplier } : config;
+    const yawStep = stepYaw(yawDynamics.current, speed.current, smoothedSteerAngle, wetConfig, delta);
     yaw.current += yawStep.yawRate * delta;
 
     if (yawStep.speedLoss > 0) {
@@ -292,11 +433,81 @@ export function VehicleController({
 
     const quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw.current);
 
-    body.setNextKinematicTranslation({ x: nextX, y: 0, z: nextZ });
+    // Solid collision: walk the move in substeps and keep only the portion up
+    // to the first registered solid obstacle. The body is kinematic, so this
+    // explicit blocking is what keeps the vehicle from tunneling through
+    // poles, pedestrians, etc.
+    let finalX = nextX;
+    let finalZ = nextZ;
+    const moveX = nextX - currentPos.x;
+    const moveZ = nextZ - currentPos.z;
+    if (moveX !== 0 || moveZ !== 0) {
+      const rect = vehicleRect(config, 0, 0, yaw.current);
+      for (let i = 1; i <= COLLISION_SUBSTEPS; i++) {
+        const t = i / COLLISION_SUBSTEPS;
+        rect.x = currentPos.x + moveX * t;
+        rect.z = currentPos.z + moveZ * t;
+        const hit = rectCollides(rect, { ignoreId: SELF_OBSTACLE_ID });
+        if (hit) {
+          const { id, obstacle } = hit;
+          // Contacting a pedestrian is an accident — same outcome the
+          // pedestrian's own sensor used to enforce, now guaranteed by the
+          // blocking itself (the vehicle never ghosts through first).
+          if (obstacle.kind === "pedestrian" && !hasHitPedestrian.current) {
+            hasHitPedestrian.current = true;
+            vehicleAudio.silence();
+            failSimulation("Latihan dihentikan karena terjadi kecelakaan dengan pejalan kaki.");
+          }
+          // Setiap rintangan yang disentuh dihitung SATU KALI per objek per
+          // run (dedupe by id) — cone/barrier/kendaraan parkir tidak boleh
+          // menambah skor berulang kali selama kendaraan masih menempel.
+          // Damping kecepatan juga hanya diterapkan sekali di sini: jika
+          // diterapkan per substep, sebuah cone yang dilalui kendaraan
+          // (bodies menimpa rintangan selama puluhan substep) akan
+          // mengerem kendaraan hampir berhenti total.
+          if (obstacle.kind !== "pedestrian" && !hitObstacleIds.current.has(id)) {
+            hitObstacleIds.current.add(id);
+            registerObstacleHit();
+            if (obstacle.soft) {
+              // Rintangan lunak (cone lalu lintas, kios pedagang): kendaraan
+              // menerobos dengan sedikit kehilangan kecepatan — bukan tembok.
+              speed.current *= 0.85;
+            } else {
+              // Objek solid (barrier, tiang, kendaraan parkir, AI): berhenti
+              // rapat di tepinya + sistem kerusakan. Makin kencang tabrakan,
+              // makin banyak damage.
+              speed.current = THREE.MathUtils.damp(speed.current, 0, 8, delta);
+              const impact = Math.min(1, Math.abs(speed.current) / config.maxSpeed);
+              const dmg = DAMAGE_SOLID_PER_HIT * (0.5 + impact);
+              addDamage(dmg);
+              const fresh = useSimStore.getState();
+              if (fresh.damage >= DAMAGE_FAIL_THRESHOLD) {
+                vehicleAudio.silence();
+                failSimulation("Kendaraan rusak parah akibat tabrakan — latihan dihentikan.");
+              } else if (performance.now() - damageWarnAt.current > DAMAGE_WARN_COOLDOWN_MS) {
+                damageWarnAt.current = performance.now();
+                raiseWarning(`Kerusakan kendaraan: ${Math.round(fresh.damage)}%`);
+              }
+            }
+          }
+          // Rintangan lunak: terus maju (tanpa break). Rintangan solid:
+          // berhenti di tepinya (finalX/finalZ tetap pada substep terakhir
+          // yang bebas).
+          if (!obstacle.soft) break;
+        }
+        finalX = rect.x;
+        finalZ = rect.z;
+      }
+    }
+
+    body.setNextKinematicTranslation({ x: finalX, y: 0, z: finalZ });
     body.setNextKinematicRotation(quat);
 
-    transform.position.set(nextX, 0, nextZ);
+    transform.position.set(finalX, 0, finalZ);
     transform.quaternion.copy(quat);
+
+    // Keep the registered rect glued to the pose we just committed to.
+    setObstacle(SELF_OBSTACLE_ID, vehicleRect(config, finalX, finalZ, yaw.current));
 
     // Drive the VISIBLE model directly from the transform we just computed,
     // instead of letting it come from RigidBody's own child-mesh sync. That
@@ -373,6 +584,65 @@ export function VehicleController({
     setSpeedKmh(Math.abs(speed.current) * 3.6);
     tickElapsed(delta * 1000);
     setGearState(gear.current, rpmRatio);
+    setSpeedLimit(speedLimitAt(finalZ));
+
+    // ── Bahan bakar, Trip Computer & SPBU ─────────────────────────────────
+    // Mesin menyala mengkonsumsi bensin; habis → mesin mati (md "Indikator
+    // bensin" + "Pengisian BBM di SPBU"). Konsumsi kini berbasis JARAK dan
+    // gaya gas (bukan timer): makin kencang meraup gas, makin boros — bahan
+    // bakar untuk Trip Computer & Eco Driving Score.
+    if (useSimStore.getState().engineRunning) {
+      consumeFuel(delta * 1000, Math.abs(speed.current), throttle);
+      recordTrip(delta * 1000, Math.abs(speed.current));
+      if (useSimStore.getState().fuel <= 0) {
+        const now = performance.now();
+        if (now - fuelWarnAt.current > FUEL_EMPTY_COOLDOWN_MS) {
+          fuelWarnAt.current = now;
+          stallEngine("Bensin habis! Isi BBM di SPBU (tekuk ke area SPBU).");
+        }
+      }
+    }
+    const inRefuel = isInRefuelZone(currentPos.x, currentPos.z);
+    setRefueling(inRefuel);
+    if (inRefuel && Math.abs(speed.current) < 1) {
+      addFuel(REFUEL_RATE * delta);
+    }
+
+    // ── Batas kecepatan (md "Mematuhi batas kecepatan") ──────────────────
+    const limit = speedLimitAt(finalZ);
+    const kmh = Math.abs(speed.current) * 3.6;
+    if (kmh > limit + SPEED_TOLERANCE_KMH) {
+      overSpeedMs.current += delta * 1000;
+      if (overSpeedMs.current > 700 && performance.now() - speedViolationCooldown.current > 2500) {
+        speedViolationCooldown.current = performance.now();
+        overSpeedMs.current = 0;
+        registerViolation(1);
+        raiseWarning(`Melebihi batas kecepatan (${limit} km/j)!`);
+      }
+    } else {
+      overSpeedMs.current = Math.max(0, overSpeedMs.current - delta * 1000);
+    }
+
+    // ── Melawan arus (md "Tidak melawan arus") ────────────────────────────
+    // Kendaraan maju ke arah -Z. Bergerak signifikan ke +Z dengan gigi maju
+    // (bukan mundur) = melawan arus.
+    const movingBackward = gear.current >= 0 && speed.current > 1 && finalZ > currentPos.z;
+    if (movingBackward) {
+      wrongWayAccum.current += finalZ - currentPos.z;
+    } else {
+      wrongWayAccum.current = Math.max(0, wrongWayAccum.current - delta * 2);
+    }
+    if (wrongWayAccum.current > WRONG_WAY_THRESHOLD_M && performance.now() - wrongWayCooldown.current > 3000) {
+      wrongWayCooldown.current = performance.now();
+      wrongWayAccum.current = 0;
+      registerViolation(1);
+      raiseWarning("Melawan arus! Belok kembali ke jalur yang benar.");
+    }
+
+    // Achievement: melaju kencang (md "Statistik Berkendara"). Batas maksimum
+    // semua kendaraan 70 km/j, jadi ambang dicapai saat mendekati kecepatan
+    // maksimum.
+    if (kmh >= 65) unlockAchievement("speed-demon");
 
     // Skid noise is reserved for genuinely aggressive inputs — steering pushed
     // past ~70% of full lock at speed, hard braking, or the tire-grip model
@@ -392,21 +662,41 @@ export function VehicleController({
       skidIntensity: Math.max(corneringSlip, brakingSlip, actualGripSlip),
     });
 
-    if (!hasFinished.current && nextZ <= FINISH_Z) {
+    if (!hasFinished.current && finalZ <= FINISH_Z) {
       hasFinished.current = true;
       // Scene/VehicleController unmounts the instant phase flips to
       // "finished" (SimulationApp swaps to <FinishedScreen>), so this is the
       // last chance this component gets to run — silence here, synchronously,
       // before that unmount happens, or the engine note is left hanging.
       vehicleAudio.silence();
-      const state = useSimStore.getState();
-      const elapsedS = state.elapsedMs / 1000;
-      const parTime = 45;
-      const timePenalty = Math.max(0, elapsedS - parTime) * 1;
+      vehicleAudio.setHorn(false);
+      const finishState = useSimStore.getState();
+      const elapsedS = finishState.elapsedMs / 1000;
+      const timePenalty = Math.max(0, elapsedS - PAR_TIME_S) * 1;
       const score = Math.max(
         0,
-        Math.round(100 - state.violations * 8 - state.offRoadCount * 5 - timePenalty)
+        Math.round(
+          100 -
+            finishState.violations * 8 -
+            finishState.offRoadCount * 5 -
+            finishState.obstacleHits * 3 -
+            timePenalty
+        )
       );
+
+      // ── Achievement (md "Achievement") ──────────────────────────────────
+      const unlock = (id: string) => useSimStore.getState().unlockAchievement(id);
+      unlock("first-drive");
+      if (finishState.violations === 0) unlock("no-violations");
+      if (finishState.obstacleHits === 0 && finishState.offRoadCount === 0) unlock("clean-run");
+      if (elapsedS <= PAR_TIME_S) unlock("par-time");
+      if (finishState.weather === "malam" || finishState.weather === "senja") unlock("night-driver");
+      // Kolektor: selesaikan motor, mobil, DAN truk (disimpan di localStorage).
+      const stored = loadFinishedVehicles();
+      const next = Array.from(new Set([...stored, finishState.vehicle]));
+      saveFinishedVehicles(next);
+      if (next.length >= 3) unlock("all-vehicles");
+
       finish(score);
     }
   });
@@ -421,7 +711,8 @@ export function VehicleController({
         ref={rigidBody}
         type="kinematicPosition"
         colliders={false}
-        position={[0, 0, START_Z]}
+        position={transform.position}
+        rotation={new THREE.Euler().setFromQuaternion(transform.quaternion)}
         name="vehicle"
       >
         <CuboidCollider
@@ -432,10 +723,13 @@ export function VehicleController({
           ]}
         />
       </RigidBody>
-      <group ref={visualRoot} position={[0, 0, START_Z]}>
+      <group ref={visualRoot} position={transform.position} quaternion={transform.quaternion}>
         <Suspense fallback={null}>
-          <VehicleMesh config={config} leanRef={visualGroup} steerRef={steerGroups} />
+          <VehicleMesh config={config} variant={variant} leanRef={visualGroup} steerRef={steerGroups} />
         </Suspense>
+        {/* Headlights / high beam / signal blinkers live on the visible model
+            so they follow the exact same pose the camera sees. */}
+        <VehicleLights config={config} />
       </group>
     </>
   );

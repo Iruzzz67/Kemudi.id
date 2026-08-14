@@ -1,9 +1,19 @@
+export type MateriImage = {
+  src: string;
+  alt: string;
+  caption: string;
+  sourceUrl: string;
+  /** Indeks paragraf (0-based) setelah foto ditampilkan. Default: 0. */
+  afterParagraph?: number;
+};
+
 export type Materi = {
   slug: string;
   title: string;
   category: "Umum" | "Motor" | "Mobil" | "Truk";
   summary: string;
   content: string[];
+  images?: MateriImage[];
 };
 
 export const MATERI_LIST: Materi[] = [
@@ -22,6 +32,36 @@ export const MATERI_LIST: Materi[] = [
       "Rambu Petunjuk memandu perjalanan dan memberikan informasi lain kepada pengguna jalan, dengan tiga variasi warna dasar: hijau untuk petunjuk jurusan di jalan luar kota/tol, biru untuk petunjuk jurusan di dalam kota (bersifat perintah mengikuti arah yang ditunjuk), dan cokelat untuk penunjuk kawasan atau objek wisata.",
       "Permenhub No. 13 Tahun 2014 juga mengenal rambu konvensional (memantulkan cahaya/retro reflektif) dan rambu elektronik yang informasinya dapat diubah sesuai keadaan, misalnya untuk peringatan cuaca, perbaikan jalan, atau kampanye keselamatan. Selalu kenali rambu di sekitar sebelum memasuki area baru, terutama saat mengemudikan kendaraan besar seperti truk yang membutuhkan jarak pengereman lebih panjang.",
     ],
+    images: [
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/a/a3/ID_Rambu_peringatan_1a.svg",
+        alt: "Rambu peringatan tikungan tajam ke kiri",
+        caption: "Rambu peringatan: tikungan tajam ke kiri — dasar kuning, garis tepi & lambang hitam.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:ID_Rambu_peringatan_1a.svg",
+        afterParagraph: 2,
+      },
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/a/a6/ID_Rambu_larangan_4e.svg",
+        alt: "Rambu larangan dilarang memutar balik",
+        caption: "Rambu larangan: dilarang memutar balik — dasar putih, garis tepi merah, lambang hitam.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:ID_Rambu_larangan_4e.svg",
+        afterParagraph: 3,
+      },
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/c/c1/ID_Rambu_perintah_1e.svg",
+        alt: "Rambu perintah wajib berjalan lurus",
+        caption: "Rambu perintah: wajib berjalan lurus — dasar biru, lambang/huruf putih.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:ID_Rambu_perintah_1e.svg",
+        afterParagraph: 4,
+      },
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/e/ed/ID_Rambu_petunjuk_1b_%28variant_1%29.svg",
+        alt: "Rambu petunjuk jurusan jalan luar kota",
+        caption: "Rambu petunjuk jurusan (jalan luar kota/tol) — dasar hijau dengan tulisan putih.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:ID_Rambu_petunjuk_1b_(variant_1).svg",
+        afterParagraph: 5,
+      },
+    ],
   },
   {
     slug: "dasar-berkendara-motor",
@@ -34,6 +74,15 @@ export const MATERI_LIST: Materi[] = [
       "Gunakan rem depan dan belakang secara bersamaan dengan proporsi lebih besar di rem depan (sekitar 70%) untuk pengereman optimal tanpa terjatuh.",
       "Jaga keseimbangan dengan kecepatan minimum saat menikung, condongkan badan mengikuti arah motor, bukan melawan arah.",
       "Sepeda motor memiliki lebar sempit sehingga lincah bermanuver, namun risiko jatuh lebih tinggi terutama di jalan licin.",
+    ],
+    images: [
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/2/23/Rider_in_black_textile_suit_and_blue_helmet_on_Honda_CBR600.jpg",
+        alt: "Pengendara motor memakai helm dan jaket pelindung",
+        caption: "Pengendara motor dengan perlengkapan keselamatan: helm, jaket, dan sarung tangan.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:Rider_in_black_textile_suit_and_blue_helmet_on_Honda_CBR600.jpg",
+        afterParagraph: 0,
+      },
     ],
   },
   {
@@ -48,6 +97,15 @@ export const MATERI_LIST: Materi[] = [
       "Pahami titik buta (blind spot) di sisi kanan dan kiri mobil, selalu tengok langsung sebelum berpindah jalur.",
       "Mobil memiliki body lebih lebar dari motor sehingga membutuhkan estimasi jarak yang lebih cermat saat menyalip atau parkir.",
     ],
+    images: [
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/0/0f/Driving_car_20170523.jpg",
+        alt: "Tangan pengemudi pada setir mobil posisi jam 9 dan jam 3",
+        caption: "Posisi tangan jam 9 dan jam 3 memberikan kontrol maksimal saat bermanuver.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:Driving_car_20170523.jpg",
+        afterParagraph: 1,
+      },
+    ],
   },
   {
     slug: "dasar-mengemudikan-truk",
@@ -60,6 +118,15 @@ export const MATERI_LIST: Materi[] = [
       "Jarak pengereman truk bermuatan jauh lebih panjang, jaga jarak aman minimal 3-5 detik dari kendaraan di depan.",
       "Titik buta pada truk sangat luas terutama di sisi kiri dan belakang, gunakan kaca spion tambahan dan selalu asumsikan ada kendaraan di area tersebut.",
       "Saat menikung, truk cenderung mengalami off-tracking (roda belakang memotong lintasan lebih ke dalam), ambil lintasan lebih lebar dari yang terlihat perlu.",
+    ],
+    images: [
+      {
+        src: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Dalton_truck_and_Sukakpak_Mountain.jpg",
+        alt: "Truk besar melintasi jalan raya",
+        caption: "Truk besar membutuhkan jarak pengereman panjang dan ruang manuver yang lebih lebar.",
+        sourceUrl: "https://commons.wikimedia.org/wiki/File:Dalton_truck_and_Sukakpak_Mountain.jpg",
+        afterParagraph: 1,
+      },
     ],
   },
 ];

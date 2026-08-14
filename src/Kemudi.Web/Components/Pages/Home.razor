@@ -1,0 +1,68 @@
+@page "/"
+@using Kemudi.Web.Data
+@using Kemudi.Web.Services
+@inject ApiClient Api
+
+@if (_vehicles is null)
+{
+    <div class="loading">Memuat kendaraan...</div>
+}
+else
+{
+    <section class="hero">
+        <h1>Belajar Mengemudi, <span>Sebelum Turun ke Jalan</span></h1>
+        <p>
+            Kemudi.id adalah kursus mengemudi online dengan simulasi 3D interaktif.
+            Latih refleks dan kontrolmu mengendarai motor, mobil, dan truk langsung dari browser.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="simulasi">Coba Simulasi</a>
+            <a class="btn btn-outline btn-lg" href="kursus">Lihat Kursus</a>
+            <a class="btn btn-outline btn-lg" href="materi">Lihat Materi</a>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Tiga Jenis Kendaraan</h2>
+        <p class="section-sub">Setiap kendaraan disimulasikan dengan karakteristik fisika yang berbeda.</p>
+        <div class="grid grid-3 mt-2">
+            @foreach (var v in _vehicles)
+            {
+                <div class="card">
+                    <span class="chip" style="background:@v.Color"></span>
+                    <h3>@v.Label</h3>
+                    <p>@v.Description</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Materi Terbaru</h2>
+                <p class="section-sub">Bekali diri dengan teori sebelum praktik.</p>
+            </div>
+            <a href="materi">Lihat semua</a>
+        </div>
+        <div class="grid grid-2 mt-2">
+            @foreach (var m in MateriData.List.Take(4))
+            {
+                <a class="card" href="materi/@m.Slug">
+                    <span class="card-tag">@m.Category</span>
+                    <h3>@m.Title</h3>
+                    <p>@m.Summary</p>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    private List<Kemudi.Shared.DTOs.VehicleDto>? _vehicles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<Kemudi.Shared.DTOs.VehicleDto>>("/api/vehicles");
+    }
+}

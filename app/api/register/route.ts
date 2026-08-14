@@ -23,9 +23,21 @@ export async function POST(req: Request) {
     );
   }
 
+  // Email yang terdaftar di env ADMIN_EMAILS (dipisah koma) otomatis jadi
+  // admin. Contoh: ADMIN_EMAILS="admin@kemudi.id,admin2@kemudi.id"
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
   const hashed = await bcrypt.hash(password, 10);
   const user = await prisma.user.create({
-    data: { name: name || null, email, password: hashed },
+    data: {
+      name: name || null,
+      email,
+      password: hashed,
+      role: adminEmails.includes(email) ? "ADMIN" : "USER",
+    },
   });
 
   return NextResponse.json({ id: user.id, email: user.email });

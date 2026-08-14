@@ -1,0 +1,102 @@
+@page "/simulasi"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<section class="hero">
+    <h1>Simulasi <span>3D Mengemudi</span></h1>
+    <p>
+        Simulasi berjalan di aplikasi Unity (C# + OpenXR) untuk PC, PC VR, dan Meta Quest.
+        Halaman ini adalah <strong>launcher</strong>: pilih kendaraan, luncurkan aplikasi,
+        lalu hasil latihan otomatis dikirim kembali ke server.
+    </p>
+</section>
+
+@if (_vehicles is null)
+{
+    <div class="loading">Memuat kendaraan...</div>
+}
+else
+{
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Pilih Kendaraan</h2>
+        <div class="grid grid-3 mt-2">
+            @foreach (var v in _vehicles)
+            {
+                <div class="card @(v.Type == _selectedVehicle ? "selected" : "")" style="@(v.Type == _selectedVehicle ? "outline:2px solid var(--accent,#2563eb)" : "")">
+                    <span class="chip" style="background:@v.Color"></span>
+                    <h3>@v.Label</h3>
+                    <p>@v.Description</p>
+                    <div class="meta mt-1">
+                        <span>Top speed: @Math.Round(v.MaxSpeed * 3.6) km/j</span>
+                        <span>@v.GearCount gigi</span>
+                    </div>
+                    <button class="btn @(v.Type == _selectedVehicle ? "btn-primary" : "btn-outline") mt-1"
+                            @onclick="() => SelectVehicle(v.Type)">
+                        @(v.Type == _selectedVehicle ? "✓ Dipilih" : "Pilih")
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="card mt-3" style="text-align:center;padding:1.5rem">
+            @if (string.IsNullOrEmpty(_selectedVehicle))
+            {
+                <p class="muted">Pilih salah satu kendaraan di atas untuk melanjutkan.</p>
+            }
+            else
+            {
+                <p>
+                    Kendaraan: <strong>@(_vehicles.First(v => v.Type == _selectedVehicle).Label)</strong>
+                    · Status login: <strong>@(Auth.IsAuthenticated ? "Sudah masuk" : "Belum masuk")</strong>
+                </p>
+                <p class="muted mt-1">
+                    Hasil latihan hanya tersimpan di dashboard bila Anda sudah login.
+                </p>
+
+                <div class="flex mt-2" style="justify-content:center;gap:0.75rem;flex-wrap:wrap">
+                    <button class="btn btn-primary btn-lg" @onclick="LaunchSimulation">
+                        ▶ Luncurkan Simulasi (Unity)
+                    </button>
+                    @if (!Auth.IsAuthenticated)
+                    {
+                        <a class="btn btn-outline btn-lg" href="login">Masuk untuk simpan hasil</a>
+                    }
+                </div>
+
+                @if (_launching)
+                {
+                    <div class="error-box mt-2" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a">
+                        <strong>Alur peluncuran (dokumen §61):</strong><br />
+                        1. Buka aplikasi Unity <em>Kemudi.Simulation</em> di PC / headset VR Anda.<br />
+                        2. Di aplikasi, pilih kendaraan <strong>@_selectedVehicle</strong> dan jalankan simulasi.<br />
+                        3. Setelah selesai, Unity mengirim hasil ke API (skor, waktu, pelanggaran, rintangan).<br />
+                        4. Kembali ke halaman <a href="dashboard" style="color:#2563eb;text-decoration:underline">Dashboard</a> untuk melihat riwayat.
+                    </div>
+                }
+            }
+        </div>
+    </section>
+}
+
+@code {
+    private List<VehicleDto>? _vehicles;
+    private string? _selectedVehicle;
+    private bool _launching;
+
+    private void SelectVehicle(string type) => _selectedVehicle = type;
+
+    private void LaunchSimulation()
+    {
+        // Launcher: dalam produksi, tombol ini membuka aplikasi Unity
+        // (desktop build / deep-link). Hasil dikirim Unity ke /api/progress.
+        _launching = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+    }
+}

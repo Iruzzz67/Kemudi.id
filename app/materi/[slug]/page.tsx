@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMateriBySlug, MATERI_LIST } from "@/lib/materi-data";
@@ -29,9 +30,44 @@ export default async function MateriDetailPage({
 
       <div className="mt-8 space-y-4">
         {materi.content.map((paragraph, i) => (
-          <p key={i} className="leading-relaxed text-neutral-700 dark:text-neutral-300">
-            {paragraph}
-          </p>
+          <Fragment key={i}>
+            <p className="leading-relaxed text-neutral-700 dark:text-neutral-300">
+              {paragraph}
+            </p>
+
+            {materi.images
+              ?.filter((img) => (img.afterParagraph ?? 0) === i)
+              .map((img) => (
+                <figure
+                  key={img.src}
+                  className="my-6 overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+                >
+                  <div className="flex items-center justify-center bg-neutral-50 p-4 dark:bg-neutral-950">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      width={640}
+                      height={360}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className="max-h-72 w-auto max-w-full rounded-lg object-contain"
+                    />
+                  </div>
+                  <figcaption className="border-t border-neutral-200 px-4 py-3 text-sm text-neutral-500 dark:border-neutral-800">
+                    {img.caption}{" "}
+                    <a
+                      href={img.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:underline"
+                    >
+                      (Sumber)
+                    </a>
+                  </figcaption>
+                </figure>
+              ))}
+          </Fragment>
         ))}
       </div>
 

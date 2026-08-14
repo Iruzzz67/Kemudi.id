@@ -16,6 +16,10 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
 
+  // Area admin punya layout sendiri (sidebar + header) — jangan tampilkan
+  // navbar pengguna di sini.
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <header className="sticky top-0 z-50 h-16 border-b border-neutral-200 bg-white/90 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/90">
       <nav className="mx-auto flex h-full max-w-6xl items-center justify-between px-4">
@@ -42,6 +46,18 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {status === "authenticated" ? (
             <>
+              {session.user?.role === "ADMIN" && (
+                <Link
+                  href="/admin/dashboard"
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                    pathname.startsWith("/admin")
+                      ? "bg-emerald-600 text-white"
+                      : "text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950"
+                  }`}
+                >
+                  🛡️ Admin
+                </Link>
+              )}
               <span className="hidden text-sm text-neutral-500 sm:inline">
                 {session.user?.email}
               </span>

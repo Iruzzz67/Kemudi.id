@@ -3,23 +3,15 @@
 import { CuboidCollider, RigidBody } from "@react-three/rapier";
 import { ActiveCollisionTypes } from "@dimforge/rapier3d-compat";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useSimStore } from "@/store/simStore";
 import { ROAD_WIDTH, RoadSample, headingFromTangent } from "@/lib/track";
+import { removeObstacle, setObstacle } from "@/lib/obstacles";
+import { getLightPhase, LightPhase } from "@/lib/trafficLight";
 
-const CYCLE_MS = 11000;
-const GREEN_MS = 5500;
-const YELLOW_MS = 1500;
-
-export type LightPhase = "green" | "yellow" | "red";
-
-export function getLightPhase(t: number): LightPhase {
-  const m = t % CYCLE_MS;
-  if (m < GREEN_MS) return "green";
-  if (m < GREEN_MS + YELLOW_MS) return "yellow";
-  return "red";
-}
+export type { LightPhase };
+export { getLightPhase };
 
 const COLORS: Record<LightPhase, string> = {
   green: "#22c55e",
@@ -28,9 +20,29 @@ const COLORS: Record<LightPhase, string> = {
 };
 const DIM = "#3f3f46";
 
-export function TrafficLight({ sample }: { sample: RoadSample }) {
+export function TrafficLight({ sample, id = "traffic-light-pole" }: { sample: RoadSample; id?: string }) {
   const heading = useMemo(() => headingFromTangent(sample.tangent), [sample]);
   const registerViolation = useSimStore((s) => s.registerViolation);
+
+  // The pole group sits at [ROAD_WIDTH/2 + 0.6, 0, -0.6] inside a group
+  // rotated by `heading` at sample.point — resolve it to world coords so the
+  // vehicle can be blocked by it (the pole is solid, not just a sensor).
+  const poleWorld = useMemo(() => {
+    const local = new THREE.Vector3(ROAD_WIDTH / 2 + 0.6, 0, -0.6);
+    local.applyAxisAngle(new THREE.Vector3(0, 1, 0), heading);
+    return { x: sample.point.x + local.x, z: sample.point.z + local.z };
+  }, [sample, heading]);
+
+  useEffect(() => {
+    setObstacle(id, {
+      shape: "circle",
+      kind: "pole",
+      x: poleWorld.x,
+      z: poleWorld.z,
+      radius: 0.35,
+    });
+    return () => removeObstacle(id);
+  }, [id, poleWorld.x, poleWorld.z]);
 
   const redRef = useRef<THREE.Mesh>(null);
   const yellowRef = useRef<THREE.Mesh>(null);

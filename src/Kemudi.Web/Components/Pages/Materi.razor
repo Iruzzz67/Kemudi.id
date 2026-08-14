@@ -1,0 +1,20 @@
+@page "/materi"
+@using Kemudi.Web.Data
+
+<div class="section-head">
+    <div>
+        <h1 class="section-title">Materi Teori</h1>
+        <p class="section-sub">Pelajari rambu lalu lintas dan dasar berkendara sebelum praktik.</p>
+    </div>
+</div>
+
+<div class="grid grid-2 mt-2">
+    @foreach (var m in MateriData.List)
+    {
+        <a class="card" href="materi/@m.Slug">
+            <span class="card-tag">@m.Category</span>
+            <h3>@m.Title</h3>
+            <p>@m.Summary</p>
+        </a>
+    }
+</div>

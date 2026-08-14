@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { COURSE_PACKAGES, MENTORS, SCHEDULE_SLOTS, WHAT_YOU_GET, formatRupiah } from "@/lib/kursus-data";
-import { VEHICLES } from "@/lib/vehicles";
+import { VEHICLES, VEHICLE_ORDER, VehicleType } from "@/lib/vehicles";
+import { useState } from "react";
 import { MentorSelector } from "@/components/kursus/MentorSelector";
 
 export default function KursusPage() {
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleType | null>(null);
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="text-3xl font-bold">Kursus Mengemudi</h1>
@@ -110,7 +114,28 @@ export default function KursusPage() {
           sebelum memilih.
         </p>
         <div className="mt-6">
-          <MentorSelector mentors={MENTORS} />
+          <div className="mb-4">
+            <div className="text-sm text-neutral-500">Pilih Kendaraan yang Ingin Dikursuskan</div>
+            <div className="mt-2 flex gap-2">
+              {VEHICLE_ORDER.map((vt) => {
+                const v = VEHICLES[vt];
+                return (
+                  <button
+                    key={vt}
+                    type="button"
+                    data-vehicletype={vt}
+                    className={`rounded-full px-3 py-1 text-sm font-medium text-white`} 
+                    style={{ backgroundColor: v.color }}
+                    onClick={() => setSelectedVehicle((s) => (s === vt ? null : vt))}
+                  >
+                    {v.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <MentorSelector mentors={selectedVehicle ? MENTORS.filter((m) => m.vehicleTypes.includes(selectedVehicle)) : MENTORS} />
         </div>
       </section>
     </div>

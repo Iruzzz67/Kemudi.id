@@ -1,0 +1,71 @@
+@page "/register"
+@using Kemudi.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<div class="text-center" style="margin-bottom:1.5rem">
+    <h1 class="section-title">Daftar Akun</h1>
+    <p class="muted">Mulai perjalanan belajarmu bersama Kemudi.id.</p>
+</div>
+
+<div style="display:flex;justify-content:center">
+    <div class="form card" style="width:100%">
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="error-box">@_error</div>
+        }
+
+        <div class="field">
+            <label>Nama Lengkap</label>
+            <input type="text" @bind="_name" />
+        </div>
+
+        <div class="field">
+            <label>Email</label>
+            <input type="email" @bind="_email" />
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input type="password" @bind="_password" />
+            <div class="hint">Minimal 6 karakter.</div>
+        </div>
+
+        <div class="flex-between">
+            <button class="btn btn-primary" disabled="@_busy" @onclick="RegisterAsync">@(_busy ? "Mendaftar..." : "Daftar")</button>
+            <span class="muted">Sudah punya akun? <a href="login">Masuk</a></span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _name = "";
+    private string _email = "";
+    private string _password = "";
+    private string? _error;
+    private bool _busy;
+
+    private async Task RegisterAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_name) || string.IsNullOrWhiteSpace(_email) || _password.Length < 6)
+            {
+                _error = "Nama, email valid, dan password minimal 6 karakter wajib diisi.";
+                return;
+            }
+
+            var result = await Auth.RegisterAsync(_name, _email, _password);
+            if (result.Success)
+                Nav.NavigateTo("/dashboard", forceLoad: true);
+            else
+                _error = result.Error;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

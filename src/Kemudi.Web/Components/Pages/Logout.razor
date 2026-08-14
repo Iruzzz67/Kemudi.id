@@ -1,0 +1,16 @@
+@page "/logout"
+@using Kemudi.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<div class="text-center" style="padding:3rem 0">
+    <p class="muted">Keluar dari akun...</p>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Auth.Logout();
+        Nav.NavigateTo("/", forceLoad: true);
+    }
+}

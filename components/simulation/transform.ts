@@ -5,9 +5,12 @@ export type VehicleTransform = {
   quaternion: THREE.Quaternion;
 };
 
-export function createVehicleTransform(startZ: number): VehicleTransform {
+export function createVehicleTransform(
+  position: THREE.Vector3,
+  quaternion: THREE.Quaternion
+): VehicleTransform {
   return {
-    position: new THREE.Vector3(0, 0, startZ),
-    quaternion: new THREE.Quaternion(),
+    position: position.clone(),
+    quaternion: quaternion.clone(),
   };
 }

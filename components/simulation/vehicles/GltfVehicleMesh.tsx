@@ -3,22 +3,50 @@
 import { RefObject, useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
-import { VehicleConfig, VehicleType, pivotHeightOf } from "@/lib/vehicles";
+import { useXR } from "@react-three/xr";
+import { VehicleConfig, VehicleType, pivotHeightOf, VehicleVariant } from "@/lib/vehicles";
+import { splitMergedFrontWheels } from "./splitWheels";
 
-const MODEL_URL: Record<VehicleType, string> = {
-  MOTOR: "/models/motor.glb",
-  MOBIL: "/models/mobil.glb",
-  TRUK: "/models/truck.glb",
+// ── Model per platform ─────────────────────────────────────────────────────
+// Model default dipakai untuk varian tanpa GLB sendiri: MOBIL memakai
+// f1roadcar.glb, TRUK memakai truckww2.glb. Varian dengan field `glb`
+// (lib/vehicles.ts) memakai model spesifiknya — saat ini hanya sedan →
+// bmw.glb dan box → truckww2.glb (varian lain sudah dihapus). Auto-fit di
+// bawah menormalkan skala model ke kotak collider kendaraan (lib/vehicles.ts).
+//
+// Arah hadap model (diukur langsung dari binary GLB): motor.glb menghadap -Z
+// (hidung di -Z) — tidak butuh putar. f1roadcar.glb: root transform R_x(+90°)
+// memetakan raw -Y → world +Z — model menghadap +Z, butuh 180° agar menghadap
+// -Z (maju). truckww2.glb juga menghadap +Z — butuh 180°. bmw.glb panjang di
+// sumbu X (bukan Z) dengan hidung di +X — auto-fit π/2 sudah menyejajarkannya,
+// jadi rotasi ekstra 0 (lihat EXTRA_ROTATION_BY_URL di bawah).
+const MODEL_URLS: Record<VehicleType, { desktop: string; vr: string }> = {
+  MOTOR: { desktop: "/models/motor.glb", vr: "/models/motor.glb" },
+  MOBIL: { desktop: "/models/f1roadcar.glb", vr: "/models/f1roadcar.glb" },
+  TRUK: { desktop: "/models/truckww2.glb", vr: "/models/truckww2.glb" },
 };
 
-// A standard glTF export already faces -Z (the sim's forward direction), so
-// no base flip is needed. Tweak per vehicle here (e.g. Math.PI) if a
-// particular export was authored facing some other way — instead of
-// re-exporting the .blend file.
-const EXTRA_ROTATION_Y: Record<VehicleType, number> = {
-  MOTOR: 0,
-  MOBIL: 0,
-  TRUK: 0,
+// Arah hadap model diukur per-URL (GLTFLoader.parse + profil siluet — GROUND
+// TRUTH). Nilai ini rotasi EKSTRA di atas auto-fit (yang sudah memutar model
+// ber-poros-X agar panjangnya sejajar -Z):
+//   - motor.glb: hidung di -Z — tidak butuh putar.
+//   - f1roadcar.glb: hidung di +Z — perlu 180°.
+//   - truckww2.glb: kabin di +Z — perlu 180°.
+//   - bmw.glb: PANJANG di sumbu X, hidung di +X — auto-fit π/2 sudah
+//     menyejajarkannya ke -Z, jadi rotasi ekstra 0 (memakai π yang diukur
+//     untuk f1roadcar membuat hidung mengarah +Z = mobil kebalik).
+const EXTRA_ROTATION_BY_URL: Record<string, number> = {
+  "/models/motor.glb": 0,
+  "/models/f1roadcar.glb": Math.PI,
+  "/models/truckww2.glb": Math.PI,
+};
+
+// Fallback per tipe untuk model/varian yang belum diukur (fortuner, mercedes,
+// dll.) — nilai yang sama dengan model default per jenisnya.
+const EXTRA_ROTATION_Y: Record<VehicleType, { desktop: number; vr: number }> = {
+  MOTOR: { desktop: 0, vr: 0 },
+  MOBIL: { desktop: Math.PI, vr: Math.PI },
+  TRUK: { desktop: Math.PI, vr: Math.PI },
 };
 
 // Some exports carry a leftover ground/backdrop plane (and sometimes a
@@ -40,16 +68,18 @@ function stripHelperObjects(root: THREE.Object3D) {
 // independently-steerable assembly — everything physically bolted to the
 // front fork/axle, so it swivels as one rigid piece with the wheel/handlebar
 // instead of the tire spinning away from a fork that stays put. Each inner
-// array shares a single pivot; separate arrays (e.g. the truck's two front
-// wheels) get their own pivot so they swivel in place instead of arcing
-// around a shared center between them.
+// array shares a single pivot; separate arrays get their own pivot so they
+// swivel in place instead of arcing around a shared center between them.
 //
-// MOBIL has no entry: that source model is a single fused mesh with no
-// separate wheel/steering geometry, so there's nothing to rotate — it would
-// need a re-export with the wheels as distinct objects to support this.
+// Hanya MOTOR yang punya roda depan terpisah di ekspor aslinya (ban_depan
+// dkk). f1roadcar.glb adalah ekspor Sketchfab hasil material-merger — rodanya
+// menyatu ke mesh body — jadi splitMergedFrontWheels() di bawah mengekstrak
+// roda depannya menjadi sub-mesh bernama wheel-front-left/right sebelum grup
+// kemudi dibangun. TRUK (truckww2.glb) juga hasil merger dan tidak punya roda
+// kemudi visual.
 const STEER_GROUPS: Partial<Record<VehicleType, string[][]>> = {
   MOTOR: [["ban_depan", "shock_depan", "spakbor_depan", "rem_depan", "handlebars", "rem_tangan", "kopling"]],
-  TRUK: [["Llantas_delantera_derecha"], ["Llantas_delantera_Izquierda"]],
+  MOBIL: [["wheel-front-left"], ["wheel-front-right"]],
 };
 
 function escapeRegExp(s: string) {
@@ -98,20 +128,33 @@ function buildSteerGroups(model: THREE.Object3D, groups: string[][] | undefined)
 
 export function GltfVehicleMesh({
   config,
+  variant,
   leanRef,
   steerRef,
 }: {
   config: VehicleConfig;
+  variant?: VehicleVariant;
   leanRef: RefObject<THREE.Group | null>;
   steerRef: RefObject<THREE.Object3D[]>;
 }) {
-  const { scene } = useGLTF(MODEL_URL[config.type]);
+  const isPresenting = useXR((s) => s.session != null);
+  const variantUrl = variant?.glb;
+  const url =
+    variantUrl ??
+    MODEL_URLS[config.type][isPresenting ? "vr" : "desktop"];
+  // Rotasi ekstra mengikuti MODEL yang sebenarnya dipakai (varian bisa berbeda
+  // arah hadap dari model default per tipe) — lihat EXTRA_ROTATION_BY_URL.
+  const extraRotationY = EXTRA_ROTATION_BY_URL[url] ?? EXTRA_ROTATION_Y[config.type][isPresenting ? "vr" : "desktop"];
+  const { scene } = useGLTF(url);
 
   // Clone so re-selecting a vehicle (unmount/remount) doesn't reuse — and
   // mutate in place — the single scene graph useGLTF caches per URL.
   const { model, steerGroups } = useMemo(() => {
     const clone = scene.clone(true);
     stripHelperObjects(clone);
+    // Model mobil: split roda depan agar bisa berbelok. Motor & truk punya
+    // kelompok kemudi sendiri (STEER_GROUPS) atau roda menyatu.
+    if (config.type === "MOBIL") splitMergedFrontWheels(clone);
     const groups = buildSteerGroups(clone, STEER_GROUPS[config.type]);
     return { model: clone, steerGroups: groups };
   }, [scene, config.type]);
@@ -157,7 +200,7 @@ export function GltfVehicleMesh({
     // to land the model centered at the origin post-rotation, rotate the
     // (scaled) center first and cancel that out — instead of the center in
     // the model's own unrotated axes, which would land wrong once rotated.
-    const totalRotationY = autoRotationY + EXTRA_ROTATION_Y[config.type];
+    const totalRotationY = autoRotationY + extraRotationY;
     const scaledCenter = center.clone().multiplyScalar(s);
     scaledCenter.applyAxisAngle(new THREE.Vector3(0, 1, 0), totalRotationY);
 
@@ -166,7 +209,7 @@ export function GltfVehicleMesh({
       offset: new THREE.Vector3(-scaledCenter.x, -box.min.y * s, -scaledCenter.z),
       rotationY: totalRotationY,
     };
-  }, [model, config.dimensions, config.type]);
+  }, [model, config.dimensions, extraRotationY]);
 
   const pivotHeight = pivotHeightOf(config);
 
@@ -185,5 +228,8 @@ export function GltfVehicleMesh({
 }
 
 useGLTF.preload("/models/motor.glb");
-useGLTF.preload("/models/mobil.glb");
-useGLTF.preload("/models/truck.glb");
+useGLTF.preload("/models/f1roadcar.glb");
+useGLTF.preload("/models/truckww2.glb");
+useGLTF.preload("/models/bmw.glb");
+useGLTF.preload("/models/fortuner.glb");
+useGLTF.preload("/models/mercedes.glb");

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { VEHICLES, VehicleType } from "@/lib/vehicles";
+import UserRegistrationStatus from "@/components/UserRegistrationStatus";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -12,6 +13,16 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
     take: 50,
   });
+
+  // Hanya ambil pendaftaran milik pengguna ini (berdasarkan email sesi).
+  // Tanpa filter email, Prisma menganggap undefined sebagai "tanpa filter"
+  // dan bisa mengembalikan pendaftaran milik orang lain.
+  const registration = session.user.email
+    ? await prisma.courseRegistration.findFirst({
+        where: { email: session.user.email },
+        orderBy: { createdAt: "desc" },
+      })
+    : null;
 
   const bestScore = attempts.reduce((max, a) => Math.max(max, a.score), 0);
   const totalAttempts = attempts.length;
@@ -33,6 +44,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8">
+        <UserRegistrationStatus registration={registration} />
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Riwayat Latihan</h2>
           <Link href="/simulasi" className="text-sm font-medium text-blue-600 hover:underline">

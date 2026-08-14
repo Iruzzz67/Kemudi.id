@@ -168,6 +168,7 @@ export type Mentor = {
   bio: string;
   initials: string;
   avatarColor: string;
+  phone?: string;
   portfolio: {
     certifications: string[];
     achievements: string[];
@@ -187,6 +188,7 @@ export const MENTORS: Mentor[] = [
     bio: "Mantan instruktur di sekolah mengemudi berlisensi Jakarta, spesialis membimbing pemula yang gugup di jalan ramai.",
     initials: "BS",
     avatarColor: "#3b82f6",
+    phone: "+62 812-3456-7890",
     portfolio: {
       certifications: [
         "Lisensi Instruktur Mengemudi Nasional (LIMN)",
@@ -213,6 +215,7 @@ export const MENTORS: Mentor[] = [
     bio: "Fokus pada teknik defensive driving dan kesiapan menghadapi kondisi jalan licin atau darurat.",
     initials: "SR",
     avatarColor: "#ec4899",
+    phone: "+62 811-2345-678",
     portfolio: {
       certifications: [
         "Certified Defensive Driving Instructor — Global Defensive Driving",
@@ -238,6 +241,7 @@ export const MENTORS: Mentor[] = [
     bio: "Eks pengemudi logistik antarkota, ahli mengajarkan manuver truk di area sempit dan teknik mundur presisi.",
     initials: "AW",
     avatarColor: "#16a34a",
+    phone: "+62 813-9876-5432",
     portfolio: {
       certifications: [
         "Sertifikasi Instruktur SIM B1/B2 — Kemenhub",

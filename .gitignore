@@ -43,3 +43,27 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ===== .NET (migrasi) =====
+**/bin/
+**/obj/
+*.user
+*.suo
+**/kemudi.db
+**/kemudi.db-*
+
+# ===== Unity (migrasi) =====
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Uu]ser[Ss]ettings/*.asset
+[Uu]ser[Ss]ettings/*.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+crashlytics-build.properties

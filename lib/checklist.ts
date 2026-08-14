@@ -1,4 +1,5 @@
 import { TransmissionMode } from "@/store/simStore";
+import { VehicleType } from "@/lib/vehicles";
 
 export type ChecklistState = {
   engineRunning: boolean;
@@ -9,6 +10,10 @@ export type ChecklistState = {
   hasClutchedOnce: boolean;
   hasEngagedGearOne: boolean;
   turnSignalUsedOnce: boolean;
+  helmetOn: boolean;
+  jacketOn: boolean;
+  glovesOn: boolean;
+  bootsOn: boolean;
 };
 
 export type ChecklistItem = { label: string; done: boolean };
@@ -21,17 +26,27 @@ export type ChecklistItem = { label: string; done: boolean };
  */
 export function getChecklistItems(
   state: ChecklistState,
-  transmissionMode: TransmissionMode
+  transmissionMode: TransmissionMode,
+  vehicleType: VehicleType
 ): ChecklistItem[] {
   const items: ChecklistItem[] = [
     { label: "Masuk kendaraan", done: true },
     { label: "Tutup pintu", done: true },
-    { label: "Atur kursi", done: state.seatAdjusted },
-    { label: "Atur spion", done: state.mirrorAdjusted },
-    { label: "Pasang sabuk pengaman", done: state.seatbeltOn },
-    { label: "Nyalakan mesin", done: state.engineRunning },
-    { label: "Lepaskan rem tangan", done: !state.handbrakeOn },
   ];
+
+  if (vehicleType === "MOTOR") {
+    items.push({ label: "Pakai helm", done: state.helmetOn });
+    items.push({ label: "Pakai jaket", done: state.jacketOn });
+    items.push({ label: "Pakai sarung tangan", done: state.glovesOn });
+    items.push({ label: "Pakai sepatu", done: state.bootsOn });
+  } else {
+    items.push({ label: "Atur kursi", done: state.seatAdjusted });
+    items.push({ label: "Atur spion", done: state.mirrorAdjusted });
+    items.push({ label: "Pasang sabuk pengaman", done: state.seatbeltOn });
+  }
+
+  items.push({ label: "Nyalakan mesin", done: state.engineRunning });
+  items.push({ label: "Lepaskan rem tangan", done: !state.handbrakeOn });
 
   if (transmissionMode === "manual") {
     items.push({ label: "Injak kopling", done: state.hasClutchedOnce });

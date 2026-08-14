@@ -12,9 +12,105 @@ model User {
   name      String?
   email     String   @unique
   password  String
+  role      String   @default("USER") // "USER" | "ADMIN"
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  attempts SimulationAttempt[]
+  attempts      SimulationAttempt[]
+  registrations CourseRegistration[]
+  auditLogs     AuditLog[]
+}
+
+// Pendaftaran kursus dari halaman Data Diri & Pembayaran. Status pembayaran
+// hanya bisa dikonfirmasi oleh admin (halaman /admin/pendaftaran).
+model CourseRegistration {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  mentorId      String
+  name          String
+  email         String
+  phone         String?
+  nik           String
+  address       String
+  paymentMethod String // "transfer" | "e-wallet" | "cash"
+  amount        Int
+  status        String   @default("pending") // "pending" | "paid"
+  startDate     String
+  createdAt     DateTime @default(now())
+
+  @@index([email])
+  @@index([status])
+}
+
+// Data mentor yang dikelola admin (sistem admin terpisah dari data statis
+// `lib/kursus-data.ts` yang dipakai halaman publik).
+model Mentor {
+  id              String    @id
+  name            String
+  title           String
+  bio             String?
+  phone           String?
+  vehicleTypes    String // "MOTOR,MOBIL" — dipisah koma
+  experienceYears Int       @default(0)
+  rating          Float     @default(0)
+  studentsTrained Int       @default(0)
+  status          String    @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  schedules Schedule[]
+}
+
+// Jadwal kursus yang dikelola admin.
+model Schedule {
+  id          String   @id @default(cuid())
+  mentorId    String
+  mentor      Mentor   @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  date        DateTime
+  startTime   String // "08:00"
+  endTime     String // "10:00"
+  vehicleType String // "MOTOR" | "MOBIL" | "TRUK"
+  location    String
+  totalSlots  Int      @default(4)
+  filledSlots Int      @default(0)
+  status      String   @default("AVAILABLE") // "AVAILABLE" | "FULL" | "CANCELLED" | "COMPLETED"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([mentorId])
+  @@index([date])
+}
+
+// Data kursus yang dikelola admin.
+model Course {
+  id          String   @id
+  name        String
+  description String
+  price       Int
+  sessions    Int
+  durationMin Int
+  vehicleType String // "MOTOR" | "MOBIL" | "TRUK"
+  level       String // "Pemula" | "Menengah" | "Mahir"
+  status      String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Jejak aktivitas penting admin (login, konfirmasi pembayaran, CRUD, dll).
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String?
+  admin      User?    @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  adminEmail String
+  action     String
+  target     String
+  targetId   String?
+  metadata   String? // JSON string
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 enum VehicleType {

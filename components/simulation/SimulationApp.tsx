@@ -8,11 +8,17 @@ import { WalkingHud } from "./WalkingHud";
 import { HandlingSettingsPanel } from "./HandlingSettingsPanel";
 import { useSimStore } from "@/store/simStore";
 import { VEHICLE_ORDER, VEHICLES, VehicleType } from "@/lib/vehicles";
+import { WEATHERS, WEATHER_ORDER } from "@/lib/weather";
+import { ACHIEVEMENTS } from "@/lib/achievements";
+import { computeEcoScore, ecoRatingLabel, ecoGrade, economyKmPerL } from "@/lib/ecoDriving";
 import { vehicleAudio } from "./audio/vehicleAudio";
+import { VRToggleButton } from "@/components/ui/VRToggleButton";
 
 function VehicleSelectScreen() {
   const vehicle = useSimStore((s) => s.vehicle);
   const setVehicle = useSimStore((s) => s.setVehicle);
+  const weather = useSimStore((s) => s.weather);
+  const setWeather = useSimStore((s) => s.setWeather);
   const startWalking = useSimStore((s) => s.startWalking);
   const transmissionMode = useSimStore((s) => s.transmissionMode);
   const setTransmissionMode = useSimStore((s) => s.setTransmissionMode);
@@ -27,8 +33,19 @@ function VehicleSelectScreen() {
     startWalking();
   };
 
+  // Same audio-unlock gesture, but then the simulation runs and — once the
+  // <Canvas>/<XR> has mounted — the VR session is requested. The button's
+  // internal retry loop waits for that mount, so clicking here works from the
+  // very first screen instead of only after "Mulai Simulasi".
+  const handleEnterVR = () => {
+    vehicleAudio.start();
+    vehicleAudio.setMuted(muted);
+    startWalking();
+  };
+
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-4 text-center">
+      <VRToggleButton onEnterVR={handleEnterVR} />
       <div>
         <h1 className="text-3xl font-bold">Pilih Kendaraan</h1>
         <p className="mt-2 text-neutral-500">
@@ -64,6 +81,44 @@ function VehicleSelectScreen() {
         })}
       </div>
 
+      {/* Cuaca dinamis (md: cerah, berawan, hujan, kabut, senja, malam) */}
+      <div className="max-w-xl">
+        <div className="text-sm font-medium text-neutral-500">Cuaca</div>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          {WEATHER_ORDER.map((w) => {
+            const cfg = WEATHERS[w];
+            const selected = weather === w;
+            return (
+              <button
+                key={w}
+                onClick={() => setWeather(w)}
+                title={
+                  w.startsWith("hujan") ? "Jalan licin — grip ban berkurang" : undefined
+                }
+                className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                  selected
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-neutral-300 text-neutral-600 hover:border-neutral-500 dark:border-neutral-700 dark:text-neutral-300"
+                }`}
+              >
+                {cfg.emoji} {cfg.label}
+              </button>
+            );
+          })}
+        </div>
+        {(weather === "hujan-ringan" || weather === "hujan-deras") && (
+          <p className="mt-2 text-xs text-neutral-400">
+            🌧️ Saat hujan, cengkeraman ban berkurang — rem lebih pelan, belok
+            lebih hati-hati.
+          </p>
+        )}
+        {weather === "kabut" && (
+          <p className="mt-2 text-xs text-neutral-400">
+            🌫️ Jarak pandang terbatas — nyalakan lampu (L) dan kurangi kecepatan.
+          </p>
+        )}
+      </div>
+
       <div>
         <div className="text-sm font-medium text-neutral-500">Jenis Transmisi</div>
         <div className="mt-2 inline-flex rounded-full border border-neutral-200 p-1 dark:border-neutral-800">
@@ -92,8 +147,11 @@ function VehicleSelectScreen() {
           <p className="mt-2 max-w-sm text-xs text-neutral-400">
             Tahan <kbd className="rounded border px-1 py-0.5 font-mono">Shift</kbd> (kopling)
             sebelum oper gigi dengan <kbd className="rounded border px-1 py-0.5 font-mono">Q</kbd>/
-            <kbd className="rounded border px-1 py-0.5 font-mono">E</kbd>. Oper gigi tanpa kopling
-            akan merusak girboks dan bisa membuat mesin mati.
+            <kbd className="rounded border px-1 py-0.5 font-mono">E</kbd> (atau{" "}
+            <kbd className="rounded border px-1 py-0.5 font-mono">PageUp</kbd>/
+            <kbd className="rounded border px-1 py-0.5 font-mono">PageDown</kbd>), dan{" "}
+            <kbd className="rounded border px-1 py-0.5 font-mono">N</kbd> untuk netral. Oper gigi
+            tanpa kopling akan merusak girboks dan bisa membuat mesin mati.
           </p>
         )}
       </div>
@@ -126,13 +184,28 @@ function VehicleSelectScreen() {
       <p className="max-w-md text-xs text-neutral-400">
         Anda akan muncul di area parkir dan berjalan kaki menuju kendaraan. Dekati pintu pengemudi
         untuk masuk, lalu tekan <kbd className="rounded border px-1.5 py-0.5 font-mono">I</kbd> untuk
-        menyalakan mesin. Sebelum berjalan, selesaikan checklist di kiri layar: pasang sabuk (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">B</kbd>), lepas rem tangan (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">Space</kbd>), atur kursi (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">[</kbd>/
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">]</kbd>) dan spion (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">M</kbd>). Tekan{" "}
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">C</kbd> untuk ganti sudut kamera.
+        menyalakan mesin. Sebelum berjalan, selesaikan checklist di kiri layar: {vehicle === "MOTOR" ? (
+          <>
+            pakai helm (<kbd className="rounded border px-1.5 py-0.5 font-mono">H</kbd>),
+            jaket (<kbd className="rounded border px-1.5 py-0.5 font-mono">J</kbd>),
+            sarung tangan (<kbd className="rounded border px-1.5 py-0.5 font-mono">G</kbd>),
+            dan sepatu (<kbd className="rounded border px-1.5 py-0.5 font-mono">F</kbd>)
+          </>
+        ) : (
+          <>
+            pasang sabuk (<kbd className="rounded border px-1.5 py-0.5 font-mono">B</kbd>),
+            atur kursi (<kbd className="rounded border px-1.5 py-0.5 font-mono">[</kbd>/
+            <kbd className="rounded border px-1.5 py-0.5 font-mono">]</kbd>) dan spion (
+            <kbd className="rounded border px-1.5 py-0.5 font-mono">M</kbd>)
+          </>
+        )}{" "}
+        serta lepas rem tangan/standar (<kbd className="rounded border px-1.5 py-0.5 font-mono">Space</kbd>).
+        Tekan <kbd className="rounded border px-1.5 py-0.5 font-mono">C</kbd> untuk ganti sudut kamera,
+        <kbd className="rounded border px-1.5 py-0.5 font-mono">T</kbd> klakson,{" "}
+        <kbd className="rounded border px-1.5 py-0.5 font-mono">L</kbd>/
+        <kbd className="rounded border px-1.5 py-0.5 font-mono">K</kbd> lampu/lampu jauh,{" "}
+        <kbd className="rounded border px-1.5 py-0.5 font-mono">V</kbd> hazard, dan{" "}
+        <kbd className="rounded border px-1.5 py-0.5 font-mono">P</kbd> pause.
       </p>
 
       {showHandling && <HandlingSettingsPanel onClose={() => setShowHandling(false)} />}
@@ -144,14 +217,44 @@ function FinishedScreen() {
   const score = useSimStore((s) => s.score);
   const violations = useSimStore((s) => s.violations);
   const offRoadCount = useSimStore((s) => s.offRoadCount);
+  const obstacleHits = useSimStore((s) => s.obstacleHits);
   const elapsedMs = useSimStore((s) => s.elapsedMs);
   const vehicle = useSimStore((s) => s.vehicle);
+  const unlocked = useSimStore((s) => s.unlockedAchievements);
   const reset = useSimStore((s) => s.reset);
   const startDriving = useSimStore((s) => s.startDriving);
+  const tripDistanceKm = useSimStore((s) => s.tripDistanceKm);
+  const tripFuelUsedL = useSimStore((s) => s.tripFuelUsedL);
+  const tripTopSpeedKmh = useSimStore((s) => s.tripTopSpeedKmh);
+
+  // Trip Computer & Eco Driving Score (ringkasan akhir).
+  const avgSpeedKmh = elapsedMs > 1000 ? tripDistanceKm / (elapsedMs / 3600000) : 0;
+  const economy = economyKmPerL(tripDistanceKm, tripFuelUsedL);
+  const ecoScore =
+    tripDistanceKm >= 0.1
+      ? computeEcoScore({
+          distanceKm: tripDistanceKm,
+          fuelUsedL: tripFuelUsedL,
+          consumptionLperKm: VEHICLES[vehicle].fuelConsumptionLperKm,
+          violations,
+          offRoadCount,
+          obstacleHits,
+        })
+      : null;
+  const ecoLabel = ecoScore !== null ? ecoRatingLabel(ecoScore) : null;
+  const grade = ecoScore !== null ? ecoGrade(ecoScore) : null;
 
   const { data: session } = useSession();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // VR is only meaningful while driving, but keeping the exit button around is
+  // harmless — and the disabled-state tooltip explains why it can't be used.
+  const handleEnterVR = () => {
+    vehicleAudio.start();
+    startDriving();
+  };
+
 
   // Safety net: VehicleController already silences audio the instant it
   // detects the finish line, but that only helps if it got to run before
@@ -184,13 +287,104 @@ function FinishedScreen() {
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <VRToggleButton onEnterVR={handleEnterVR} />
       <h1 className="text-3xl font-bold">Simulasi Selesai</h1>
       <div className="text-6xl font-bold text-blue-600">{score}</div>
-      <div className="flex gap-6 text-sm text-neutral-500">
+      <div className="flex flex-wrap justify-center gap-6 text-sm text-neutral-500">
         <span>Waktu: {(elapsedMs / 1000).toFixed(1)}s</span>
         <span>Pelanggaran: {violations}</span>
         <span>Keluar jalur: {offRoadCount}</span>
+        <span>Rintangan: {obstacleHits}</span>
       </div>
+
+      {/* Trip Computer & Eco Driving (md "Statistik Berkendara") */}
+      <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white/70 p-5 text-left dark:border-neutral-800 dark:bg-neutral-900/70">
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold">🛣️ Statistik Perjalanan</div>
+          <div
+            className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold ${
+              ecoScore === null
+                ? "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
+                : ecoScore >= 75
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300"
+                  : ecoScore >= 55
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300"
+            }`}
+          >
+            {grade !== null ? (
+              <>
+                <span>🌿 {grade}</span>
+                <span>{ecoScore} · {ecoLabel}</span>
+              </>
+            ) : (
+              <span>🌿 —</span>
+            )}
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-neutral-500">Jarak</span>
+            <span className="font-medium tabular-nums">{tripDistanceKm.toFixed(2)} km</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">Rata-rata</span>
+            <span className="font-medium tabular-nums">{avgSpeedKmh.toFixed(0)} km/j</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">Top speed</span>
+            <span className="font-medium tabular-nums">{tripTopSpeedKmh.toFixed(0)} km/j</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-neutral-500">Bensin</span>
+            <span className="font-medium tabular-nums">{tripFuelUsedL.toFixed(2)} L</span>
+          </div>
+          <div className="col-span-2 flex justify-between">
+            <span className="text-neutral-500">Konsumsi</span>
+            <span className="font-medium tabular-nums">
+              {economy !== null ? `${economy.toFixed(1)} km/L` : "—"}
+            </span>
+          </div>
+        </div>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+          <div
+            className={`h-full rounded-full ${
+              ecoScore === null
+                ? "bg-neutral-300 dark:bg-neutral-700"
+                : ecoScore >= 75
+                  ? "bg-emerald-500"
+                  : ecoScore >= 55
+                    ? "bg-amber-500"
+                    : "bg-red-500"
+            }`}
+            style={{ width: `${ecoScore ?? 0}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">
+          Skor eco dihitung dari efisiensi bahan bakar (km/L) dikurangi pelanggaran lalu lintas.
+          Gas halus = irit & aman.
+        </p>
+      </div>
+
+      {/* Achievement (md "Achievement") */}
+      {unlocked.length > 0 && (
+        <div className="w-full max-w-md rounded-2xl border border-yellow-400/40 bg-black/40 px-5 py-4 backdrop-blur">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-yellow-400">
+            🏆 Achievement ({unlocked.length}/{ACHIEVEMENTS.length})
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            {ACHIEVEMENTS.filter((a) => unlocked.includes(a.id)).map((a) => (
+              <span
+                key={a.id}
+                title={a.description}
+                className="rounded-full bg-white/10 px-3 py-1 text-sm text-white"
+              >
+                {a.icon} {a.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap justify-center gap-3">
         <button
@@ -240,8 +434,14 @@ function FailedScreen() {
     vehicleAudio.silence();
   }, []);
 
+  const handleEnterVR = () => {
+    vehicleAudio.start();
+    startDriving();
+  };
+
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      <VRToggleButton onEnterVR={handleEnterVR} />
       <h1 className="text-3xl font-bold text-red-600">Latihan Dihentikan</h1>
       <p className="max-w-md text-neutral-500">{failReason}</p>
 
@@ -265,7 +465,6 @@ function FailedScreen() {
     </div>
   );
 }
-
 export function SimulationApp() {
   const phase = useSimStore((s) => s.phase);
   const vehicle = useSimStore((s) => s.vehicle);
@@ -278,6 +477,7 @@ export function SimulationApp() {
     <div className="relative h-[calc(100vh-4rem)] w-full">
       <Scene vehicle={vehicle} />
       {phase === "walking" ? <WalkingHud /> : <Hud />}
+      <VRToggleButton />
     </div>
   );
 }
