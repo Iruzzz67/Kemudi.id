@@ -2,13 +2,17 @@
 
 Proyek Unity untuk simulasi mengemudi Kemudi.id (Motor, Mobil, Truk) dengan dukungan VR OpenXR.
 
-> **Status: Scaffold.** Folder ini berisi struktur arsitektur + script C# inti siap impor ke Unity Editor.
+> **Status: scaffold + scene #1 lengkap.** Folder ini berisi struktur arsitektur + script C#
+> inti siap impor ke Unity Editor. Scene dibangun **saat runtime** oleh
+> `KemudiSceneBootstrap` (menu *Kemudi → Create Main Scene*), jadi tidak perlu
+> menyusun scene manual: lintasan Kota Bogor ±916 m, scenery lingkungan, rintangan,
+> lalu lintas, pejalan kaki, lampu merah, checklist, HUD, skor, dan laporan hasil
+> ke API sudah terpasang.
 >
 > Panduan performa & arsitektur lengkap: [`docs/OPTIMASI_SIMULASI.md`](../../docs/OPTIMASI_SIMULASI.md)
 > dan pemetaan input [`docs/VR_INPUT_MAP.md`](../../docs/VR_INPUT_MAP.md).
-> Ini bukan project Unity yang bisa langsung di-build — folder `Assets/` belum memiliki `.meta`
-> dan scene. Buka Unity Hub → *Add project from disk* → pilih folder ini, lalu Unity akan
-> membuat `.meta` dan Anda bisa membangun scene pertama dari `Scenes/` (lihat bagian "Cara mulai").
+> Buka Unity Hub → *Add project from disk* → pilih folder ini, lalu Unity akan
+> membuat `.meta`; jalankan scene dari menu (lihat bagian "Cara mulai").
 
 ## Struktur
 
@@ -102,21 +106,38 @@ Hand Tracking ┘
    finish. Semua dibangun dari kode: manager, input, track (1 mesh + collider),
    kendaraan, kamera, lampu, ground.
 
-   Scene #1 sudah dilengkapi lalu lintas (§36-39):
-   - **Traffic light** di jalan lurus pertama (stop line z=36) — menerobos
-     lampu merah = pelanggaran (`TrafficLightZone`).
+   **Lintasan — map ala Kota Bogor (±916 m, finish z = -900):**
+   Start Area (z=16) → Kota 1 (lampu merah z=-75, zebra z=-150) → S-Curve
+   (cone slalom & barrier z=-202..-254) → Permukiman (zebra z=-390) →
+   Zona Proyek & rintangan (z=-450..-495, truk berhenti) → Kota 2 (lampu
+   merah z=-650, halte z=-675, bus z=-705) → Berkelok (z=-760..-850) →
+   Finish (zebra z=-850, garis finish z=-900). Rute, scenery, dan rintangan
+   diport dari `lib/track.ts`/`lib/scenery.ts` versi web lama.
+
+   **Lalu lintas & aturan (§36-39):**
+   - **2 traffic light** (Kota 1 z=-75, Kota 2 z=-650) — menerobos lampu merah
+     = pelanggaran berat (`TrafficLightZone`).
    - **Kendaraan AI** (`TrafficManager`, 3 unit, pool, update 5-10 Hz) yang
      berhenti di lampu merah — menabraknya = tabrakan fisik biasa.
-   - **Zebra cross + pejalan kaki** di jalan lurus terakhir (x=160) — tidak
-     memberi jalan saat menyeberang = pelanggaran (`CrosswalkZone`), dan
-     menabrak pejalan kaki = langsung gagal (`PedestrianCollisionWatcher`).
-   - **Rintangan lintasan** (cone slalom, water barrier, kendaraan parkir) —
-     layout CELAH LEBAR agar konsisten dengan web yang sudah diperlonggar
-     (`TrackObstacleBuilder`): cone di tepi jalan (±4,2 m), barrier melintang
-     di tepi (±4,5 m, panjang 2,8 m → celah tengah ±6 m), kendaraan parkir di
-     bahu (±4,2 m). Menabrak rintangan = 1 hit `ObstacleHit` per objek per
-     percobaan, penalti skor ringan **-3 poin** (konsisten dengan web;
-     `ObstacleCollisionWatcher` → obstacleHits di laporan §62).
+   - **3 zebra cross + pejalan kaki** (z=-150, -390, -850) — tidak memberi
+     jalan saat menyeberang = pelanggaran (`CrosswalkZone`), dan menabrak
+     pejalan kaki = langsung gagal (`PedestrianCollisionWatcher`).
+   - **Rintangan lintasan** — layout CELAH LEBAR konsisten dengan web
+     (`TrackObstacleBuilder`): cone slalom & cone akhir (lateral ±4,2 m),
+     water barrier/palang proyek (±4,5 m), tiang pembatas (±5,1 m),
+     kendaraan parkir (±4,2 m), truk (-495) & bus (-705) di bahu jalan,
+     lubang jalan (visual, z=-508..-516). Menabrak rintangan = 1 hit
+     `ObstacleHit` per objek per percobaan, penalti skor ringan **-3 poin**
+     (konsisten dengan web; `ObstacleCollisionWatcher` → obstacleHits §62).
+
+   **Scenery lingkungan** (`BuildScenery`): 10 lampu jalan (tiap ±90 m),
+   pohon tiap ±34 m, rumah & ruko di Kota 1/Kota 2, rumah permukiman,
+   2 kios pedagang, halte bus, dan 2 papan penunjuk — posisi mengikuti garis
+   tengah jalan otomatis di tikungan.
+
+   **Skor & kegagalan** (`ScoringSystem`): 100 − pelanggaran×8 − keluar jalur×5
+   − tabrakan×12 − rintangan×3 − penalti waktu (par 120 detik). Pelanggaran
+   mencapai 3× → simulasi gagal; menabrak pejalan kaki → langsung gagal.
 
    > **Keterbatasan scaffold:** kendaraan AI bersifat kinematic sehingga
    > "menembus" pejalan kaki (tanpa tabrakan fisik). Deteksi tabrakan hanya
@@ -126,6 +147,23 @@ Hand Tracking ┘
 Setelah Play: mesin [I], rem tangan [Space], sabuk [B], kursi `[`, spion `]`,
 W/A/S/D gas/setir/rem, [C] kamera, [P] pause, [R] ulang dari layar hasil.
 
+## Build WebGL + integrasi website
+
+Halaman **/simulasi** di website (Blazor) menampilkan simulasi lewat iframe:
+
+1. Unity → **File → Build Settings** → pilih **WebGL** → **Player Settings**.
+2. Set **Template** = `Kemudi` (Assets/WebGLTemplates/Kemudi) — template ini
+   membaca `?token=` & `?vehicle=` dari query string launcher.
+3. Build ke folder sementara, lalu salin **isi folder hasil** (index.html +
+   Build/ + StreamingAssets/) ke `src/Kemudi.Web/wwwroot/unity/`.
+4. Jalankan website → buka `/simulasi` → pilih kendaraan → **▶ Mulai Simulasi**.
+   Hasil akhir otomatis dikirim ke `POST /api/progress` (CORS API sudah
+   `AllowAnyOrigin`); token JWT disisipkan launcher lewat query string dan
+   dibaca `SimulationResultReporter` → `WebGlBridge`.
+
+> Jika folder `wwwroot/unity/` belum berisi build, halaman /simulasi menampilkan
+> pesan panduan build — bukan error.
+
 ## Build target
 
 | Platform | Profile |
@@ -133,3 +171,4 @@ W/A/S/D gas/setir/rem, [C] kamera, [P] pause, [R] ulang dari layar hasil.
 | Windows PC | Desktop |
 | PC VR (OpenXR) | VR_PC |
 | Meta Quest (standalone) | VR_Standalone (Android) |
+| WebGL (browser) | WebGL |

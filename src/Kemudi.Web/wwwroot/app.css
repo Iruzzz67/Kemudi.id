@@ -394,3 +394,92 @@ tr:last-child td { border-bottom: none; }
 .admin-dl > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.45rem 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.9rem; }
 .admin-dl dt { color: #64748b; }
 .admin-dl dd { margin: 0; font-weight: 500; }
+
+/* ===== Peningkatan UI (site.js) ===== */
+
+/* Scroll reveal — kelas ditambahkan JS; tanpa JS konten tetap tampil. */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.revealed {
+    opacity: 1;
+    transform: none;
+}
+
+/* Ripple tombol (site.js). */
+.btn { position: relative; overflow: hidden; }
+.btn .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    transform: scale(0);
+    animation: ripple 0.6s ease-out forwards;
+    pointer-events: none;
+}
+@keyframes ripple {
+    to { transform: scale(2.5); opacity: 0; }
+}
+
+/* Card & kartu admin: hover mengangkat + bayangan halus. */
+.card:not(.selected):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+}
+.admin-card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.admin-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+/* Hero: gradien bergerak + blob lembut di belakang. */
+.hero {
+    position: relative;
+    background: radial-gradient(1200px 400px at 20% 0%, rgba(37, 99, 235, 0.08), transparent 60%),
+                radial-gradient(1000px 400px at 80% 0%, rgba(56, 189, 248, 0.08), transparent 60%);
+    animation: heroGlow 9s ease-in-out infinite alternate;
+}
+@keyframes heroGlow {
+    from { background-position: 0% 0%; }
+    to { background-position: 100% 0%; }
+}
+.hero h1 { animation: fadeSlide 0.7s ease both; }
+.hero p { animation: fadeSlide 0.7s ease 0.15s both; }
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Navbar: bayangan saat discroll (site.js menambah kelas .scrolled). */
+.kemudi-navbar {
+    transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.kemudi-navbar.scrolled {
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+}
+
+/* Tabel: baris hover. */
+.table tbody tr { transition: background 0.15s ease; }
+.table tbody tr:hover { background: rgba(37, 99, 235, 0.04); }
+
+/* Simulasi WebGL (halaman /simulasi). */
+.sim-frame-wrap { margin-top: 1.25rem; }
+.sim-iframe {
+    width: 100%;
+    height: 72vh;
+    min-height: 480px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #0b1220;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+    display: block;
+}
+
+/* Sidebar admin: transisi link lebih halus. */
+.admin-nav-link {
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.admin-nav-link:hover { transform: translateX(2px); }

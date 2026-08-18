@@ -347,7 +347,7 @@ Selain game simulasi, project ini memiliki **website kursus mengemudi** yang sel
 | `/kursus/personal` | Form data diri + metode pembayaran + instruksi pembayaran |
 | `/kursus/payment` | Halaman pembayaran |
 | `/materi` & `/materi/{slug}` | Materi teori |
-| `/simulasi` | 🎮 Peluncur simulasi 3D (aplikasi Unity) |
+| `/simulasi` | 🎮 Simulasi 3D — main di browser (Unity WebGL, iframe) + launcher desktop/VR |
 | `/login`, `/register`, `/logout` | Autentikasi |
 | `/dashboard` | Statistik & riwayat latihan (butuh login) |
 | `/admin/*` | Panel admin terpisah (login, dashboard, pendaftaran, pengguna, mentor, jadwal, pembayaran, kursus, statistik, pengaturan) |
@@ -458,7 +458,7 @@ Aplikasi web utama (pengganti Next.js yang sudah dihapus) — detail lengkap di 
 
 ## Proyek Unity (`simulation/`)
 
-Scaffold proyek Unity untuk simulasi (status: **scaffold + script inti**, belum siap build) — detail di [`simulation/Kemudi.Simulation/README.md`](./simulation/Kemudi.Simulation/README.md).
+Proyek Unity untuk simulasi — **scene #1 lengkap** dibangun saat runtime (`KemudiSceneBootstrap`): lintasan Kota Bogor ±916 m, scenery, rintangan, lalu lintas, pejalan kaki, checklist, skor, dan laporan hasil ke API. Dukungan build **WebGL** (main di browser lewat halaman `/simulasi`) dan **VR OpenXR** (PC VR & Meta Quest). Detail di [`simulation/Kemudi.Simulation/README.md`](./simulation/Kemudi.Simulation/README.md).
 
 ```
 Assets/

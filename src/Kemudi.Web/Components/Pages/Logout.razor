@@ -8,9 +8,9 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Auth.Logout();
+        await Auth.LogoutAsync();
         Nav.NavigateTo("/", forceLoad: true);
     }
 }

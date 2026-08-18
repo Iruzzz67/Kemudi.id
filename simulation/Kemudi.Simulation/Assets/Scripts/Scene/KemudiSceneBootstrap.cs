@@ -57,6 +57,7 @@ namespace Kemudi.Simulation.Scene
             BuildManagers();
             BuildTrack();
             BuildObstacles();
+            BuildScenery();
             BuildTrafficSystem();
             BuildCameraRig();
 
@@ -125,7 +126,8 @@ namespace Kemudi.Simulation.Scene
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Plane);
             go.name = "Ground";
-            go.transform.localScale = new Vector3(60f, 1f, 200f); // bidang luas di sepanjang jalan
+            // Bidang luas menutupi seluruh lintasan ±916 m (z = +16 s/d -900).
+            go.transform.localScale = new Vector3(150f, 1f, 1000f);
             AssignMaterial(go.GetComponent<MeshRenderer>(), groundMaterial != null
                 ? groundMaterial
                 : CreateMaterial(new Color(0.16f, 0.2f, 0.13f), "Grass"));
@@ -187,17 +189,237 @@ namespace Kemudi.Simulation.Scene
             builder.Build();
         }
 
-        /// <summary>Rute lurus dengan beberapa tikungan lembut (y = 0.5 di atas ground).</summary>
+        // ── Scenery lingkungan (padanan lib/scenery.ts versi web) ────────────
+
+        /// <summary>
+        /// Bangun lingkungan di sepanjang jalan: lampu jalan, pohon, rumah,
+        /// ruko, kios pedagang, halte, dan papan penunjuk. Posisi mengikuti
+        /// garis tengah (PointNearZ) sehingga otomatis mengikuti belokan —
+        /// sama seperti resolveSceneryPose di versi web lama.
+        /// </summary>
+        private void BuildScenery()
+        {
+            var centerline = new Vector3[_waypoints.Length];
+            for (var i = 0; i < _waypoints.Length; i++) centerline[i] = _waypoints[i].position;
+
+            // 1) Lampu jalan — tiap ±90 m dari z=-30 sampai z=-840, berselang sisi.
+            for (var i = 0; i < 10; i++)
+                BuildStreetLamp(centerline, -30 - i * 90, (i % 2 == 0 ? 1f : -1f) * 5.8f);
+
+            // 2) Pohon — tiap ±34 m dari z=14 sampai z=-880, berselang sisi.
+            var index = 0;
+            for (var z = 14; z >= -880; z -= 34)
+            {
+                var side = index % 2 == 0 ? 1f : -1f;
+                var offset = side * (7.5f + 3f * ((Mathf.Abs(z) * 31) % 10) / 10f); // 7.5-10.5, deterministik
+                BuildTree(centerline, z, offset);
+                index++;
+            }
+
+            // 3) Kota 1 — rumah & ruko (offset jauh dari jalan, ±14-16).
+            BuildBoxProp(centerline, "HouseK1", -70f, 14f, new Vector3(6f, 4f, 5f), new Color(0.8f, 0.65f, 0.45f));
+            BuildBoxProp(centerline, "HouseK1", -90f, -14f, new Vector3(5f, 3.5f, 4.5f), new Color(0.75f, 0.6f, 0.4f));
+            BuildBoxProp(centerline, "ShophouseK1", -85f, 15.5f, new Vector3(6f, 5f, 7f), new Color(0.85f, 0.75f, 0.6f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.55f, 0.3f, 0.2f));
+            BuildBoxProp(centerline, "ShophouseK1", -105f, -15.5f, new Vector3(6f, 5f, 7f), new Color(0.8f, 0.7f, 0.55f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.5f, 0.28f, 0.18f));
+            BuildBoxProp(centerline, "ShophouseK1", -125f, 15.5f, new Vector3(6f, 5f, 7f), new Color(0.82f, 0.72f, 0.58f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.55f, 0.3f, 0.2f));
+            BuildBoxProp(centerline, "HouseK1", -110f, 14f, new Vector3(5.5f, 3.8f, 5f), new Color(0.78f, 0.62f, 0.42f));
+            BuildBoxProp(centerline, "HouseK1", -130f, -14f, new Vector3(6f, 4.2f, 5f), new Color(0.7f, 0.55f, 0.4f));
+            BuildBoxProp(centerline, "HouseK1", -145f, 14.5f, new Vector3(5f, 3.6f, 4.5f), new Color(0.8f, 0.68f, 0.48f));
+
+            // 4) Permukiman — rumah kecil, offset ±12.5.
+            BuildBoxProp(centerline, "HouseP", -310f, 12.5f, new Vector3(4.5f, 3.2f, 4f), new Color(0.72f, 0.58f, 0.4f));
+            BuildBoxProp(centerline, "HouseP", -330f, -12.5f, new Vector3(4f, 3f, 3.8f), new Color(0.76f, 0.62f, 0.44f));
+            BuildBoxProp(centerline, "HouseP", -355f, 12.5f, new Vector3(4.5f, 3.4f, 4f), new Color(0.68f, 0.54f, 0.38f));
+            BuildBoxProp(centerline, "HouseP", -375f, -12.5f, new Vector3(4f, 3f, 3.8f), new Color(0.74f, 0.6f, 0.42f));
+            BuildBoxProp(centerline, "HouseP", -405f, 12.5f, new Vector3(4.5f, 3.2f, 4f), new Color(0.7f, 0.56f, 0.4f));
+            BuildBoxProp(centerline, "HouseP", -425f, -12.5f, new Vector3(4f, 3.1f, 3.8f), new Color(0.78f, 0.64f, 0.46f));
+
+            // 5) Kota 2 — rumah & ruko (offset ±14-16).
+            BuildBoxProp(centerline, "ShophouseK2", -640f, 16f, new Vector3(6f, 5f, 7f), new Color(0.84f, 0.74f, 0.6f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.55f, 0.3f, 0.2f));
+            BuildBoxProp(centerline, "ShophouseK2", -665f, -16f, new Vector3(6f, 5f, 7f), new Color(0.8f, 0.7f, 0.55f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.5f, 0.28f, 0.18f));
+            BuildBoxProp(centerline, "ShophouseK2", -695f, 16f, new Vector3(6f, 5f, 7f), new Color(0.82f, 0.72f, 0.58f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.55f, 0.3f, 0.2f));
+            BuildBoxProp(centerline, "ShophouseK2", -720f, -16f, new Vector3(6f, 5f, 7f), new Color(0.78f, 0.68f, 0.54f), new Vector3(6.5f, 0.8f, 7.5f), new Color(0.5f, 0.28f, 0.18f));
+            BuildBoxProp(centerline, "HouseK2", -630f, 14f, new Vector3(6f, 4f, 5f), new Color(0.8f, 0.65f, 0.45f));
+            BuildBoxProp(centerline, "HouseK2", -655f, -14f, new Vector3(5f, 3.6f, 4.5f), new Color(0.75f, 0.6f, 0.4f));
+            BuildBoxProp(centerline, "HouseK2", -685f, 14f, new Vector3(5.5f, 3.8f, 5f), new Color(0.78f, 0.62f, 0.42f));
+            BuildBoxProp(centerline, "HouseK2", -710f, -14f, new Vector3(6f, 4.2f, 5f), new Color(0.7f, 0.55f, 0.4f));
+            BuildBoxProp(centerline, "HouseK2", -735f, 14.5f, new Vector3(5f, 3.6f, 4.5f), new Color(0.8f, 0.68f, 0.48f));
+
+            // 6) Halte bus, kios pedagang (dekat jalan), papan penunjuk.
+            BuildBoxProp(centerline, "BusStop", -675f, -5.6f, new Vector3(2.2f, 2.6f, 4f), new Color(0.55f, 0.65f, 0.75f), new Vector3(3f, 0.3f, 5f), new Color(0.35f, 0.45f, 0.55f));
+            BuildBoxProp(centerline, "Kiosk", -330f, 5.6f, new Vector3(1.8f, 2.2f, 1.8f), new Color(0.9f, 0.6f, 0.3f), new Vector3(2f, 0.25f, 2f), new Color(0.7f, 0.3f, 0.15f));
+            BuildBoxProp(centerline, "Kiosk", -650f, -5.6f, new Vector3(1.8f, 2.2f, 1.8f), new Color(0.85f, 0.55f, 0.25f), new Vector3(2f, 0.25f, 2f), new Color(0.65f, 0.28f, 0.12f));
+            BuildSign(centerline, -100f, 6.2f, "Sign1");
+            BuildSign(centerline, -620f, -6.2f, "Sign2");
+
+            Debug.Log("[Kemudi.Scene] Scenery dibangun: lampu, pohon, rumah/ruko, halte, kios, papan.");
+        }
+
+        /// <summary>Titik & arah hadap pada garis tengah yang Z-nya paling dekat dengan target.</summary>
+        private static bool PointNearZ(Vector3[] centerline, float targetZ, out Vector3 point, out Vector3 forward)
+        {
+            point = centerline[0];
+            forward = Vector3.forward;
+            if (centerline == null || centerline.Length == 0) return false;
+
+            var best = 0;
+            var bestDist = float.MaxValue;
+            for (var i = 0; i < centerline.Length; i++)
+            {
+                var d = Mathf.Abs(centerline[i].z - targetZ);
+                if (d < bestDist) { bestDist = d; best = i; }
+            }
+
+            point = centerline[best];
+            forward = best < centerline.Length - 1
+                ? (centerline[best + 1] - centerline[best]).normalized
+                : (centerline[best] - centerline[best - 1]).normalized;
+            return true;
+        }
+
+        private void BuildStreetLamp(Vector3[] centerline, float z, float offset)
+        {
+            if (!PointNearZ(centerline, z, out var center, out var forward)) return;
+            var right = Vector3.Cross(Vector3.up, forward).normalized;
+            var root = new GameObject("StreetLamp_" + z);
+            root.transform.SetParent(transform, false);
+            root.transform.position = center + right * offset;
+            root.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+
+            var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pole.name = "Pole";
+            pole.transform.SetParent(root.transform, false);
+            pole.transform.localPosition = new Vector3(0f, 2f, 0f);
+            pole.transform.localScale = new Vector3(0.1f, 2f, 0.1f);
+            AssignMaterial(pole.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.25f, 0.25f, 0.28f), "LampPole"));
+            Object.Destroy(pole.GetComponent<Collider>());
+
+            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = "Head";
+            head.transform.SetParent(root.transform, false);
+            head.transform.localPosition = new Vector3(0f, 4.2f, 0f);
+            head.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);
+            AssignMaterial(head.GetComponent<MeshRenderer>(), CreateMaterial(new Color(1f, 0.95f, 0.75f), "LampHead"));
+            Object.Destroy(head.GetComponent<Collider>());
+        }
+
+        private void BuildTree(Vector3[] centerline, float z, float offset)
+        {
+            if (!PointNearZ(centerline, z, out var center, out var forward)) return;
+            var right = Vector3.Cross(Vector3.up, forward).normalized;
+            var root = new GameObject("Tree_" + z);
+            root.transform.SetParent(transform, false);
+            root.transform.position = center + right * offset;
+
+            var trunk = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            trunk.name = "Trunk";
+            trunk.transform.SetParent(root.transform, false);
+            trunk.transform.localPosition = new Vector3(0f, 1.1f, 0f);
+            trunk.transform.localScale = new Vector3(0.22f, 1.1f, 0.22f);
+            AssignMaterial(trunk.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.4f, 0.28f, 0.16f), "Trunk"));
+            Object.Destroy(trunk.GetComponent<Collider>());
+
+            var crown = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            crown.name = "Crown";
+            crown.transform.SetParent(root.transform, false);
+            crown.transform.localPosition = new Vector3(0f, 3f, 0f);
+            crown.transform.localScale = new Vector3(1.8f, 1.6f, 1.8f);
+            AssignMaterial(crown.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.16f, 0.45f, 0.2f), "TreeCrown"));
+            Object.Destroy(crown.GetComponent<Collider>());
+        }
+
+        /// <summary>Bangunan sederhana (kotak + atap opsional) di bahu jalan.</summary>
+        private void BuildBoxProp(Vector3[] centerline, string name, float z, float offset,
+            Vector3 size, Color color, Vector3? roofSize = null, Color? roofColor = null)
+        {
+            if (!PointNearZ(centerline, z, out var center, out var forward)) return;
+            var right = Vector3.Cross(Vector3.up, forward).normalized;
+            var root = new GameObject(name + "_" + z);
+            root.transform.SetParent(transform, false);
+            root.transform.position = center + right * offset;
+            root.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "Body";
+            body.transform.SetParent(root.transform, false);
+            body.transform.localPosition = new Vector3(0f, size.y * 0.5f, 0f);
+            body.transform.localScale = size;
+            AssignMaterial(body.GetComponent<MeshRenderer>(), CreateMaterial(color, name + "Body"));
+            Object.Destroy(body.GetComponent<Collider>());
+
+            if (roofSize.HasValue)
+            {
+                var roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                roof.name = "Roof";
+                roof.transform.SetParent(root.transform, false);
+                roof.transform.localPosition = new Vector3(0f, size.y + roofSize.Value.y * 0.5f, 0f);
+                roof.transform.localScale = roofSize.Value;
+                AssignMaterial(roof.GetComponent<MeshRenderer>(),
+                    CreateMaterial(roofColor ?? new Color(0.5f, 0.15f, 0.1f), name + "Roof"));
+                Object.Destroy(roof.GetComponent<Collider>());
+            }
+        }
+
+        private void BuildSign(Vector3[] centerline, float z, float offset, string name)
+        {
+            if (!PointNearZ(centerline, z, out var center, out var forward)) return;
+            var right = Vector3.Cross(Vector3.up, forward).normalized;
+            var root = new GameObject(name);
+            root.transform.SetParent(transform, false);
+            root.transform.position = center + right * offset;
+            root.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+
+            var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pole.name = "Pole";
+            pole.transform.SetParent(root.transform, false);
+            pole.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+            pole.transform.localScale = new Vector3(0.07f, 1.2f, 0.07f);
+            AssignMaterial(pole.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.25f, 0.25f, 0.28f), "SignPole"));
+            Object.Destroy(pole.GetComponent<Collider>());
+
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.name = "Board";
+            board.transform.SetParent(root.transform, false);
+            board.transform.localPosition = new Vector3(0f, 2.6f, 0f);
+            board.transform.localScale = new Vector3(1.6f, 0.9f, 0.1f);
+            AssignMaterial(board.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.15f, 0.4f, 0.7f), "SignBoard"));
+            Object.Destroy(board.GetComponent<Collider>());
+        }
+
+        /// <summary>
+        /// Rute map ala Kota Bogor — padanan ROAD_WAYPOINTS di lib/track.ts
+        /// versi web lama (±916 m, finish di z = -900):
+        ///   Start Area (z=16) → Kota 1 (z=-60..-180, lampu -75, zebra -150)
+        ///   → S-Curve (-180..-300) → Permukiman (-300..-430, zebra -390)
+        ///   → Obstacle Zone (-430..-520, truk -495, lubang -510)
+        ///   → Tanjakan (-520..-620) → Kota 2 (-620..-760, lampu -650, halte -675)
+        ///   → Berkelok (-760..-850) → Finish (lurus z=-900).
+        /// Segmen terakhir lurus (x=0) agar deteksi finish dengan threshold Z
+        /// sederhana tetap akurat.
+        /// </summary>
         private static Vector3[] BuildRoute()
         {
             return new[]
             {
-                new Vector3(0f, 0.5f, 0f),
-                new Vector3(40f, 0.5f, 0f),
-                new Vector3(70f, 0.5f, 25f),
-                new Vector3(110f, 0.5f, 25f),
-                new Vector3(140f, 0.5f, 0f),
-                new Vector3(200f, 0.5f, 0f)   // finish
+                new Vector3(0f, 0.5f, 16f),
+                new Vector3(0f, 0.5f, -60f),
+                new Vector3(1.6f, 0.5f, -110f),
+                new Vector3(0f, 0.5f, -160f),
+                new Vector3(3.6f, 0.5f, -210f),
+                new Vector3(-3.6f, 0.5f, -260f),
+                new Vector3(0f, 0.5f, -300f),
+                new Vector3(-2.6f, 0.5f, -350f),
+                new Vector3(2.2f, 0.5f, -400f),
+                new Vector3(0f, 0.5f, -440f),
+                new Vector3(0f, 0.5f, -500f),
+                new Vector3(1.8f, 0.5f, -560f),
+                new Vector3(-1.8f, 0.5f, -610f),
+                new Vector3(0f, 0.5f, -660f),
+                new Vector3(2.8f, 0.5f, -720f),
+                new Vector3(-2.8f, 0.5f, -775f),
+                new Vector3(2.4f, 0.5f, -820f),
+                new Vector3(0f, 0.5f, -850f),
+                new Vector3(0f, 0.5f, -900f)   // FINISH_Z
             };
         }
 
@@ -378,15 +600,58 @@ namespace Kemudi.Simulation.Scene
 
         private void BuildTrafficSystem()
         {
-            // 1) Traffic light di jalan lurus pertama (stop line z = 36).
-            var trafficLight = BuildTrafficLight(new Vector3(5.5f, 0.5f, 36f));
-            BuildTrafficLightZone(trafficLight);
+            var centerline = new Vector3[_waypoints.Length];
+            for (var i = 0; i < _waypoints.Length; i++) centerline[i] = _waypoints[i].position;
 
-            // 2) Zebra cross di jalan lurus terakhir (x = 160) + pejalan kaki.
-            BuildCrosswalk(new Vector3(160f, 0.5f, 0f));
+            // 1) Traffic light Kota 1 (z = -75) & Kota 2 (z = -650) — padanan
+            //    lib/track.ts (2 lampu lalu lintas).
+            var trafficLight = BuildTrafficLightNearZ(centerline, -75f);
+            BuildTrafficLightZone(trafficLight, centerline, -70f);
+            var trafficLight2 = BuildTrafficLightNearZ(centerline, -650f);
+            BuildTrafficLightZone(trafficLight2, centerline, -645f);
+
+            // 2) Zebra cross di z = -150 (Kota 1), -390 (Permukiman), -850
+            //    (mendekati finish) + pejalan kaki di masing-masing.
+            BuildCrosswalkNearZ(centerline, -150f);
+            BuildCrosswalkNearZ(centerline, -390f);
+            BuildCrosswalkNearZ(centerline, -850f);
 
             // 3) Kendaraan AI — rute penuh (melewati lampu, spawn di waypoint ≥ 1).
             BuildTrafficVehicles(trafficLight);
+        }
+
+        /// <summary>Bangun traffic light di posisi Z terdekat pada garis tengah.</summary>
+        private TrafficLightController BuildTrafficLightNearZ(Vector3[] centerline, float z)
+        {
+            PointNearZ(centerline, z, out var center, out _);
+            return BuildTrafficLight(center);
+        }
+
+        /// <summary>Zona trigger lampu — beberapa meter sebelum stop line.</summary>
+        private void BuildTrafficLightZone(TrafficLightController light, Vector3[] centerline, float z)
+        {
+            PointNearZ(centerline, z, out var center, out var forward);
+
+            var zone = new GameObject("TrafficLightZone");
+            zone.transform.SetParent(transform, false);
+            zone.transform.position = center + Vector3.up * 1f; // tepat sebelum stop line
+            zone.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            zone.layer = LayerMask.NameToLayer("Trigger") >= 0 ? LayerMask.NameToLayer("Trigger") : 0;
+
+            var box = zone.AddComponent<BoxCollider>();
+            box.isTrigger = true;
+            box.size = new Vector3(10f, 2f, 7f); // ±3.5 m di sepanjang jalan
+
+            var trafficLightZone = zone.AddComponent<TrafficLightZone>();
+            trafficLightZone.Configure(Violations);
+            trafficLightZone.Configure(light);
+        }
+
+        /// <summary>Zebra cross di posisi Z terdekat pada garis tengah.</summary>
+        private void BuildCrosswalkNearZ(Vector3[] centerline, float z)
+        {
+            PointNearZ(centerline, z, out var center, out _);
+            BuildCrosswalk(center);
         }
 
         private TrafficLightController BuildTrafficLight(Vector3 stopPosition)
@@ -436,21 +701,7 @@ namespace Kemudi.Simulation.Scene
             return controller;
         }
 
-        private void BuildTrafficLightZone(TrafficLightController light)
-        {
-            var zone = new GameObject("TrafficLightZone");
-            zone.transform.SetParent(transform, false);
-            zone.transform.position = new Vector3(0f, 1f, 31f); // tepat sebelum stop line z=36
-            zone.layer = LayerMask.NameToLayer("Trigger") >= 0 ? LayerMask.NameToLayer("Trigger") : 0;
 
-            var box = zone.AddComponent<BoxCollider>();
-            box.isTrigger = true;
-            box.size = new Vector3(10f, 2f, 7f); // z ∈ [27.5, 34.5]
-
-            var trafficLightZone = zone.AddComponent<TrafficLightZone>();
-            trafficLightZone.Configure(Violations);
-            trafficLightZone.Configure(light);
-        }
 
         private void BuildCrosswalk(Vector3 center)
         {

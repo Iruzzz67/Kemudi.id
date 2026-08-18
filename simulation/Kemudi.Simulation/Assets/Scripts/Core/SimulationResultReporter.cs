@@ -79,6 +79,11 @@ namespace Kemudi.Simulation.Core
         {
             if (SendInProgress || string.IsNullOrWhiteSpace(apiBaseUrl)) return;
 
+            // Build WebGL: token disisipkan launcher Blazor via query string
+            // (WebGlBridge) — dipakai bila field authToken belum diisi.
+            if (string.IsNullOrEmpty(authToken))
+                authToken = WebGlBridge.AuthToken;
+
             var payload = new ResultPayload
             {
                 vehicleType = simulation != null

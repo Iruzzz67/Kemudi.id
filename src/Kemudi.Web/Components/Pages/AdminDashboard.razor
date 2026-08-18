@@ -21,29 +21,29 @@ else
     <div class="admin-cards">
         <div class="admin-card">
             <div class="ac-label">Pengguna</div>
-            <div class="ac-value">@_data.TotalUsers</div>
+            <div class="ac-value count-up" data-target="@(_data!.TotalUsers)">@_data.TotalUsers</div>
             <div class="ac-sub">+@_data.NewUsers7d dalam 7 hari</div>
         </div>
         <div class="admin-card">
             <div class="ac-label">Pendaftaran</div>
-            <div class="ac-value">@_data.TotalRegistrations</div>
+            <div class="ac-value count-up" data-target="@(_data!.TotalRegistrations)">@_data.TotalRegistrations</div>
             <div class="ac-sub">@_data.PendingRegistrations menunggu verifikasi</div>
         </div>
         <div class="admin-card ac-amber">
             <div class="ac-label">Pembayaran Pending</div>
-            <div class="ac-value">@_data.PendingRegistrations</div>
+            <div class="ac-value count-up" data-target="@(_data!.PendingRegistrations)">@_data.PendingRegistrations</div>
         </div>
         <div class="admin-card ac-green">
             <div class="ac-label">Pembayaran Berhasil</div>
-            <div class="ac-value">@_data.PaidRegistrations</div>
+            <div class="ac-value count-up" data-target="@(_data!.PaidRegistrations)">@_data.PaidRegistrations</div>
         </div>
         <div class="admin-card">
             <div class="ac-label">Mentor</div>
-            <div class="ac-value">@_data.TotalMentors</div>
+            <div class="ac-value count-up" data-target="@(_data!.TotalMentors)">@_data.TotalMentors</div>
         </div>
         <div class="admin-card">
             <div class="ac-label">Kursus Aktif</div>
-            <div class="ac-value">@_data.ActiveCourses</div>
+            <div class="ac-value count-up" data-target="@(_data!.ActiveCourses)">@_data.ActiveCourses</div>
         </div>
     </div>
 

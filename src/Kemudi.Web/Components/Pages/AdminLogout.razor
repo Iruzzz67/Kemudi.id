@@ -4,9 +4,9 @@
 @inject NavigationManager Nav
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Auth.Logout();
+        await Auth.LogoutAsync();
         Nav.NavigateTo("/admin/login", forceLoad: true);
     }
 }

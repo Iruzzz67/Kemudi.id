@@ -171,9 +171,17 @@ namespace Kemudi.Simulation.Core
             // ObstacleHit punya bobot ringan sendiri (-3 poin, konsisten web),
             // bukan lewat AddViolation(severity) yang lebih berat.
             if (violation.Type == ViolationSystem.ViolationType.ObstacleHit)
+            {
                 scoringSystem?.AddObstacleHit();
-            else
-                scoringSystem?.AddViolation(violation.Severity);
+                return;
+            }
+
+            scoringSystem?.AddViolation(violation.Severity);
+
+            // Gagal bila pelanggaran lalu lintas mencapai ambang batas
+            // (failThresholdViolations di ScoringSystem, default 3).
+            if (scoringSystem != null && scoringSystem.TotalViolations >= scoringSystem.FailThreshold)
+                Fail("Pelanggaran mencapai ambang batas (" + scoringSystem.FailThreshold + ").");
         }
 
         private void SetPhase(Phase phase)

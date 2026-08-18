@@ -1,22 +1,25 @@
 using System.Text;
 using System.Text.Json;
 using Kemudi.Shared.DTOs;
+using Microsoft.JSInterop;
 
 namespace Kemudi.Web.Services;
 
 /// <summary>
 /// State autentikasi sisi server (Blazor Server). Token JWT disimpan di cookie
-/// httpOnly <c>kemudi_token</c>; halaman membaca properti <see cref="IsAuthenticated"/>.
+/// <c>kemudi_token</c>; halaman membaca properti <see cref="IsAuthenticated"/>.
 /// </summary>
 public sealed class AuthService
 {
     private readonly ApiClient _api;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly IJSRuntime? _js;
 
-    public AuthService(ApiClient api, IHttpContextAccessor httpContext)
+    public AuthService(ApiClient api, IHttpContextAccessor httpContext, IJSRuntime js)
     {
         _api = api;
         _httpContext = httpContext;
+        _js = js;
     }
 
     public bool IsAuthenticated => !string.IsNullOrEmpty(_api.Token);
@@ -35,7 +38,7 @@ public sealed class AuthService
             "/api/admin/auth/login", new LoginRequest(email, password), ct);
         if (result is null) return (false, "Login gagal. Periksa email dan password.");
 
-        SetTokenCookie(result.Token);
+        await SetTokenCookieAsync(result.Token);
         return (true, null);
     }
 
@@ -46,7 +49,7 @@ public sealed class AuthService
             "/api/auth/login", new LoginRequest(email, password), ct);
         if (result is null) return (false, "Login gagal. Periksa email dan password.", null);
 
-        SetTokenCookie(result.Token);
+        await SetTokenCookieAsync(result.Token);
         return (true, null, result);
     }
 
@@ -57,15 +60,23 @@ public sealed class AuthService
             "/api/auth/register", new RegisterRequest(name, email, password), ct);
         if (result is null) return (false, "Registrasi gagal. Email mungkin sudah terdaftar.");
 
-        SetTokenCookie(result.Token);
+        await SetTokenCookieAsync(result.Token);
         return (true, null);
     }
 
-    public void Logout()
+    public async Task LogoutAsync()
     {
-        var context = _httpContext.HttpContext;
-        if (context is null) return;
-        context.Response.Cookies.Delete(ApiClient.TokenCookie);
+        // Hapus cache token di sirkuit agar IsAuthenticated langsung false.
+        _api.ClearToken();
+        try
+        {
+            if (_js is not null)
+                await _js.InvokeVoidAsync("clearAuthCookie", ApiClient.TokenCookie);
+        }
+        catch (InvalidOperationException)
+        {
+            // Prerender — JS belum tersedia; cookie dibersihkan pada render interaktif.
+        }
     }
 
     private bool HasRole(string role)
@@ -101,19 +112,18 @@ public sealed class AuthService
         return null;
     }
 
-    private void SetTokenCookie(string token)
+    private async Task SetTokenCookieAsync(string token)
     {
-        var context = _httpContext.HttpContext;
-        if (context is null) return;
-        context.Response.Cookies.Append(
-            ApiClient.TokenCookie,
-            token,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax,
-                Secure = context.Request.IsHttps,
-                MaxAge = TimeSpan.FromDays(7)
-            });
+        try
+        {
+            // Respons HTTP sudah terkirim saat event handler sirkuit berjalan,
+            // jadi cookie ditulis dari klien via js/auth.js (lihat catatan di file).
+            if (_js is not null)
+                await _js.InvokeVoidAsync("setAuthCookie", ApiClient.TokenCookie, token, 7);
+        }
+        catch (InvalidOperationException)
+        {
+            // Prerender — sirkuit belum interaktif; cookie di-set pada render interaktif.
+        }
     }
 }

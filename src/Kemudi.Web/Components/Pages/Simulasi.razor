@@ -4,13 +4,15 @@
 @inject ApiClient Api
 @inject AuthService Auth
 @inject NavigationManager Nav
+@inject IHttpClientFactory HttpClientFactory
 
 <section class="hero">
     <h1>Simulasi <span>3D Mengemudi</span></h1>
     <p>
-        Simulasi berjalan di aplikasi Unity (C# + OpenXR) untuk PC, PC VR, dan Meta Quest.
-        Halaman ini adalah <strong>launcher</strong>: pilih kendaraan, luncurkan aplikasi,
-        lalu hasil latihan otomatis dikirim kembali ke server.
+        Berlatih mengemudi di lintasan ala Kota Bogor (±916 m) — motor, mobil, atau truk —
+        lengkap dengan lalu lintas, pejalan kaki, lampu merah, rintangan, dan skor akhir.
+        Simulasi dibuat dengan <strong>Unity (C#)</strong> dan bisa dimainkan langsung di browser (WebGL)
+        atau di aplikasi desktop/VR (OpenXR).
     </p>
 </section>
 
@@ -21,7 +23,7 @@
 else
 {
     <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">Pilih Kendaraan</h2>
+        <h2 class="section-title" style="font-size:1.25rem">1. Pilih Kendaraan</h2>
         <div class="grid grid-3 mt-2">
             @foreach (var v in _vehicles)
             {
@@ -40,43 +42,71 @@ else
                 </div>
             }
         </div>
+    </section>
 
-        <div class="card mt-3" style="text-align:center;padding:1.5rem">
-            @if (string.IsNullOrEmpty(_selectedVehicle))
-            {
-                <p class="muted">Pilih salah satu kendaraan di atas untuk melanjutkan.</p>
-            }
-            else
-            {
-                <p>
-                    Kendaraan: <strong>@(_vehicles.First(v => v.Type == _selectedVehicle).Label)</strong>
-                    · Status login: <strong>@(Auth.IsAuthenticated ? "Sudah masuk" : "Belum masuk")</strong>
-                </p>
-                <p class="muted mt-1">
-                    Hasil latihan hanya tersimpan di dashboard bila Anda sudah login.
-                </p>
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">2. Mainkan</h2>
 
-                <div class="flex mt-2" style="justify-content:center;gap:0.75rem;flex-wrap:wrap">
-                    <button class="btn btn-primary btn-lg" @onclick="LaunchSimulation">
-                        ▶ Luncurkan Simulasi (Unity)
-                    </button>
-                    @if (!Auth.IsAuthenticated)
-                    {
-                        <a class="btn btn-outline btn-lg" href="login">Masuk untuk simpan hasil</a>
-                    }
-                </div>
-
-                @if (_launching)
-                {
-                    <div class="error-box mt-2" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a">
-                        <strong>Alur peluncuran (dokumen §61):</strong><br />
-                        1. Buka aplikasi Unity <em>Kemudi.Simulation</em> di PC / headset VR Anda.<br />
-                        2. Di aplikasi, pilih kendaraan <strong>@_selectedVehicle</strong> dan jalankan simulasi.<br />
-                        3. Setelah selesai, Unity mengirim hasil ke API (skor, waktu, pelanggaran, rintangan).<br />
-                        4. Kembali ke halaman <a href="dashboard" style="color:#2563eb;text-decoration:underline">Dashboard</a> untuk melihat riwayat.
+        @if (_webGlAvailable == null)
+        {
+            <div class="loading">Memeriksa build WebGL...</div>
+        }
+        else if (_webGlAvailable == true)
+        {
+            <div class="card mt-2">
+                <div class="flex" style="justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+                    <div>
+                        <h3 style="margin:0 0 0.25rem">▶ Mainkan di Browser (WebGL)</h3>
+                        <p class="muted" style="margin:0">
+                            Kendaraan: <strong>@SelectedLabel</strong> ·
+                            Status login: <strong>@(Auth.IsAuthenticated ? "Sudah masuk — hasil akan tersimpan" : "Belum masuk — hasil tidak tersimpan")</strong>
+                        </p>
                     </div>
+                    <button class="btn btn-primary btn-lg" @onclick="ToggleWebGl" disabled="@(_selectedVehicle is null)">
+                        @(_playingWebGl ? "✕ Tutup Simulasi" : "▶ Mulai Simulasi")
+                    </button>
+                </div>
+                @if (!Auth.IsAuthenticated)
+                {
+                    <p class="muted mt-1">💡 <a href="login" style="color:#2563eb;text-decoration:underline">Masuk dulu</a> agar skor &amp; riwayat tersimpan di dashboard.</p>
                 }
+            </div>
+
+            @if (_playingWebGl)
+            {
+                <div class="sim-frame-wrap">
+                    <iframe class="sim-iframe" src="@_webGlUrl" allow="fullscreen; xr-spatial-tracking; gamepad" loading="lazy"></iframe>
+                    <p class="muted" style="text-align:center;margin-top:0.5rem">
+                        Kontrol: <strong>W/S</strong> gas/rem · <strong>A/D</strong> belok · <strong>Space</strong> rem tangan ·
+                        <strong>I</strong> mesin · <strong>C</strong> kamera · <strong>B/H/J/G/F</strong> checklist.
+                        Selesaikan checklist pra-jalan lalu meluncur hingga garis finish.
+                    </p>
+                </div>
             }
+        }
+        else
+        {
+            <div class="error-box mt-2" style="background:#fffbeb;border-color:#fcd34d;color:#92400e">
+                <strong>Build WebGL belum tersedia.</strong><br />
+                Simulasi browser membutuhkan hasil build WebGL dari proyek Unity
+                (<code>simulation/Kemudi.Simulation</code>) yang disalin ke
+                <code>src/Kemudi.Web/wwwroot/unity/</code> — lihat
+                <a href="https://github.com/Iruzzz67/Kemudi.id/blob/main/simulation/Kemudi.Simulation/README.md" style="color:#92400e;text-decoration:underline">README Unity</a>.
+            </div>
+        }
+    </section>
+
+    <section class="section">
+        <div class="card mt-2" style="text-align:center;padding:1.5rem">
+            <h3 style="margin-top:0">🖥️ Aplikasi Desktop / VR (OpenXR)</h3>
+            <p class="muted">
+                Untuk pengalaman VR penuh (PC VR &amp; Meta Quest), buka proyek
+                <em>Kemudi.Simulation</em> di Unity, build, lalu mainkan. Hasil latihan
+                dikirim otomatis ke server via <code>POST /api/progress</code>.
+            </p>
+            <a class="btn btn-outline" href="https://github.com/Iruzzz67/Kemudi.id/tree/main/simulation/Kemudi.Simulation" target="_blank" rel="noopener">
+                Panduan Build Unity
+            </a>
         </div>
     </section>
 }
@@ -84,19 +114,49 @@ else
 @code {
     private List<VehicleDto>? _vehicles;
     private string? _selectedVehicle;
-    private bool _launching;
+    private bool? _webGlAvailable;
+    private bool _playingWebGl;
 
-    private void SelectVehicle(string type) => _selectedVehicle = type;
+    private string SelectedLabel => _vehicles?.FirstOrDefault(v => v.Type == _selectedVehicle)?.Label ?? "—";
 
-    private void LaunchSimulation()
+    private string? _webGlUrl;
+    private string? WebGlUrl
     {
-        // Launcher: dalam produksi, tombol ini membuka aplikasi Unity
-        // (desktop build / deep-link). Hasil dikirim Unity ke /api/progress.
-        _launching = true;
+        get
+        {
+            if (_selectedVehicle is null) return null;
+            var token = Auth.IsAuthenticated ? Uri.EscapeDataString(Api.Token ?? "") : "";
+            return Nav.BaseUri + "unity/index.html?token=" + token + "&vehicle=" + _selectedVehicle;
+        }
+    }
+
+    private void SelectVehicle(string type)
+    {
+        _selectedVehicle = type;
+        _webGlUrl = WebGlUrl;
+    }
+
+    private void ToggleWebGl()
+    {
+        _webGlUrl = WebGlUrl;
+        _playingWebGl = !_playingWebGl;
     }
 
     protected override async Task OnInitializedAsync()
     {
         _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+
+        // Cek apakah build WebGL tersedia di /unity/index.html.
+        try
+        {
+            var http = HttpClientFactory.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Head, new Uri(Nav.BaseUri + "unity/index.html"));
+            using var response = await http.SendAsync(request);
+            _webGlAvailable = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            _webGlAvailable = false;
+        }
     }
 }

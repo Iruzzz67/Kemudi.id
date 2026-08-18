@@ -39,6 +39,9 @@ public sealed class ApiClient
         }
     }
 
+    /// <summary>Bersihkan token cache di sirkuit (dipakai saat logout).</summary>
+    public void ClearToken() => _cachedToken = null;
+
     public async Task<T?> GetAsync<T>(string path, CancellationToken ct = default)
     {
         using var request = CreateRequest(HttpMethod.Get, path);
