@@ -37,7 +37,8 @@ public enum RegistrationStatus
 {
     Pending = 0,
     Paid = 1,
-    Cancelled = 2
+    Cancelled = 2,
+    Rejected = 3
 }
 
 /// <summary>Mode pelatihan simulasi.</summary>

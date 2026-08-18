@@ -1,0 +1,155 @@
+@page "/admin/pengaturan"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Pengaturan</h1>
+<p class="page-sub">Profil, ganti password, akun admin, dan audit log.</p>
+
+@if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+@if (_success is not null)
+{
+    <div class="success-box">@_success</div>
+}
+
+<div class="admin-cards" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+    <div class="admin-panel" style="margin-top:0">
+        <h2>Ganti Password</h2>
+        <div class="form">
+            <div class="field"><label>Password Lama</label><input type="password" @bind="_currentPassword" /></div>
+            <div class="field"><label>Password Baru</label><input type="password" @bind="_newPassword" /></div>
+            <button class="btn btn-primary" disabled="@_busy" @onclick="ChangePassword">Simpan Password</button>
+        </div>
+    </div>
+
+    <div class="admin-panel" style="margin-top:0">
+        <h2>Akun Admin</h2>
+        <div class="admin-toolbar" style="margin-bottom:0.5rem">
+            <input type="email" placeholder="email@contoh.com" @bind="_promoteEmail" />
+            <button class="btn btn-primary" disabled="@_busy" @onclick="PromoteAdmin">Jadikan Admin</button>
+        </div>
+        <ul style="list-style:none;padding:0;margin:0">
+            @foreach (var a in _admins)
+            {
+                <li style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px dashed #e2e8f0">
+                    <span>@a.Email</span>
+                    <AdminBadge Value="@(a.IsActive ? "active" : "inactive")" />
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+<div class="admin-panel">
+    <h2>Audit Log <span style="font-weight:400;color:#94a3b8;font-size:0.8rem">(100 terbaru)</span></h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Aksi</th><th>Target</th><th>Admin</th><th>Waktu</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var l in _logs)
+                {
+                    <tr>
+                        <td>@ActionLabel(l.Action)</td>
+                        <td>@l.Target</td>
+                        <td>@l.AdminEmail</td>
+                        <td>@l.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (_logs.Count == 0)
+    {
+        <p class="empty">Belum ada aktivitas.</p>
+    }
+</div>
+
+@code {
+    private List<AdminAuditLogDto> _logs = new();
+    private List<AdminAccountDto> _admins = new();
+    private string _currentPassword = "";
+    private string _newPassword = "";
+    private string _promoteEmail = "";
+    private bool _busy;
+    private string? _error;
+    private string? _success;
+
+    private async Task ChangePassword()
+    {
+        _busy = true;
+        _error = null;
+        _success = null;
+        var result = await Api.PostVoidAsync("/api/admin/settings/change-password",
+            new ChangePasswordRequest(_currentPassword, _newPassword));
+        if (!result.Success) _error = result.Error;
+        else
+        {
+            _success = "Password berhasil diganti.";
+            _currentPassword = "";
+            _newPassword = "";
+        }
+        _busy = false;
+    }
+
+    private async Task PromoteAdmin()
+    {
+        _busy = true;
+        _error = null;
+        _success = null;
+        var result = await Api.PostVoidAsync("/api/admin/settings/promote", new { email = _promoteEmail });
+        if (!result.Success) _error = result.Error;
+        else
+        {
+            _success = $"{_promoteEmail} kini berperan ADMIN.";
+            _promoteEmail = "";
+            _admins = await Api.GetAsync<List<AdminAccountDto>>("/api/admin/settings/admins") ?? new();
+        }
+        _busy = false;
+    }
+
+    private static string ActionLabel(string action) => action switch
+    {
+        "auth.login" => "Login admin",
+        "registration.confirm" => "Konfirmasi pendaftaran",
+        "registration.reject" => "Tolak pendaftaran",
+        "registration.reopen" => "Buka kembali pendaftaran",
+        "payment.confirm" => "Verifikasi pembayaran",
+        "payment.reject" => "Tolak pembayaran",
+        "payment.reopen" => "Buka kembali pembayaran",
+        "mentor.create" => "Buat mentor",
+        "mentor.update" => "Ubah mentor",
+        "mentor.delete" => "Hapus mentor",
+        "course.create" => "Buat kursus",
+        "course.update" => "Ubah kursus",
+        "course.delete" => "Hapus kursus",
+        "schedule.create" => "Buat jadwal",
+        "schedule.update" => "Ubah jadwal",
+        "schedule.delete" => "Hapus jadwal",
+        "user.update" => "Ubah pengguna",
+        "user.deactivate" => "Nonaktifkan pengguna",
+        "admin.change_password" => "Ganti password admin",
+        "admin.promote" => "Jadikan admin",
+        _ => action
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+
+        _logs = await Api.GetAsync<List<AdminAuditLogDto>>("/api/admin/settings/audit-logs") ?? new();
+        _admins = await Api.GetAsync<List<AdminAccountDto>>("/api/admin/settings/admins") ?? new();
+    }
+}

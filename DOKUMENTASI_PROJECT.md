@@ -2,12 +2,15 @@
 
 > **Simulasi Mengemudi Motor, Mobil, dan Truk — dari simulasi 3D interaktif hingga website kursus mengemudi.**
 >
-> **Struktur repo:** aplikasi web Next.js + simulasi 3D berada di root (`app/`, `components/`, `lib/`),
-> hasil **migrasi C#/.NET** ada di [`src/`](./src/README.md) dan **proyek Unity** di
-> [`simulation/`](./simulation/Kemudi.Simulation/README.md).
+> **Struktur repo:** aplikasi web dibangun dengan **.NET/C#** (ASP.NET Core + Blazor)
+> di [`src/`](./src/README.md), **simulasi 3D** dengan **Unity** di
+> [`simulation/`](./simulation/Kemudi.Simulation/README.md). Jalankan dengan `dotnet run`
+> (lihat [Cara Menjalankan](#cara-menjalankan)).
 >
 > **Dokumentasi lain:** [README.md](./README.md) (visi & fitur game) ·
-> [PANDUAN_PENEMPATAN_ASSET.md](./PANDUAN_PENEMPATAN_ASSET.md) (penempatan & penggantian aset 3D)
+> [`src/README.md`](./src/README.md) (aplikasi .NET) ·
+> [`docs/OPTIMASI_SIMULASI.md`](./docs/OPTIMASI_SIMULASI.md) (arsitektur simulasi Unity) ·
+> [`docs/VR_INPUT_MAP.md`](./docs/VR_INPUT_MAP.md) (input VR)
 
 ---
 
@@ -332,52 +335,61 @@ Nilai maksimal: **100**
 
 ## Website Kemudi.id
 
-Selain game simulasi, project ini memiliki **website kursus mengemudi** (Next.js App Router) dengan halaman-halaman berikut.
+Selain game simulasi, project ini memiliki **website kursus mengemudi** yang seluruhnya dibangun dengan **.NET/C#** — Blazor Web App (ASP.NET Core), EF Core, dan ASP.NET Core Identity. Kode lama React/TypeScript/Next.js sudah dihapus dari repo; semua halaman & API kini `.razor`/`.cs`.
 
-### Halaman & Rute
+### Halaman & Rute (Blazor)
 
 | Rute | Deskripsi |
 |---|---|
 | `/` | Landing page — hero, 3 jenis kendaraan, materi terbaru |
 | `/kursus` | Paket kursus, jadwal, pemilihan mentor (bisa difilter per kendaraan) |
-| `/kursus/mentor/[id]` | Portofolio mentor (sertifikasi, pencapaian, testimoni) |
+| `/kursus/mentor/{slug}` | Portofolio mentor (sertifikasi, pencapaian, testimoni) |
 | `/kursus/personal` | Form data diri + metode pembayaran + instruksi pembayaran |
 | `/kursus/payment` | Halaman pembayaran |
-| `/materi` & `/materi/[slug]` | Materi teori |
-| `/simulasi` | 🎮 Peluncur simulasi 3D (dynamic import, `ssr: false`) |
-| `/login` & `/register` | Autentikasi |
+| `/materi` & `/materi/{slug}` | Materi teori |
+| `/simulasi` | 🎮 Peluncur simulasi 3D (aplikasi Unity) |
+| `/login`, `/register`, `/logout` | Autentikasi |
 | `/dashboard` | Statistik & riwayat latihan (butuh login) |
+| `/admin/*` | Panel admin terpisah (login, dashboard, pendaftaran, pengguna, mentor, jadwal, pembayaran, kursus, statistik, pengaturan) |
 
 ### Autentikasi
 
-- NextAuth v5 dengan strategi **JWT** dan provider **Credentials** (email + password, diverifikasi dengan bcryptjs).
-- Registrasi via `POST /api/register` (validasi email unik, password ≥ 6 karakter, hash bcrypt).
+- **ASP.NET Core Identity** + **JWT** — token disimpan di cookie `kemudi_token` (httpOnly) oleh `AuthService` dan disisipkan otomatis oleh `ApiClient`.
+- Registrasi via `POST /api/auth/register` (validasi email unik, password ≥ 6 karakter, hash Identity).
+- Role `Admin` berasal dari Identity role → klaim JWT; endpoint `/api/admin/*` divalidasi `[Authorize(Roles = "Admin")]` (non-admin mendapat 403).
 
-### Database (Prisma + SQLite)
+### Database (EF Core + SQLite)
 
-Skema di `prisma/schema.prisma`:
+Model di `src/Kemudi.Domain/Entities/` + DbContext `src/Kemudi.Infrastructure/Data/AppDbContext.cs` (migrasi EF di `src/Kemudi.Infrastructure/Migrations/`):
 
 | Model | Field |
 |---|---|
-| `User` | `id` (cuid, PK), `name`, `email` (unique), `password` (hash), `createdAt`, relasi `attempts` |
-| `SimulationAttempt` | `id`, `userId` (FK → User), `vehicleType` (MOTOR/MOBIL/TRUK), `score` (0–100), `timeTakenMs`, `violations`, `offRoadCount`, `completed`, `createdAt` |
+| `ApplicationUser` (Identity) | `id`, `name`, `email` (unique), `passwordHash`, `isActive`, `createdAt`, relasi `attempts` |
+| `SimulationAttempt` | `id`, `userId` (FK → User), `vehicleType` (MOTOR/MOBIL/TRUK), `score` (0–100), `timeTakenMs`, `violations`, `offRoadCount`, `obstacleHits`, `completed`, `createdAt` |
+| `Course`, `CoursePackage`, `Mentor`, `Schedule`, `CourseRegistration`, `Payment`, `AuditLog`, `TrainingSession`, `Vehicle` | lihat `src/Kemudi.Domain/Entities/` |
 
-### API Routes
+### API (ASP.NET Core Web API)
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
-| GET/POST | `/api/auth/[...nextauth]` | Handler NextAuth |
-| POST | `/api/register` | Registrasi user baru |
-| POST | `/api/progress` | Simpan hasil simulasi (butuh login) — skor di-clamp 0–100 di server |
-| GET | `/api/progress` | Ambil riwayat latihan user (50 terbaru) |
+| POST | `/api/auth/register` | Registrasi user baru |
+| POST | `/api/auth/login` | Login → JWT |
+| GET | `/api/auth/me` | Profil user (JWT) |
+| POST / GET | `/api/progress` | Simpan/ambil riwayat simulasi (JWT) — skor di-clamp 0–100 di server |
+| GET | `/api/courses`, `/api/courses/{slug}` | Paket kursus |
+| GET | `/api/mentors`, `/api/mentors/{slug}` | Mentor |
+| GET | `/api/vehicles` | Kendaraan |
+| POST / GET | `/api/course-registration` | Pendaftaran kursus |
+| POST | `/api/payment` | Pembayaran |
+| `/api/admin/*` | 10 controller | Panel admin (JWT, role Admin) |
 
 ### Kursus & Pendaftaran
 
-- **7 paket kursus** (`COURSE_PACKAGES`): Motor Reguler/Intensif, Mobil Reguler/Intensif/Mahir (Defensive), Truk Reguler/Profesional — harga mulai Rp350.000 hingga Rp4.500.000.
-- **4 mentor** (`MENTORS`): Budi Santoso, Siti Rahma, Agus Wirawan, Dewi Lestari — lengkap dengan rating, pengalaman, jumlah murid, dan portofolio.
-- **5 slot jadwal** (`SCHEDULE_SLOTS`).
-- **3 metode pembayaran**: Transfer Bank (BCA/BNI + tombol salin nomor rekening), E-Wallet/QRIS, Bayar di Tempat.
-- **Alur pendaftaran**: pilih paket → pilih mentor → isi data diri (nama, email, telepon, NIK, alamat) → instruksi pembayaran → konfirmasi "Saya sudah bayar" → data disimpan di localStorage (`kemudi_registration`) → diarahkan ke `/dashboard`.
+- **7 paket kursus**: Motor Reguler/Intensif, Mobil Reguler/Intensif/Mahir (Defensive), Truk Reguler/Profesional — harga mulai Rp350.000 hingga Rp4.500.000 (ter-seed di EF, `SeedData.cs`).
+- **4 mentor**: Budi Santoso, Siti Rahma, Agus Wirawan, Dewi Lestari — lengkap dengan rating, pengalaman, jumlah murid, dan portofolio.
+- **5 slot jadwal** (`Schedule`).
+- **3 metode pembayaran**: Transfer Bank (BCA/BNI), E-Wallet/QRIS, Bayar di Tempat.
+- **Alur pendaftaran**: pilih paket → pilih mentor → isi data diri (nama, email, telepon, NIK, alamat) → instruksi pembayaran → konfirmasi "Saya sudah bayar" → pendaftaran tersimpan di database (status `pending`, diverifikasi admin di `/admin/pendaftaran`).
 
 ### Materi
 
@@ -388,50 +400,44 @@ Skema di `prisma/schema.prisma`:
 | `dasar-mengemudikan-mobil` | Dasar Mengemudikan Mobil | Mobil |
 | `dasar-mengemudikan-truk` | Dasar Mengemudikan Truk | Truk |
 
+> Materi statis didefinisikan di `src/Kemudi.Web/Data/MateriData.cs`.
+
 ### Dashboard
 
 - Kartu statistik: **Total Percobaan**, **Skor Terbaik**, **Rata-rata Skor**.
-- **Status pendaftaran** kursus (pending → paid) via komponen `UserRegistrationStatus`.
-- **Tabel riwayat latihan**: tanggal, kendaraan, skor, waktu, pelanggaran, keluar jalur — diambil langsung dari Prisma.
+- **Status pendaftaran** kursus (pending → paid) diambil dari API.
+- **Tabel riwayat latihan**: tanggal, kendaraan, skor, waktu, pelanggaran, keluar jalur — dari database via `POST/GET /api/progress`.
 
 ---
 
 ## Dukungan VR / XR
 
-Simulasi mendukung **WebXR** agar pengguna bisa berlatih di dalam kabin kendaraan secara imersif. Komponennya ada di `components/simulation/xr/`.
+Simulasi mendukung **VR (OpenXR)** agar pengguna bisa berlatih di dalam kabin kendaraan secara imersif. Implementasinya ada di proyek **Unity** `simulation/Kemudi.Simulation/Assets/Scripts/XR/` (bukan WebXR/Three.js):
 
-| Komponen | Fungsi |
+| Komponen (C#) | Fungsi |
 |---|---|
-| `store.ts` | Store XR global (`createXRStore`) — hand + controller aktif, **emulator off**, `frameRate` & `frameBufferScaling` "mid", `foveation: 1` (optimal Quest 2/3) |
-| `VRToggleButton.tsx` | Tombol **"Masuk VR"** di DOM — deteksi dukungan WebXR (butuh HTTPS/localhost), retry loop ≤3,5 dtk saat Canvas belum mount |
-| `VRButton.tsx` | Tombol VR 3D (warna idle/hover/active/danger/disabled) |
-| `XRInputAdapter.ts` | Adaptor input XR → `VehicleInput` |
-| `XRControlsMap.tsx` | Pemetaan stik/tombol controller (setir, gigi, lampu, kamera, pause) |
-| `VRControlPanel.tsx` | Panel kontrol world-space di kabin (mesin, rem tangan, sein, lampu, hazard, klakson, sabuk, helm, kamera, keluar VR) |
-| `XRDashboard.tsx` | Dashboard speedometer/gear world-space |
-| `CabinAnchor.tsx` | Jangkar kabin — dashboard & panel VR mengikuti posisi kursi pengemudi |
-| `CameraFollower.tsx` | Kamera mengikuti rig XR |
-| `XRComfort.tsx` | Vignette anti motion sickness |
-| `XROptimizer.tsx` | Optimasi performa VR |
-| `handGestures.ts` | Deteksi gesture tangan (pinch, fist) via joint tracking |
-| `vrActions.ts` | Aksi VR (toggle engine, handbrake, sein, lampu, dll.) |
-| `uiHover.ts` | Hover state untuk UI VR |
+| `XRManager.cs` | Inisialisasi OpenXR & rig |
+| `XRInputProvider.cs` | Provider input VR → `UniversalInputSystem` → `VehicleInputState` |
+| `XRComfortSystem.cs` | Vignette anti motion sickness |
+| `XRDashboard.cs` | Dashboard speedometer/gear world-space |
+| `HandTrackingManager.cs` | Hand tracking (default OFF) |
+| `HudController.cs` | HUD melayang mengikuti kamera FPV (±2,2 m di depan mata) |
 
-> Emulator `@pmndrs/xr` (IWER) **sengaja dimatikan** (`emulate: false`) karena menyuntikkan instance Three.js kedua yang bisa merusak sesi headset asli.
+> Pemetaan input lengkap: [`docs/VR_INPUT_MAP.md`](./docs/VR_INPUT_MAP.md). Build target: PC VR (OpenXR) & Meta Quest standalone (Android).
 
 ---
 
-## Migrasi .NET / C# (`src/`)
+## Aplikasi .NET / C# (`src/`)
 
-Hasil migrasi dari Next.js/TS ke .NET (PHASE 1–4) — detail lengkap di [`src/README.md`](./src/README.md).
+Aplikasi web utama (pengganti Next.js yang sudah dihapus) — detail lengkap di [`src/README.md`](./src/README.md).
 
 | Proyek | Teknologi | Isi |
 |---|---|---|
-| `Kemudi.Domain` | Class Library | Entities (Course, CoursePackage, CourseRegistration, Mentor, Payment, SimulationAttempt, TrainingSession, Vehicle) + Enums |
-| `Kemudi.Shared` | Class Library | DTO (Auth, Course, Progress, UserProfile, Vehicle) |
+| `Kemudi.Domain` | Class Library | Entities (Course, CoursePackage, CourseRegistration, Mentor, Payment, Schedule, AuditLog, SimulationAttempt, TrainingSession, Vehicle) + Enums |
+| `Kemudi.Shared` | Class Library | DTO (Auth, Course, Progress, UserProfile, Vehicle, Admin) |
 | `Kemudi.Infrastructure` | Class Library | EF Core DbContext, Identity, JWT, SeedData (3 kendaraan, 3 kursus, 7 paket, 4 mentor) |
-| `Kemudi.Api` | Web API | Controllers (Auth, Courses, Mentors, Vehicles, Progress, CourseRegistration, Payments) + Swagger + CORS |
-| `Kemudi.Web` | Blazor Web App | Home, Kursus, Materi, MentorDetail, Personal, Payment, Login, Register, Logout, Dashboard, Simulasi |
+| `Kemudi.Api` | Web API | Controllers (Auth, Courses, Mentors, Vehicles, Progress, CourseRegistration, Payments) + **admin `/api/admin/*`** + Swagger + CORS |
+| `Kemudi.Web` | Blazor Web App | Home, Kursus, Materi, MentorDetail, Personal, Payment, Login, Register, Logout, Dashboard, Simulasi + **panel admin `/admin/*`** |
 
 **Endpoint API:**
 
@@ -487,52 +493,35 @@ Assets/
 
 ```
 Kemudi.id/
-├── app/                  🌐 Website Next.js (App Router)
-│   ├── api/              #   NextAuth, progress, register
-│   ├── dashboard/        #   Dashboard progres latihan
-│   ├── kursus/           #   Kursus, mentor, personal, payment
-│   ├── login/ register/  #   Autentikasi
-│   ├── materi/           #   Materi teori
-│   ├── simulasi/         #   🎮 Entry point simulasi 3D
-│   └── page.tsx          #   Landing page
-├── components/
-│   ├── simulation/       #   🎮 Komponen simulasi 3D (Scene, Track, VehicleController, HUD, dll.)
-│   ├── simulation/xr/    #   🥽 Komponen VR/XR
-│   ├── simulation/vehicles/  # Mesh kendaraan (prosedural + GLB)
-│   ├── kursus/           #   MentorSelector
-│   └── ui/               #   VRToggleButton
-├── lib/                  🧠 Logika inti (fisika, track, rintangan, data kursus/materi, auth)
-├── store/simStore.ts     State global simulasi (Zustand)
-├── prisma/               Skema database SQLite
-├── public/models/        Model GLB kendaraan
-├── src/                  ⚙️ Migrasi .NET/C# (API + Blazor)
-├── simulation/           🎯 Proyek Unity
-└── README.md             Visi & fitur game
+├── Kemudi.slnx           Solusi .NET
+├── src/
+│   ├── Kemudi.Domain/          # Entity + Enum (C#)
+│   ├── Kemudi.Shared/          # DTO
+│   ├── Kemudi.Infrastructure/  # EF Core + Identity + JWT + Migrations
+│   ├── Kemudi.Api/             # ASP.NET Core Web API (termasuk /api/admin/*)
+│   └── Kemudi.Web/             # Blazor Web App (halaman publik + panel admin /admin/*)
+├── simulation/
+│   └── Kemudi.Simulation/      # 🎯 Proyek Unity (simulasi 3D)
+├── tools/
+│   └── MigratePrismaData/      # Tool migrasi data dari database lama
+├── docs/                       # Dokumentasi migrasi
+└── README.md                   # Visi & fitur game
 ```
 
 ---
 
 ## Cara Menjalankan
 
-### Website + Simulasi (Next.js)
-
-```bash
-npm install
-npx prisma migrate dev   # buat database + tabel
-npm run dev              # http://localhost:3000
-npm run build && npm start   # production
-```
-
-> Untuk VR dari headset (Quest) lewat LAN: butuh HTTPS atau `localhost` — gunakan `npm run dev:https` atau `adb reverse tcp:3000 tcp:3000`.
-
-### API + Website .NET
+### API + Website (.NET/C#)
 
 ```bash
 dotnet build Kemudi.slnx
 cd src/Kemudi.Api && dotnet ef database update --project ../Kemudi.Infrastructure --startup-project .
 dotnet run --project src/Kemudi.Api    # http://localhost:5077 (Swagger /swagger)
-dotnet run --project src/Kemudi.Web    # http://localhost:5259
+dotnet run --project src/Kemudi.Web    # http://localhost:5259 (panel admin di /admin/login)
 ```
+
+Akun admin default: `admin@kemudi.id` / `admin1234` (bisa diubah di `src/Kemudi.Api/appsettings.json`).
 
 ### Unity
 
@@ -596,20 +585,15 @@ Game dirancang menyerupai kondisi lalu lintas Indonesia dengan:
 
 ## Teknologi
 
-- Next.js
-- React
-- TypeScript
-- Three.js
-- React Three Fiber
-- Rapier Physics
-- Tailwind CSS
-- Zustand
-- Framer Motion
+- **ASP.NET Core** (Web API + Blazor Web App)
+- **C#** (.NET 8)
+- **Entity Framework Core** (SQLite dev / siap PostgreSQL)
+- **ASP.NET Core Identity** + **JWT**
+- **Unity** (simulasi 3D & VR)
+- **CSS** (global `app.css`)
 
-> **Versi terpasang di project** (`package.json`): Next.js 16.2.11 · React 19.2.4 · TypeScript 5 ·
-> Three.js 0.185.1 · @react-three/fiber 9.6.1 · @react-three/drei 10.7.7 · @react-three/rapier 2.2.0 ·
-> @pmndrs/xr 6.6.30 · Tailwind CSS 4 · Zustand 5.0.14 · NextAuth 5.0.0-beta.32 · Prisma 6.19.3 ·
-> bcryptjs 3.0.3. Stack .NET: ASP.NET Core Web API + EF Core + Identity + JWT + Blazor Web App.
+> **Versi terpasang:** .NET SDK 8+ (solusi `Kemudi.slnx`, target `net8.0`), EF Core 8, Identity,
+> Swashbuckle (Swagger), Unity 6 / 2022.3+ untuk `simulation/`. Tidak ada lagi dependency npm/Node.
 
 ---
 

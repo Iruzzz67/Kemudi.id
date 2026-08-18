@@ -19,6 +19,8 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CourseRegistration> CourseRegistrations => Set<CourseRegistration>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
+    public DbSet<Schedule> Schedules => Set<Schedule>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -125,6 +127,25 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(x => x.RegistrationId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Schedule>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.MentorId);
+            e.HasIndex(x => x.Date);
+            e.Property(x => x.VehicleType).HasConversion<string>();
+            e.HasOne(x => x.Mentor)
+                .WithMany()
+                .HasForeignKey(x => x.MentorId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<AuditLog>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.HasIndex(x => x.CreatedAt);
+            e.HasIndex(x => x.AdminEmail);
         });
     }
 }

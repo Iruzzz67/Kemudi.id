@@ -17,6 +17,7 @@ public sealed class Mentor
     public string Initials { get; set; } = string.Empty;
     public string AvatarColor { get; set; } = "#3b82f6";
     public string? Phone { get; set; }
+    public string Status { get; set; } = "ACTIVE"; // "ACTIVE" | "INACTIVE"
 
     // Portofolio (CSV/dipisah baris agar tetap relasional-sederhana)
     public string Certifications { get; set; } = string.Empty;

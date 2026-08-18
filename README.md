@@ -1,13 +1,35 @@
 # 🚗 Kemudi.id - Simulasi Mengemudi Motor, Mobil, dan Truk
 
-> **Struktur repo:** aplikasi web Next.js asli berada di root (`app/`, `components/`, `lib/`),
-> sedangkan hasil **migrasi C#/.NET + Unity** ada di [`src/`](./src/README.md) dan
-> [`simulation/`](./simulation/Kemudi.Simulation/README.md).
+> **Struktur repo:** aplikasi web dibangun dengan **.NET/C#** — `src/` berisi
+> ASP.NET Core API + Blazor (website & panel admin), `simulation/` berisi proyek
+> Unity (simulasi 3D), `docs/` berisi dokumentasi. Jalankan semuanya dengan
+> **`dotnet run`** (lihat [Cara Menjalankan](#cara-menjalankan)).
 >
-> **Dokumentasi:** [DOKUMENTASI_WEBSITE_SIMULASI.md](./DOKUMENTASI_WEBSITE_SIMULASI.md) ·
-> [CAKUPAN_PROJECT.md](./CAKUPAN_PROJECT.md) ·
-> [RINGKASAN_VR_SIMULASI.md](./RINGKASAN_VR_SIMULASI.md) ·
-> [KEMUDI_ID_MIGRASI_CSHARP_DOTNET_VR.md](./KEMUDI_ID_MIGRASI_CSHARP_DOTNET_VR.md)
+> **Dokumentasi:** [`src/README.md`](./src/README.md) (aplikasi .NET) ·
+> [`docs/MIGRASI_DOTNET_FULL.md`](./docs/MIGRASI_DOTNET_FULL.md) (migrasi) ·
+> [`DOKUMENTASI_PROJECT.md`](./DOKUMENTASI_PROJECT.md) (dokumentasi lengkap)
+
+---
+
+## Cara Menjalankan
+
+```bash
+# 1. Build solusi
+dotnet build Kemudi.slnx
+
+# 2. Terapkan database (SQLite, otomatis ter-seed)
+cd src/Kemudi.Api
+dotnet ef database update --project ../Kemudi.Infrastructure --startup-project .
+
+# 3. API → http://localhost:5077 (Swagger /swagger)
+dotnet run --project src/Kemudi.Api
+
+# 4. Website → http://localhost:5259
+dotnet run --project src/Kemudi.Web
+```
+
+- Akun admin default: `admin@kemudi.id` / `admin1234` (ubah di `Admin:Email`/`Admin:Password` pada `src/Kemudi.Api/appsettings.json`).
+- Panel admin: `http://localhost:5259/admin/login`.
 
 ---
 
@@ -383,45 +405,42 @@ Game dirancang menyerupai kondisi lalu lintas Indonesia dengan:
 
 ## Teknologi
 
-- Next.js
-- React
-- TypeScript
-- Three.js
-- React Three Fiber
-- Rapier Physics
-- Tailwind CSS
-- Zustand
-- Framer Motion
+- **ASP.NET Core** (Web API + Blazor Web App)
+- **C#** (.NET 8)
+- **Entity Framework Core** (SQLite dev / siap PostgreSQL)
+- **ASP.NET Core Identity** + **JWT** (autentikasi & role)
+- **Unity** (simulasi 3D, diluncurkan dari `/simulasi`)
+- **CSS** (global `app.css`)
 
 ---
 
 ## Sistem Admin Terpisah
 
-Kemudi.id memiliki panel admin yang **terpisah secara visual, struktural, dan fungsional** dari sistem pengguna — dengan layout sendiri (sidebar + header, tanpa navbar user), login khusus, dan proteksi berlapis.
+Kemudi.id memiliki panel admin yang **terpisah secara visual, struktural, dan fungsional** dari sistem pengguna — layout sendiri (sidebar, tanpa navbar user), login khusus, dan proteksi berlapis.
 
 ### Halaman admin
 
 | Route | Fungsi |
 | --- | --- |
-| `/admin/login` | Login admin (desain terpisah; user biasa ditolak) |
+| `/admin/login` | Login admin (desain terpisah; user biasa ditolak — 403) |
 | `/admin/dashboard` | Ringkasan sistem, grafik 7 hari, aktivitas terbaru |
-| `/admin/pendaftaran` | Pendaftaran kursus + konfirmasi/tolak pembayaran |
-| `/admin/pengguna` | Manajemen pengguna (role, aktif/nonaktif, detail) |
+| `/admin/pendaftaran` | Pendaftaran kursus + konfirmasi/tolak pembayaran (hitungan orang unik per email) |
+| `/admin/pengguna` | Manajemen pengguna (role admin/user, aktif/nonaktif, detail) |
 | `/admin/mentor` | CRUD mentor |
 | `/admin/jadwal` | CRUD jadwal kursus |
-| `/admin/pembayaran` | Verifikasi pembayaran (PAID/REJECTED) |
+| `/admin/pembayaran` | Verifikasi pembayaran (paid/rejected/reopen) |
 | `/admin/kursus` | CRUD paket kursus |
 | `/admin/statistik` | Statistik pengguna, kursus, pembayaran, pendaftaran |
-| `/admin/pengaturan` | Profil, ganti password, akun admin, audit log |
+| `/admin/pengaturan` | Ganti password, kelola akun admin (promote), audit log |
 
 ### Keamanan (berlapis)
 
-1. **`proxy.ts`** (pengganti middleware di Next.js 16) mengarahkan yang belum login ke `/admin/login` dan memblokir yang bukan admin; API `/api/admin/*` non-admin dapat **403**.
-2. **`lib/admin.ts` → `requireAdmin()`** — setiap route handler admin dan halaman admin memvalidasi ulang role dari sesi di server (tidak mengandalkan penyembunyian UI).
-3. Role selalu berasal dari **database/session**, tidak pernah dari request body.
-4. Akun yang dinonaktifkan admin tidak bisa login. Admin tidak bisa menonaktifkan akun sendiri.
-5. Aktivitas penting (login, konfirmasi/tolak pembayaran, CRUD mentor/kursus/jadwal, perubahan user) tercatat di **audit log**.
-6. Password di-hash bcrypt; halaman pengaturan menyediakan ganti password (memvalidasi password lama).
+1. **`[Authorize(Roles = "Admin")]`** pada seluruh controller `/api/admin/*` — token tanpa role Admin mendapat **403**.
+2. **`AdminLayout`** — halaman admin memeriksa role dari klaim JWT; bukan admin diarahkan ke `/admin/login`.
+3. Role selalu berasal dari **Identity role** (klaim JWT), tidak pernah dari input klien.
+4. Akun yang dinonaktifkan admin (`IsActive = false`) tidak bisa login. Admin tidak bisa menonaktifkan akun sendiri.
+5. Aktivitas penting (login, konfirmasi/tolak pembayaran, CRUD mentor/kursus/jadwal, perubahan user) tercatat di **audit log** (`AuditLog`).
+6. Password di-hash oleh ASP.NET Identity; halaman pengaturan menyediakan ganti password (memvalidasi password lama).
 
 ### Hak akses
 
@@ -430,19 +449,8 @@ Kemudi.id memiliki panel admin yang **terpisah secara visual, struktural, dan fu
 
 Cara menjadikan akun admin:
 
-```bash
-# 1) Daftar akun seperti biasa, lalu:
-npm run set-admin -- <email-akun>
-# contoh: npm run set-admin -- admin@kemudi.id
-```
-
-Atau daftar akun baru dengan email yang tercantum di variabel `ADMIN_EMAILS` di `.env` (dipisah koma) — akun tersebut otomatis berperan ADMIN.
-
-Seed data awal panel admin (mentor, kursus, jadwal contoh):
-
-```bash
-npm run seed-admin
-```
+1. **Akun admin default** dibuat otomatis saat API pertama kali dijalankan (`admin@kemudi.id`, lihat konfigurasi `Admin:Email`/`Admin:Password`).
+2. Di panel admin, buka **Pengaturan → Akun Admin → Jadikan Admin** (isi email pengguna yang ingin dipromosikan).
 
 Setelah login sebagai admin, link **🛡️ Admin** di navbar membuka `/admin/dashboard`.
 
@@ -450,7 +458,7 @@ Setelah login sebagai admin, link **🛡️ Admin** di navbar membuka `/admin/da
 
 ## HUD VR Mengikuti Kamera FPV
 
-Saat sesi VR aktif, HUD melayang (`components/simulation/xr/XRHud.tsx`) menempel pada kamera FPV lewat `CameraFollower` dan ditampilkan pada jarak baca nyaman (±2,2 m di depan mata, sedikit di bawah garis pandang) sehingga tidak mepet dengan kamera.
+Saat sesi VR aktif, HUD melayang menempel pada kamera FPV (implementasi Unity: `simulation/Kemudi.Simulation/Assets/Scripts/UI/HudController.cs`) dan ditampilkan pada jarak baca nyaman (±2,2 m di depan mata, sedikit di bawah garis pandang) sehingga tidak mepet dengan kamera.
 
 ---
 

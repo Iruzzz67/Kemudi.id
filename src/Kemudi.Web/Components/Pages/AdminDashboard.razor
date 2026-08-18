@@ -1,0 +1,183 @@
+@page "/admin/dashboard"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+@if (_loading)
+{
+    <div class="loading">Memuat dashboard...</div>
+}
+else
+{
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">
+        Ringkasan sistem Kemudi.id — @DateTime.Now.ToString("dddd, dd MMMM yyyy", CultureInfo.GetCultureInfo("id-ID"))
+    </p>
+
+    <div class="admin-cards">
+        <div class="admin-card">
+            <div class="ac-label">Pengguna</div>
+            <div class="ac-value">@_data.TotalUsers</div>
+            <div class="ac-sub">+@_data.NewUsers7d dalam 7 hari</div>
+        </div>
+        <div class="admin-card">
+            <div class="ac-label">Pendaftaran</div>
+            <div class="ac-value">@_data.TotalRegistrations</div>
+            <div class="ac-sub">@_data.PendingRegistrations menunggu verifikasi</div>
+        </div>
+        <div class="admin-card ac-amber">
+            <div class="ac-label">Pembayaran Pending</div>
+            <div class="ac-value">@_data.PendingRegistrations</div>
+        </div>
+        <div class="admin-card ac-green">
+            <div class="ac-label">Pembayaran Berhasil</div>
+            <div class="ac-value">@_data.PaidRegistrations</div>
+        </div>
+        <div class="admin-card">
+            <div class="ac-label">Mentor</div>
+            <div class="ac-value">@_data.TotalMentors</div>
+        </div>
+        <div class="admin-card">
+            <div class="ac-label">Kursus Aktif</div>
+            <div class="ac-value">@_data.ActiveCourses</div>
+        </div>
+    </div>
+
+    <div class="admin-panel">
+        <h2>Grafik Pendaftaran & Pembayaran (7 hari)</h2>
+        <div class="chart-row">
+            <div class="chart-box">
+                <div class="chart-title">Pendaftaran</div>
+                <div class="chart-bars">
+                    @foreach (var point in _data.RegistrationsChart)
+                    {
+                        <div class="chart-bar-col">
+                            <div class="chart-bar" style="height:@(BarHeight(point.Value))%">@point.Value</div>
+                            <div class="chart-label">@point.Label</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="chart-box">
+                <div class="chart-title">Pembayaran</div>
+                <div class="chart-bars">
+                    @foreach (var point in _data.PaymentsChart)
+                    {
+                        <div class="chart-bar-col">
+                            <div class="chart-bar chart-bar-green" style="height:@(BarHeight(point.Value))%">@point.Value</div>
+                            <div class="chart-label">@point.Label</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-panel">
+        <h2>Pendaftaran Terbaru</h2>
+        @if (_data.RecentRegistrations.Length == 0)
+        {
+            <p class="empty">Belum ada pendaftaran.</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Nama</th><th>Email</th><th>Jumlah</th><th>Status</th><th>Tanggal</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in _data.RecentRegistrations)
+                        {
+                            <tr>
+                                <td><strong>@r.Name</strong></td>
+                                <td>@r.Email</td>
+                                <td>@FormatRp(r.Amount)</td>
+                                <td><AdminBadge Value="@r.Status" /></td>
+                                <td>@r.CreatedAt.ToLocalTime().ToString("dd MMM, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="admin-panel">
+        <h2>Aktivitas Admin <span style="font-weight:400;color:#94a3b8;font-size:0.8rem">(audit log)</span></h2>
+        @if (_data.RecentAuditLogs.Length == 0)
+        {
+            <p class="empty">Belum ada aktivitas.</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Aksi</th><th>Admin</th><th>Waktu</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in _data.RecentAuditLogs)
+                        {
+                            <tr>
+                                <td>@ActionLabel(l.Action)</td>
+                                <td>@l.AdminEmail</td>
+                                <td>@l.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private AdminDashboardDto? _data;
+    private bool _loading = true;
+
+    private static int BarHeight(int value) => value == 0 ? 4 : Math.Min(100, 6 + value * 12);
+
+    private static string FormatRp(decimal amount) => $"Rp {amount.ToString("N0", CultureInfo.GetCultureInfo("id-ID"))}";
+
+    private static string ActionLabel(string action) => action switch
+    {
+        "auth.login" => "Login admin",
+        "registration.confirm" => "Konfirmasi pendaftaran",
+        "registration.reject" => "Tolak pendaftaran",
+        "registration.reopen" => "Buka kembali pendaftaran",
+        "payment.confirm" => "Verifikasi pembayaran",
+        "payment.reject" => "Tolak pembayaran",
+        "payment.reopen" => "Buka kembali pembayaran",
+        "mentor.create" => "Buat mentor",
+        "mentor.update" => "Ubah mentor",
+        "mentor.delete" => "Hapus mentor",
+        "course.create" => "Buat kursus",
+        "course.update" => "Ubah kursus",
+        "course.delete" => "Hapus kursus",
+        "schedule.create" => "Buat jadwal",
+        "schedule.update" => "Ubah jadwal",
+        "schedule.delete" => "Hapus jadwal",
+        "user.update" => "Ubah pengguna",
+        "user.deactivate" => "Nonaktifkan pengguna",
+        "admin.change_password" => "Ganti password admin",
+        "admin.promote" => "Jadikan admin",
+        _ => action
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+
+        _data = await Api.GetAsync<AdminDashboardDto>("/api/admin/dashboard");
+        _loading = false;
+    }
+}

@@ -1,0 +1,52 @@
+@inherits LayoutComponentBase
+@inject Kemudi.Web.Services.AuthService Auth
+@inject NavigationManager Nav
+
+@if (Auth.IsAuthenticated && Auth.IsAdmin)
+{
+    <div class="admin-app">
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                Kemudi<span>.id</span>
+            </div>
+            <div class="admin-brand-sub">Panel Admin</div>
+
+            <nav class="admin-nav">
+                <NavLink class="admin-nav-link" href="admin/dashboard" Match="NavLinkMatch.Prefix">📊 Dashboard</NavLink>
+                <NavLink class="admin-nav-link" href="admin/pendaftaran" Match="NavLinkMatch.Prefix">📋 Pendaftaran</NavLink>
+                <NavLink class="admin-nav-link" href="admin/pengguna" Match="NavLinkMatch.Prefix">👥 Pengguna</NavLink>
+                <NavLink class="admin-nav-link" href="admin/mentor" Match="NavLinkMatch.Prefix">🎓 Mentor</NavLink>
+                <NavLink class="admin-nav-link" href="admin/jadwal" Match="NavLinkMatch.Prefix">🗓️ Jadwal</NavLink>
+                <NavLink class="admin-nav-link" href="admin/pembayaran" Match="NavLinkMatch.Prefix">💳 Pembayaran</NavLink>
+                <NavLink class="admin-nav-link" href="admin/kursus" Match="NavLinkMatch.Prefix">📚 Kursus</NavLink>
+                <NavLink class="admin-nav-link" href="admin/statistik" Match="NavLinkMatch.Prefix">📈 Statistik</NavLink>
+                <NavLink class="admin-nav-link" href="admin/pengaturan" Match="NavLinkMatch.Prefix">⚙️ Pengaturan</NavLink>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <div class="admin-user">
+                    <div class="admin-user-email">@Auth.Email</div>
+                    <div class="admin-user-role">Administrator</div>
+                </div>
+                <a class="admin-nav-link" href="">🌐 Lihat Website</a>
+                <a class="btn btn-outline" style="width:100%;margin-top:0.5rem;color:#e2e8f0;border-color:#334155;background:transparent" href="/admin/logout">Keluar</a>
+            </div>
+        </aside>
+
+        <main class="admin-content">
+            @Body
+        </main>
+    </div>
+}
+else
+{
+    <div class="loading" style="padding:4rem 0">Memeriksa akses admin...</div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+    }
+}

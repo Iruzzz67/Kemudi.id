@@ -1,0 +1,182 @@
+@page "/admin/kursus"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Paket Kursus</h1>
+<p class="page-sub">Kelola paket kursus (harga, sesi, level).</p>
+
+@if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+
+<div class="admin-panel">
+    <div class="admin-toolbar">
+        <span class="admin-count">@_packages.Count paket</span>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" @onclick="NewPackage">+ Tambah Paket</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Paket</th><th>Kursus</th><th>Level</th><th>Harga</th><th>Sesi</th><th>Status</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _packages)
+                {
+                    <tr>
+                        <td><strong>@p.Label</strong><br /><span class="muted">@p.Description</span></td>
+                        <td>@CourseTitle(p.CourseId)</td>
+                        <td>@p.Level</td>
+                        <td>@FormatRp(p.Price)</td>
+                        <td>@p.Sessions × @p.SessionDurationMin mnt</td>
+                        <td><AdminBadge Value="@p.Status" /></td>
+                        <td>
+                            <div class="admin-actions">
+                                <button class="btn btn-outline" @onclick="() => EditPackage(p)">Edit</button>
+                                <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" @onclick="() => DeletePackage(p)">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (_packages.Count == 0)
+    {
+        <p class="empty">Belum ada paket kursus.</p>
+    }
+</div>
+
+@if (_editing is not null)
+{
+    <div class="admin-modal">
+        <div class="admin-modal-box admin-modal-wide">
+            <h3>@(_editing.Id == Guid.Empty ? "Tambah Paket" : "Edit Paket")</h3>
+            <div class="form form-wide">
+                <div class="two-col">
+                    <div class="field"><label>Kursus</label>
+                        <select @bind="_form.CourseId">
+                            @foreach (var c in _courses)
+                            {
+                                <option value="@c.Id">@c.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field"><label>Label</label><input @bind="_form.Label" /></div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Slug</label><input @bind="_form.Slug" /></div>
+                    <div class="field"><label>Level</label>
+                        <select @bind="_form.Level">
+                            <option value="Pemula">Pemula</option>
+                            <option value="Menengah">Menengah</option>
+                            <option value="Mahir">Mahir</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Harga (Rp)</label><input type="number" @bind="_form.Price" /></div>
+                    <div class="field"><label>Sesi</label><input type="number" @bind="_form.Sessions" /></div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Durasi per Sesi (menit)</label><input type="number" @bind="_form.SessionDurationMin" /></div>
+                    <div class="field"><label>Status</label>
+                        <select @bind="_form.Status">
+                            <option value="ACTIVE">Aktif</option>
+                            <option value="INACTIVE">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field"><label>Deskripsi</label><textarea @bind="_form.Description" rows="2"></textarea></div>
+                <div class="field"><label>Includes (pisahkan dengan baris baru)</label><textarea @bind="_form.Includes" rows="4"></textarea></div>
+                <div class="admin-actions" style="justify-content:flex-end">
+                    <button class="btn btn-outline" @onclick="CancelEdit">Batal</button>
+                    <button class="btn btn-primary" disabled="@_busy" @onclick="SavePackage">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AdminCourseDto> _courses = new();
+    private List<AdminCoursePackageDto> _packages = new();
+    private AdminCoursePackageDto? _editing;
+    private bool _busy;
+    private string? _error;
+
+    private AdminCoursePackageUpsertRequest _form = new(
+        Guid.Empty, "", "", "Pemula", 0, 4, 60, "", "", "ACTIVE");
+
+    private string CourseTitle(Guid id) => _courses.FirstOrDefault(c => c.Id == id)?.Title ?? "—";
+
+    private void NewPackage()
+    {
+        _editing = new AdminCoursePackageDto(Guid.Empty, _courses.FirstOrDefault()?.Id ?? Guid.Empty,
+            "", "", "Pemula", 0, 4, 60, "", "", "ACTIVE");
+        _form = new AdminCoursePackageUpsertRequest(
+            _courses.FirstOrDefault()?.Id ?? Guid.Empty, "", "", "Pemula", 0, 4, 60, "", "", "ACTIVE");
+    }
+
+    private void EditPackage(AdminCoursePackageDto p)
+    {
+        _editing = p;
+        _form = new AdminCoursePackageUpsertRequest(
+            p.CourseId, p.Slug, p.Label, p.Level, p.Price, p.Sessions,
+            p.SessionDurationMin, p.Description, p.Includes, p.Status);
+    }
+
+    private void CancelEdit() => _editing = null;
+
+    private async Task SavePackage()
+    {
+        _busy = true;
+        _error = null;
+        (bool Success, string? Error) result =
+            _editing?.Id == Guid.Empty
+                ? await Api.PostVoidAsync("/api/admin/courses/packages", _form)
+                : await Api.PutVoidAsync($"/api/admin/courses/packages/{_editing!.Id}", _form);
+        if (!result.Success) _error = result.Error;
+        else
+        {
+            _editing = null;
+            await Load();
+        }
+        _busy = false;
+    }
+
+    private async Task DeletePackage(AdminCoursePackageDto p)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.DeleteVoidAsync($"/api/admin/courses/packages/{p.Id}");
+        if (!result.Success) _error = result.Error;
+        else await Load();
+        _busy = false;
+    }
+
+    private async Task Load()
+    {
+        _courses = await Api.GetAsync<List<AdminCourseDto>>("/api/admin/courses") ?? new();
+        _packages = await Api.GetAsync<List<AdminCoursePackageDto>>("/api/admin/courses/packages") ?? new();
+    }
+
+    private static string FormatRp(decimal amount) => $"Rp {amount.ToString("N0", CultureInfo.GetCultureInfo("id-ID"))}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+        await Load();
+    }
+}

@@ -12,4 +12,7 @@ public sealed class ApplicationUser : IdentityUser
     public string? NIK { get; set; }
     public string? Address { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Akun dinonaktifkan oleh admin — tidak bisa login.</summary>
+    public bool IsActive { get; set; } = true;
 }

@@ -15,6 +15,10 @@
             @if (Auth.IsAuthenticated)
             {
                 <NavLink class="nav-link" href="dashboard">Dashboard</NavLink>
+                @if (Auth.IsAdmin)
+                {
+                    <NavLink class="nav-link" href="admin/dashboard">🛡️ Admin</NavLink>
+                }
                 <a class="btn btn-outline" href="/logout">Keluar</a>
             }
             else

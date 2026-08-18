@@ -54,7 +54,7 @@ public sealed class AuthController : ControllerBase
             return BadRequest(new { error = string.Join(" ", errors) });
         }
 
-        return Ok(BuildAuthResponse(user));
+        return Ok(await BuildAuthResponse(user));
     }
 
     /// <summary>Login dan mendapatkan token JWT.</summary>
@@ -70,8 +70,11 @@ public sealed class AuthController : ControllerBase
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Unauthorized(new { error = "Email atau password salah." });
+        // Akun yang dinonaktifkan admin tidak boleh login.
+        if (!user.IsActive)
+            return Unauthorized(new { error = "Akun dinonaktifkan." });
 
-        return Ok(BuildAuthResponse(user));
+        return Ok(await BuildAuthResponse(user));
     }
 
     /// <summary>Mengambil profil pengguna yang sedang login.</summary>
@@ -94,13 +97,15 @@ public sealed class AuthController : ControllerBase
             CreatedAt: user.CreatedAt));
     }
 
-    private AuthResponse BuildAuthResponse(ApplicationUser user)
+    private async Task<AuthResponse> BuildAuthResponse(ApplicationUser user)
     {
+        var roles = await _userManager.GetRolesAsync(user);
         return new AuthResponse(
-            Token: _tokenService.CreateToken(user),
+            Token: _tokenService.CreateToken(user, roles),
             UserId: user.Id,
             Name: user.FullName,
             Email: user.Email ?? string.Empty,
-            ExpiresAt: DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes));
+            ExpiresAt: DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes),
+            Roles: roles.ToArray());
     }
 }

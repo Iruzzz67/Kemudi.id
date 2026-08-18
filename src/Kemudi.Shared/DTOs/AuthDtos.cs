@@ -17,4 +17,5 @@ public sealed record AuthResponse(
     string UserId,
     string? Name,
     string Email,
-    DateTime ExpiresAt);
+    DateTime ExpiresAt,
+    string[] Roles);

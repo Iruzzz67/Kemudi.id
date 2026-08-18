@@ -1,0 +1,108 @@
+@page "/admin/statistik"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Statistik Sistem</h1>
+<p class="page-sub">Ringkasan pengguna, kursus, pembayaran, dan pendaftaran.</p>
+
+@if (_loading)
+{
+    <div class="loading">Memuat statistik...</div>
+}
+else
+{
+    <h2 style="margin-top:1.5rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b">Statistik Pengguna</h2>
+    <div class="admin-cards">
+        <div class="admin-card"><div class="ac-label">Total User</div><div class="ac-value">@_stats.TotalUsers</div></div>
+        <div class="admin-card"><div class="ac-label">User Baru (bulan ini)</div><div class="ac-value">@_stats.NewUsersMonth</div></div>
+        <div class="admin-card"><div class="ac-label">User Aktif (pernah simulasi)</div><div class="ac-value">@_stats.UsersWithAttempts</div></div>
+    </div>
+
+    <h2 style="margin-top:1.5rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b">Statistik Kursus</h2>
+    <div class="chart-row" style="margin-top:0.75rem">
+        <div class="chart-box">
+            <div class="chart-title">Kendaraan Paling Banyak Disimulasikan</div>
+            <div class="chart-bars">
+                @foreach (var point in _stats.AttemptsByVehicle)
+                {
+                    <div class="chart-bar-col">
+                        <div class="chart-bar" style="height:@(MiniBar(point.Value, MaxVehicle))%">@point.Value</div>
+                        <div class="chart-label">@VehicleLabel(point.Label)</div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="chart-box">
+            <div class="chart-title">Mentor Paling Dipilih (7 hari)</div>
+            @if (_stats.RegistrationsByMentor.Length == 0)
+            {
+                <p class="muted" style="font-size:0.85rem">Belum ada pendaftaran.</p>
+            }
+            else
+            {
+                <ul style="list-style:none;padding:0;margin:0">
+                    @foreach (var point in _stats.RegistrationsByMentor)
+                    {
+                        <li style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px dashed #e2e8f0">
+                            <span>@point.Label</span>
+                            <span class="badge badge-green">@point.Value pendaftaran</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <h2 style="margin-top:1.5rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b">Statistik Pembayaran</h2>
+    <div class="admin-cards">
+        <div class="admin-card"><div class="ac-label">Total Transaksi</div><div class="ac-value">@_stats.TotalTransactions</div></div>
+        <div class="admin-card ac-green"><div class="ac-label">Total Pendapatan</div><div class="ac-value">@FormatRp(_stats.TotalRevenue)</div></div>
+        <div class="admin-card ac-amber"><div class="ac-label">Pending</div><div class="ac-value">@_stats.PendingPayments</div></div>
+        <div class="admin-card ac-green"><div class="ac-label">Berhasil</div><div class="ac-value">@_stats.PaidPayments</div></div>
+        <div class="admin-card ac-red"><div class="ac-label">Ditolak</div><div class="ac-value">@_stats.RejectedPayments</div></div>
+    </div>
+
+    <h2 style="margin-top:1.5rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b">Statistik Pendaftaran</h2>
+    <div class="admin-cards">
+        <div class="admin-card"><div class="ac-label">Harian</div><div class="ac-value">@_stats.RegistrationsToday</div></div>
+        <div class="admin-card"><div class="ac-label">Mingguan</div><div class="ac-value">@_stats.RegistrationsWeek</div></div>
+        <div class="admin-card"><div class="ac-label">Bulanan</div><div class="ac-value">@_stats.RegistrationsMonth</div></div>
+    </div>
+}
+
+@code {
+    private AdminStatsDto? _stats;
+    private bool _loading = true;
+
+    private int MaxVehicle => _stats?.AttemptsByVehicle.Length > 0
+        ? _stats.AttemptsByVehicle.Max(p => p.Value)
+        : 1;
+
+    private static int MiniBar(int value, int max) => max <= 0 ? 4 : Math.Max(4, (int)(value * 100.0 / max));
+
+    private static string VehicleLabel(string label) => label switch
+    {
+        "MOTOR" => "Motor",
+        "MOBIL" => "Mobil",
+        "TRUK" => "Truk",
+        _ => label
+    };
+
+    private static string FormatRp(decimal amount) => $"Rp {amount.ToString("N0", CultureInfo.GetCultureInfo("id-ID"))}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+        _stats = await Api.GetAsync<AdminStatsDto>("/api/admin/stats");
+        _loading = false;
+    }
+}

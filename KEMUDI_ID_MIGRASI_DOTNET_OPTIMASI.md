@@ -35,7 +35,7 @@ Project saat ini memiliki dua bagian besar:
 
 Dokumentasi sumber menyebutkan bahwa project sudah memiliki migrasi awal ke ASP.NET Core + Blazor dan scaffold Unity, tetapi bagian simulasi Unity masih berstatus scaffold. Karena target sekarang adalah **migrasi penuh**, versi TSX/React/Three.js tidak lagi menjadi runtime utama.
 
-Sumber project menjelaskan struktur website Next.js, simulasi Three.js/R3F, dukungan WebXR, migrasi .NET, dan scaffold Unity. fileciteturn0file0L5-L10
+Sumber project menjelaskan struktur website Next.js, simulasi Three.js/R3F, dukungan WebXR, migrasi .NET, dan scaffold Unity.
 
 ---
 

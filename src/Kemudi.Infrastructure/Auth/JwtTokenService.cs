@@ -24,7 +24,7 @@ public sealed class JwtTokenService
 
     public JwtTokenService(IOptions<JwtOptions> options) => _options = options.Value;
 
-    public string CreateToken(ApplicationUser user)
+    public string CreateToken(ApplicationUser user, IEnumerable<string> roles)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -36,6 +36,8 @@ public sealed class JwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier, user.Id),
         };
+        foreach (var role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
         if (!string.IsNullOrEmpty(user.FullName))
             claims.Add(new Claim(ClaimTypes.Name, user.FullName));
 

@@ -17,4 +17,5 @@ public sealed class CoursePackage
     public int SessionDurationMin { get; set; }
     public string Description { get; set; } = string.Empty;
     public string Includes { get; set; } = string.Empty; // dipisah baris baru ("\n")
+    public string Status { get; set; } = "ACTIVE";     // "ACTIVE" | "INACTIVE"
 }

@@ -2,6 +2,7 @@ using System.Text;
 using Kemudi.Infrastructure;
 using Kemudi.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -73,6 +74,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Pastikan role "Admin" dan akun admin awal selalu ada (dibuat bila belum).
+await SeedAdminRoleAsync(app.Services, builder.Configuration);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -86,3 +90,37 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// Menjamin role "Admin" ada dan membuat akun admin default bila belum ada
+/// (konfigurasi <c>Admin:Email</c>/<c>Admin:Password</c>, default
+/// admin@kemudi.id / admin1234).
+/// </summary>
+static async Task SeedAdminRoleAsync(IServiceProvider services, IConfiguration configuration)
+{
+    using var scope = services.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    if (!await roleManager.RoleExistsAsync(Kemudi.Api.Controllers.AdminAuthController.AdminRole))
+    {
+        await roleManager.CreateAsync(new IdentityRole(Kemudi.Api.Controllers.AdminAuthController.AdminRole));
+    }
+
+    var email = configuration["Admin:Email"] ?? "admin@kemudi.id";
+    if (await userManager.FindByEmailAsync(email) is not null) return;
+
+    var admin = new ApplicationUser
+    {
+        UserName = email,
+        Email = email,
+        FullName = "Admin Kemudi",
+        IsActive = true
+    };
+    var password = configuration["Admin:Password"] ?? "admin1234";
+    var result = await userManager.CreateAsync(admin, password);
+    if (result.Succeeded)
+    {
+        await userManager.AddToRoleAsync(admin, Kemudi.Api.Controllers.AdminAuthController.AdminRole);
+    }
+}
