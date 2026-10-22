@@ -7,11 +7,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useSimStore } from "@/store/simStore";
 import { ROAD_HALF_WIDTH, RoadSample, headingFromTangent } from "@/lib/track";
+import { circleCollides, removeObstacle, setObstacle } from "@/lib/obstacles";
 import { vehicleAudio } from "./audio/vehicleAudio";
 
 const WALK_SPEED = 1.3; // m/s
 const PAUSE_S = 1.2; // dwell time at each curb before turning back
 const SHOULDER_MARGIN = 1.4; // how far onto the shoulder the walk extends past the road edge
+// Horizontal radius of the pedestrian's solid footprint. Bigger than the
+// visual body so the car stops a small, forgiving distance away.
+const PED_RADIUS = 0.3;
 
 function PedestrianFigure() {
   return (
@@ -55,6 +59,19 @@ export function Pedestrian({ sample, id }: { sample: RoadSample; id: string }) {
   // (not just standing on the shoulder) versus in transit.
   useEffect(() => () => clearPedestrianCrossing(id), [id, clearPedestrianCrossing]);
 
+  // Register as a solid obstacle so the vehicle is physically blocked by the
+  // pedestrian instead of driving through it.
+  useEffect(() => {
+    setObstacle(id, {
+      shape: "circle",
+      kind: "pedestrian",
+      x: sample.point.x,
+      z: sample.point.z,
+      radius: PED_RADIUS,
+    });
+    return () => removeObstacle(id);
+  }, [id, sample.point.x, sample.point.z]);
+
   const heading = useMemo(() => headingFromTangent(sample.tangent), [sample]);
   const quat = useMemo(
     () => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), heading),
@@ -95,7 +112,30 @@ export function Pedestrian({ sample, id }: { sample: RoadSample; id: string }) {
     const worldX = sample.point.x + rightVec.x * walkX;
     const worldZ = sample.point.z + rightVec.z * walkX;
 
-    body.setNextKinematicTranslation({ x: worldX, y: 0, z: worldZ });
+    // Solid against the vehicle: a stopped car is an obstacle, not a ghost —
+    // stop at its edge instead of walking through it (and freeze the crossing
+    // clock while waiting so the pedestrian resumes seamlessly once the way
+    // clears). If already overlapping, allow movement so a spawn overlap can
+    // escape instead of trapping the pedestrian.
+    const current = body.translation();
+    const wasInsideVehicle =
+      circleCollides(current.x, current.z, PED_RADIUS, { shapes: ["rect"] }) !== null;
+    const blocked =
+      !wasInsideVehicle &&
+      circleCollides(worldX, worldZ, PED_RADIUS, { shapes: ["rect"] }) !== null;
+
+    const finalX = blocked ? current.x : worldX;
+    const finalZ = blocked ? current.z : worldZ;
+    if (blocked) walkClock.current -= delta;
+
+    body.setNextKinematicTranslation({ x: finalX, y: 0, z: finalZ });
+    setObstacle(id, {
+      shape: "circle",
+      kind: "pedestrian",
+      x: finalX,
+      z: finalZ,
+      radius: PED_RADIUS,
+    });
     if (facingRef.current) {
       facingRef.current.rotation.y = heading + (dirSign > 0 ? Math.PI / 2 : -Math.PI / 2);
     }
@@ -103,7 +143,7 @@ export function Pedestrian({ sample, id }: { sample: RoadSample; id: string }) {
     // "In road" means actually out on the asphalt (within the painted lane),
     // not just standing on the curb/shoulder — that's the distinction between
     // "must yield to this pedestrian" and "pedestrian is just waiting".
-    setPedestrianCrossing(id, { x: worldX, z: worldZ, inRoad: Math.abs(walkX) <= ROAD_HALF_WIDTH });
+    setPedestrianCrossing(id, { x: finalX, z: finalZ, inRoad: Math.abs(walkX) <= ROAD_HALF_WIDTH });
   });
 
   return (

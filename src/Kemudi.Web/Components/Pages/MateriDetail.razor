@@ -1,0 +1,39 @@
+@page "/materi/{Slug}"
+@using Kemudi.Web.Data
+@implements IDisposable
+
+@if (_materi is null)
+{
+    <div class="empty">Materi tidak ditemukan. <a href="materi">Kembali ke daftar materi</a>.</div>
+}
+else
+{
+    <div class="detail-hero">
+        <div>
+            <span class="card-tag">@_materi.Category</span>
+            <h1>@_materi.Title</h1>
+            <p>@_materi.Summary</p>
+        </div>
+    </div>
+
+    <div class="card">
+        @foreach (var para in _materi.Content)
+        {
+            <p>@para</p>
+        }
+    </div>
+
+    <div class="mt-3">
+        <a class="btn btn-outline" href="materi">← Semua Materi</a>
+        <a class="btn btn-primary" href="simulasi">Coba Simulasi</a>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+    private Kemudi.Web.Data.Materi? _materi;
+
+    protected override void OnInitialized() => _materi = MateriData.BySlug(Slug);
+
+    public void Dispose() { }
+}

@@ -1,0 +1,113 @@
+@page "/kursus"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<div class="section-head">
+    <div>
+        <h1 class="section-title">Kursus Mengemudi</h1>
+        <p class="section-sub">Pilih paket, kendaraan, dan mentor yang sesuai kebutuhanmu.</p>
+    </div>
+</div>
+
+@if (_loading)
+{
+    <div class="loading">Memuat kursus...</div>
+}
+else
+{
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Pilih Kendaraan yang Ingin Dikursuskan</h2>
+        <div class="flex mt-1">
+            @foreach (var v in _vehicles)
+            {
+                <button class="pill @(v.Type == _selectedVehicle ? "active" : "")"
+                        @onclick="() => ToggleVehicle(v.Type)">
+                    @v.Label
+                </button>
+            }
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Paket Kursus</h2>
+        <div class="grid grid-3 mt-2">
+            @foreach (var p in FilteredPackages)
+            {
+                <div class="card">
+                    <span class="card-tag">@p.Level</span>
+                    <h3>@p.Label</h3>
+                    <p>@p.Description</p>
+                    <div class="mt-2 flex-between">
+                        <span class="price">Rp @p.Price.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span>
+                        <span class="muted">@p.Sessions× @p.SessionDurationMin mnt</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Pilih Mentor</h2>
+        <p class="section-sub">Klik mentor untuk melihat portofolio lengkap, lalu lanjutkan pendaftaran.</p>
+        <div class="grid grid-4 mt-2">
+            @foreach (var m in FilteredMentors)
+            {
+                <a class="card mentor-card" href="kursus/mentor/@m.Id">
+                    <div class="mentor-top">
+                        <span class="avatar" style="background:@m.AvatarColor">@m.Initials</span>
+                        <div>
+                            <div><strong>@m.Name</strong></div>
+                            <div class="title">@m.Title</div>
+                        </div>
+                    </div>
+                    <div class="rating">★ @m.Rating.ToString("0.0")</div>
+                    <div class="meta">
+                        <span>@m.ExperienceYears thn</span>
+                        <span>@m.StudentsTrained murid</span>
+                    </div>
+                    <div class="flex">
+                        @foreach (var t in m.VehicleTypes)
+                        {
+                            <span class="pill" style="cursor:default">@t</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+        @if (!FilteredMentors.Any())
+        {
+            <p class="empty">Tidak ada mentor untuk kendaraan ini.</p>
+        }
+    </section>
+}
+
+@code {
+    private List<VehicleDto> _vehicles = new();
+    private List<CoursePackageDto> _packages = new();
+    private List<MentorDto> _mentors = new();
+    private string? _selectedVehicle;
+    private bool _loading = true;
+
+    private List<CoursePackageDto> FilteredPackages =>
+        string.IsNullOrEmpty(_selectedVehicle)
+            ? _packages
+            : _packages.Where(p => p.VehicleType == _selectedVehicle).ToList();
+
+    private List<MentorDto> FilteredMentors =>
+        string.IsNullOrEmpty(_selectedVehicle)
+            ? _mentors
+            : _mentors.Where(m => m.VehicleTypes.Contains(_selectedVehicle)).ToList();
+
+    private void ToggleVehicle(string type) =>
+        _selectedVehicle = _selectedVehicle == type ? null : type;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles") ?? new();
+        _packages = await Api.GetAsync<List<CoursePackageDto>>("/api/courses") ?? new();
+        _mentors = await Api.GetAsync<List<MentorDto>>("/api/mentors") ?? new();
+        _loading = false;
+    }
+}

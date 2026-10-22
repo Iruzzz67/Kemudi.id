@@ -1,0 +1,76 @@
+@page "/login"
+@using Kemudi.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<div class="text-center" style="margin-bottom:1.5rem">
+    <h1 class="section-title">Masuk</h1>
+    <p class="muted">Lanjutkan latihan dan pantau progresmu di dashboard.</p>
+</div>
+
+<div style="display:flex;justify-content:center">
+    <div class="form card" style="width:100%;max-width:420px">
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="error-box">@_error</div>
+        }
+
+        <div class="field">
+            <label>Email</label>
+            <input type="email" @bind="_email" placeholder="email@contoh.com" />
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input type="password" @bind="_password" placeholder="Masukkan password" />
+        </div>
+
+        <div class="flex-between">
+            <button class="btn btn-primary" disabled="@_busy" @onclick="DoLogin">
+                @(_busy ? "Memproses..." : "Masuk")
+            </button>
+            <span class="muted">Belum punya akun? <a href="register">Daftar</a></span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _email = "";
+    private string _password = "";
+    private string? _error;
+    private bool _busy;
+
+    private async Task DoLogin()
+    {
+        if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+        {
+            _error = "Email dan password wajib diisi.";
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var (success, error, data) = await Auth.LoginAsync(_email, _password);
+
+            if (success)
+            {
+                Nav.NavigateTo("/dashboard", forceLoad: true);
+                return;
+            }
+
+            _error = error ?? "Login gagal. Periksa email dan password.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Terjadi kesalahan: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

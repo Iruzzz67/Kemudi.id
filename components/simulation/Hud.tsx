@@ -45,6 +45,7 @@ export function Hud() {
   const speedKmh = useSimStore((s) => s.speedKmh);
   const violations = useSimStore((s) => s.violations);
   const offRoadCount = useSimStore((s) => s.offRoadCount);
+  const obstacleHits = useSimStore((s) => s.obstacleHits);
   const isOffRoad = useSimStore((s) => s.isOffRoad);
   const elapsedMs = useSimStore((s) => s.elapsedMs);
   const vehicle = useSimStore((s) => s.vehicle);
@@ -58,7 +59,19 @@ export function Hud() {
   const handbrakeOn = useSimStore((s) => s.handbrakeOn);
   const seatbeltOn = useSimStore((s) => s.seatbeltOn);
   const turnSignal = useSimStore((s) => s.turnSignal);
+  const headlightsOn = useSimStore((s) => s.headlightsOn);
+  const highBeamOn = useSimStore((s) => s.highBeamOn);
+  const hazardOn = useSimStore((s) => s.hazardOn);
+  const paused = useSimStore((s) => s.paused);
   const activeWarning = useSimStore((s) => s.activeWarning);
+  const helmetOn = useSimStore((s) => s.helmetOn);
+  const jacketOn = useSimStore((s) => s.jacketOn);
+  const glovesOn = useSimStore((s) => s.glovesOn);
+  const bootsOn = useSimStore((s) => s.bootsOn);
+  const toggleHelmet = useSimStore((s) => s.toggleHelmet);
+  const toggleJacket = useSimStore((s) => s.toggleJacket);
+  const toggleGloves = useSimStore((s) => s.toggleGloves);
+  const toggleBoots = useSimStore((s) => s.toggleBoots);
   const [muted, setMuted] = useState(vehicleAudio.isMuted());
   const [showHandling, setShowHandling] = useState(false);
 
@@ -113,9 +126,19 @@ export function Hud() {
             >
               Sabuk {seatbeltOn ? "ON" : "OFF"}
             </span>
+            {hazardOn && (
+              <span className="animate-pulse rounded bg-orange-500/90 px-1.5 py-0.5 font-semibold text-white">
+                ⚠ Hazard
+              </span>
+            )}
             {turnSignal !== "off" && (
               <span className="animate-pulse rounded bg-amber-400/90 px-1.5 py-0.5 font-semibold text-black">
                 {turnSignal === "left" ? "◀ Sein Kiri" : "Sein Kanan ▶"}
+              </span>
+            )}
+            {(headlightsOn || highBeamOn) && (
+              <span className="rounded bg-yellow-500/80 px-1.5 py-0.5 font-semibold text-black">
+                {highBeamOn ? "Lampu Jauh" : "💡 Lampu"}
               </span>
             )}
           </div>
@@ -129,6 +152,7 @@ export function Hud() {
         <div className="text-xl font-semibold tabular-nums">{seconds}s</div>
         <div className="mt-1 text-xs text-white/70">Pelanggaran: {violations}</div>
         <div className="text-xs text-white/70">Keluar jalur: {offRoadCount}</div>
+        <div className="text-xs text-white/70">Rintangan: {obstacleHits}</div>
       </div>
 
       {!engineRunning && (
@@ -157,6 +181,24 @@ export function Hud() {
         </div>
       )}
 
+      {paused && (
+        <div className="pointer-events-auto absolute inset-0 flex items-center justify-center bg-black/60">
+          <div className="rounded-2xl bg-black/80 px-10 py-8 text-center text-white backdrop-blur">
+            <div className="text-4xl font-bold">⏸ Dijeda</div>
+            <p className="mt-2 text-sm text-white/70">
+              Tekan <kbd className="rounded border px-1.5 py-0.5 font-mono">P</kbd> atau tombol menu
+              (tahan) untuk melanjutkan
+            </p>
+            <button
+              onClick={() => useSimStore.getState().togglePause()}
+              className="mt-5 rounded-full bg-blue-600 px-6 py-2.5 font-semibold text-white hover:bg-blue-700"
+            >
+              Lanjutkan
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="pointer-events-auto absolute bottom-4 right-4 flex gap-2">
         <button
           onClick={() => setShowHandling(true)}
@@ -176,6 +218,56 @@ export function Hud() {
         </button>
       </div>
 
+      {vehicle === "MOTOR" && (
+        <div className="pointer-events-auto absolute bottom-28 right-4 w-52 rounded-lg bg-black/60 px-3 py-3 text-white backdrop-blur">
+          <div className="mb-2 text-xs uppercase tracking-wide text-white/60">
+            Keselamatan Motor
+          </div>
+          <div className="grid gap-2">
+            <button
+              onClick={toggleHelmet}
+              className={`w-full rounded-lg px-3 py-2 text-left text-xs font-semibold transition ${
+                helmetOn
+                  ? "bg-emerald-500/90 text-white"
+                  : "bg-white/10 text-white/80 hover:bg-white/15"
+              }`}
+            >
+              {helmetOn ? "Helm ON" : "Helm"}
+            </button>
+            <button
+              onClick={toggleJacket}
+              className={`w-full rounded-lg px-3 py-2 text-left text-xs font-semibold transition ${
+                jacketOn
+                  ? "bg-emerald-500/90 text-white"
+                  : "bg-white/10 text-white/80 hover:bg-white/15"
+              }`}
+            >
+              {jacketOn ? "Jaket ON" : "Jaket"}
+            </button>
+            <button
+              onClick={toggleGloves}
+              className={`w-full rounded-lg px-3 py-2 text-left text-xs font-semibold transition ${
+                glovesOn
+                  ? "bg-emerald-500/90 text-white"
+                  : "bg-white/10 text-white/80 hover:bg-white/15"
+              }`}
+            >
+              {glovesOn ? "Sarung ON" : "Sarung"}
+            </button>
+            <button
+              onClick={toggleBoots}
+              className={`w-full rounded-lg px-3 py-2 text-left text-xs font-semibold transition ${
+                bootsOn
+                  ? "bg-emerald-500/90 text-white"
+                  : "bg-white/10 text-white/80 hover:bg-white/15"
+              }`}
+            >
+              {bootsOn ? "Sepatu ON" : "Sepatu"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {showHandling && (
         // pointer-events-none on the Hud root is inherited by default, and
         // the panel's own "fixed" positioning doesn't reset that — without
@@ -186,12 +278,12 @@ export function Hud() {
       )}
 
       <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
-        <div className="max-w-2xl rounded-lg bg-black/60 px-4 py-2 text-center text-xs text-white/80 backdrop-blur">
-          [I] kontak &middot; W gas &middot; S rem &middot; A/D belok &middot; [Space] rem tangan
-          &middot; R mundur
-          {transmissionMode === "manual" && " · Shift kopling · Q/E gigi"} &middot; B sabuk
-          &middot; M spion &middot; [ ] kursi &middot; Z/X sein &middot; [C] kamera (
-          {CAMERA_LABEL[cameraMode]})
+        <div className="max-w-3xl rounded-lg bg-black/60 px-4 py-2 text-center text-xs text-white/80 backdrop-blur">
+          [I] kontak &middot; W gas &middot; S rem &middot; A/D belok &middot; [Space] rem tangan &middot; R
+          mundur
+          {transmissionMode === "manual" && " · Shift kopling · Q/E gigi · N netral"} &middot; B sabuk
+          &middot; M spion &middot; [ ] kursi &middot; Z/X sein &middot; T klakson &middot; L lampu &middot; K
+          lampu jauh &middot; V hazard &middot; P pause &middot; [C] kamera ({CAMERA_LABEL[cameraMode]})
         </div>
       </div>
 

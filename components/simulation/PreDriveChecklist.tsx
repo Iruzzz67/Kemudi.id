@@ -8,6 +8,7 @@ import { getChecklistItems } from "@/lib/checklist";
 // kiri layar, tercentang otomatis ketika dilakukan."
 export function PreDriveChecklist() {
   const transmissionMode = useSimStore((s) => s.transmissionMode);
+  const vehicleType = useSimStore((s) => s.vehicle);
   const engineRunning = useSimStore((s) => s.engineRunning);
   const handbrakeOn = useSimStore((s) => s.handbrakeOn);
   const seatbeltOn = useSimStore((s) => s.seatbeltOn);
@@ -16,6 +17,10 @@ export function PreDriveChecklist() {
   const hasClutchedOnce = useSimStore((s) => s.hasClutchedOnce);
   const hasEngagedGearOne = useSimStore((s) => s.hasEngagedGearOne);
   const turnSignalUsedOnce = useSimStore((s) => s.turnSignalUsedOnce);
+  const helmetOn = useSimStore((s) => s.helmetOn);
+  const jacketOn = useSimStore((s) => s.jacketOn);
+  const glovesOn = useSimStore((s) => s.glovesOn);
+  const bootsOn = useSimStore((s) => s.bootsOn);
 
   const items = getChecklistItems(
     {
@@ -27,8 +32,13 @@ export function PreDriveChecklist() {
       hasClutchedOnce,
       hasEngagedGearOne,
       turnSignalUsedOnce,
+      helmetOn,
+      jacketOn,
+      glovesOn,
+      bootsOn,
     },
-    transmissionMode
+    transmissionMode,
+    vehicleType
   );
 
   return (

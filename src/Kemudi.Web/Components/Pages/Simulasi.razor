@@ -1,0 +1,203 @@
+@page "/simulasi"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+
+<!-- Simulation Header -->
+<section class="sim-hero" style="background:var(--black);padding:3rem 2rem 2rem;color:#fff;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.03) 60px,rgba(255,255,255,0.03) 61px);pointer-events:none;"></div>
+    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1;">
+        <div class="sim-street-label" style="margin-bottom:1rem;">SIMULASI</div>
+        <h1 style="font-size:2.25rem;letter-spacing:-0.03em;margin:0;line-height:1.1;">
+            Simulasi Mengemudi 3D
+        </h1>
+        <p style="color:rgba(255,255,255,0.5);margin:0.75rem 0 0;max-width:520px;font-size:1.05rem;">
+            Pilih kendaraan, pilih rute, dan mulai latihan. Fisika beneran, jalan virtual.
+        </p>
+    </div>
+</section>
+
+<!-- Vehicle Selection -->
+<section class="sim-section" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">1</span>
+        <h2 style="margin:0;font-size:1.15rem;">Pilih Kendaraan</h2>
+    </div>
+
+    @if (_vehicles is null)
+    {
+        <div class="loading">Memuat kendaraan...</div>
+    }
+    else
+    {
+        <div class="sim-vehicle-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+            @foreach (var v in _vehicles)
+            {
+                <button class="sim-vehicle-btn @(_selectedType == v.Type ? "selected" : "")"
+                        @onclick="() => SelectVehicle(v.Type)">
+                    <div class="sim-vehicle-icon">
+                        @(v.Type == "MOTOR" ? "🏍️" : v.Type == "MOBIL" ? "🚗" : "🚛")
+                    </div>
+                    <div class="sim-vehicle-name">@v.Label</div>
+                    <div class="sim-vehicle-meta">@Math.Round(v.MaxSpeed * 3.6) km/j · @v.GearCount gigi</div>
+                </button>
+            }
+        </div>
+    }
+</section>
+
+<!-- Route / Track Selection -->
+<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">2</span>
+        <h2 style="margin:0;font-size:1.15rem;">Pilih Rute</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+        @foreach (var r in _routes)
+        {
+            <button class="sim-route-btn @(_selectedRoute == r.Id ? "selected" : "")"
+                    @onclick="() => _selectedRoute = r.Id">
+                <div class="sim-route-top">
+                    <span class="sim-route-icon">🛣️</span>
+                    <div>
+                        <div class="sim-route-name">@r.Name</div>
+                        <div class="sim-route-desc">@r.Description</div>
+                    </div>
+                </div>
+                <div class="sim-route-specs">
+                    <span>@r.Distance</span>
+                    <span>@r.Difficulty</span>
+                    <span>@r.TrafficLevel</span>
+                </div>
+            </button>
+        }
+    </div>
+</section>
+
+<!-- Simulation Canvas Area -->
+<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">3</span>
+        <h2 style="margin:0;font-size:1.15rem;">Simulasi</h2>
+    </div>
+
+    <div class="sim-road-surface" style="min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+        <div style="text-align:center;color:var(--muted);">
+            <div style="font-size:4rem;margin-bottom:0.75rem;opacity:0.4;">🛣️</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.25rem;">
+                Simulasi 3D tersedia di website utama
+            </div>
+            <div style="font-size:0.9rem;margin-bottom:1.5rem;">
+                Pilih kendaraan dan rute, lalu buka simulasi di aplikasi simulasi terpisah.
+            </div>
+            <a class="btn btn-primary btn-lg"
+               href="@SimulationLink"
+               target="_blank"
+               rel="noopener">
+                ▶ Buka Simulasi 3D
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Controls Info -->
+<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">4</span>
+        <h2 style="margin:0;font-size:1.15rem;">Kontrol</h2>
+    </div>
+
+    <div class="sim-road-surface" style="padding:2rem;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
+            <div>
+                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Kendali</h3>
+                <div class="sim-control-row"><kbd>W</kbd> <span>Maju / Gas</span></div>
+                <div class="sim-control-row"><kbd>S</kbd> <span>Mundur / Rem</span></div>
+                <div class="sim-control-row"><kbd>A</kbd> <span>Belok Kiri</span></div>
+                <div class="sim-control-row"><kbd>D</kbd> <span>Belok Kanan</span></div>
+            </div>
+            <div>
+                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Transmisi</h3>
+                <div class="sim-control-row"><kbd>Q</kbd> <span>Gigi Naik</span></div>
+                <div class="sim-control-row"><kbd>E</kbd> <span>Gigi Turun</span></div>
+                <div class="sim-control-row"><kbd>Space</kbd> <span>Rem Tangan</span></div>
+            </div>
+            <div>
+                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Lainnya</h3>
+                <div class="sim-control-row"><kbd>R</kbd> <span>Reset Posisi</span></div>
+                <div class="sim-control-row"><kbd>C</kbd> <span>Ganti Kamera</span></div>
+                <div class="sim-control-row"><kbd>Esc</kbd> <span>Pause / Menu</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vehicle Detail Card (if selected) -->
+@if (_selectedVehicle is not null)
+{
+    <section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
+        <div class="sim-road-surface" style="padding:1.5rem;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                <div class="sim-vehicle-icon" style="width:48px;height:48px;font-size:1.5rem;">
+                    @(_selectedVehicle.Type == "MOTOR" ? "🏍️" : _selectedVehicle.Type == "MOBIL" ? "🚗" : "🚛")
+                </div>
+                <div>
+                    <h3 style="margin:0;font-size:1.15rem;">@_selectedVehicle.Label</h3>
+                    <p style="margin:0.15rem 0 0;color:var(--muted);font-size:0.9rem;">@_selectedVehicle.Description</p>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;">
+                <div class="sim-spec-pill">
+                    <span class="sim-spec-val">@(_selectedVehicle.MaxSpeed)</span>
+                    <span class="sim-spec-lbl">m/s max</span>
+                </div>
+                <div class="sim-spec-pill">
+                    <span class="sim-spec-val">@(_selectedVehicle.MaxSpeed * 3.6).ToString("0")</span>
+                    <span class="sim-spec-lbl">km/j</span>
+                </div>
+                <div class="sim-spec-pill">
+                    <span class="sim-spec-val">@(_selectedVehicle.GearCount)</span>
+                    <span class="sim-spec-lbl">Gigi</span>
+                </div>
+                <div class="sim-spec-pill">
+                    <span class="sim-spec-val">@(_selectedVehicle.Type == "MOTOR" ? "Ringan" : _selectedVehicle.Type == "MOBIL" ? "Sedang" : "Berat")</span>
+                    <span class="sim-spec-lbl">Kelas</span>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    private List<VehicleDto>? _vehicles;
+    private VehicleDto? _selectedVehicle;
+    private string? _selectedType;
+    private string? _selectedRoute;
+    private string SimulationLink =>
+        _selectedVehicle is null || _selectedRoute is null
+            ? "http://localhost:3000/simulasi"
+            : $"http://localhost:3000/simulasi?vehicle={Uri.EscapeDataString(_selectedVehicle.Type)}&route={Uri.EscapeDataString(_selectedRoute)}&autoStart=1";
+
+    private record RouteItem(string Id, string Name, string Description, string Distance, string Difficulty, string TrafficLevel);
+
+    private readonly List<RouteItem> _routes = new()
+    {
+        new("city", "Jalan Kota", "Jalanan perkotaan dengan traffic light dan pejalan kaki.", "2.5 km", "Mudah", "Sedang"),
+        new("suburban", "Jalan Perumahan", "Jalanan perumahan dengan tikungan dan parkir paralel.", "3.2 km", "Mudah", "Ringan"),
+        new("highway", "Jalan Tol", "Jalanan lurus dengan kecepatan tinggi dan tanjakan.", "5.0 km", "Sedang", "Sedang"),
+        new("mountain", "Jalanan Gunung", "Tikungan tajam, tanjakan curam, dan turunan berbahaya.", "4.1 km", "Sulit", "Ringan"),
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+    }
+
+    private void SelectVehicle(string type)
+    {
+        _selectedType = type;
+        _selectedVehicle = _vehicles?.FirstOrDefault(v => v.Type == type);
+    }
+
+}

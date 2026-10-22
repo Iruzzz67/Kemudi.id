@@ -1,10 +1,10 @@
 "use client";
 
-import { use } from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { MENTORS } from "@/lib/kursus-data";
 
-export default function PaymentPage() {
+function PaymentContent() {
   const params = useSearchParams();
   const router = useRouter();
   const mentorId = params?.get("mentor") || "";
@@ -45,11 +45,30 @@ export default function PaymentPage() {
       </div>
 
       <div className="mt-6 flex gap-2">
-        <button onClick={() => router.back()} className="rounded-full border px-4 py-2">Kembali</button>
-        <button onClick={handlePay} className="ml-auto rounded-full bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700">
+        <button onClick={() => router.back()} className="rounded-full border px-4 py-2">
+          Kembali
+        </button>
+        <button
+          onClick={handlePay}
+          className="ml-auto rounded-full bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700"
+        >
           Bayar Sekarang
         </button>
       </div>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-neutral-400">
+          Memuat halaman pembayaran...
+        </div>
+      }
+    >
+      <PaymentContent />
+    </Suspense>
   );
 }

@@ -1,0 +1,95 @@
+@page "/register"
+@using Kemudi.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<div class="text-center" style="margin-bottom:1.5rem">
+    <h1 class="section-title">Daftar Akun</h1>
+    <p class="muted">Mulai perjalanan belajarmu bersama Kemudi.id.</p>
+</div>
+
+<div style="display:flex;justify-content:center">
+    <div class="form card" style="width:100%;max-width:420px">
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="error-box">@_error</div>
+        }
+
+        <div class="field">
+            <label>Nama Lengkap</label>
+            <input type="text" @bind="_name" placeholder="Nama kamu" />
+        </div>
+
+        <div class="field">
+            <label>Email</label>
+            <input type="email" @bind="_email" placeholder="email@contoh.com" />
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input type="password" @bind="_password" placeholder="Minimal 6 karakter" />
+            <div class="hint">Minimal 6 karakter.</div>
+        </div>
+
+        <div class="flex-between">
+            <button class="btn btn-primary" disabled="@_busy" @onclick="DoRegister">
+                @(_busy ? "Mendaftar..." : "Daftar")
+            </button>
+            <span class="muted">Sudah punya akun? <a href="login">Masuk</a></span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _name = "";
+    private string _email = "";
+    private string _password = "";
+    private string? _error;
+    private bool _busy;
+
+    private async Task DoRegister()
+    {
+        if (string.IsNullOrWhiteSpace(_name))
+        {
+            _error = "Nama wajib diisi.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_email))
+        {
+            _error = "Email wajib diisi.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_password) || _password.Length < 6)
+        {
+            _error = "Password minimal 6 karakter.";
+            return;
+        }
+
+        _busy = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var (success, error) = await Auth.RegisterAsync(_name, _email, _password);
+
+            if (success)
+            {
+                Nav.NavigateTo("/dashboard", forceLoad: true);
+                return;
+            }
+
+            _error = error ?? "Registrasi gagal. Coba lagi.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Terjadi kesalahan: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

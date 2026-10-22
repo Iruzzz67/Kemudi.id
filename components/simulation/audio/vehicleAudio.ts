@@ -17,6 +17,8 @@ class VehicleAudioEngine {
   private skidFilter: BiquadFilterNode | null = null;
   private skidGain: GainNode | null = null;
   private masterGain: GainNode | null = null;
+  private hornGain: GainNode | null = null;
+  private hornNodes: AudioScheduledSourceNode[] = [];
   private muted = false;
 
   start() {
@@ -131,6 +133,54 @@ class VehicleAudioEngine {
     source.connect(bandpass).connect(gain).connect(this.masterGain);
     source.start(now);
     source.stop(now + duration);
+  }
+
+  // Two-tone electric honk. Held input (keyboard T / right stick press) keeps
+  // the tone looping through a per-oscillator tremolo; releasing ramps the
+  // gain down and tears the nodes down shortly after, so it never lingers.
+  setHorn(on: boolean) {
+    const ctx = this.ctx;
+    if (!ctx || !this.masterGain) return;
+
+    if (on && !this.hornGain) {
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      gain.connect(this.masterGain);
+      this.hornGain = gain;
+
+      const nodes: AudioScheduledSourceNode[] = [];
+      [332, 415].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = "square";
+        osc.frequency.value = freq;
+        const tremolo = ctx.createOscillator();
+        tremolo.frequency.value = 11 + i * 3;
+        const tremoloGain = ctx.createGain();
+        tremoloGain.gain.value = 0.18;
+        const oscGain = ctx.createGain();
+        oscGain.gain.value = 0.16;
+        tremolo.connect(tremoloGain).connect(oscGain.gain);
+        osc.connect(oscGain).connect(gain);
+        osc.start();
+        tremolo.start();
+        nodes.push(osc, tremolo);
+      });
+      this.hornNodes = nodes;
+      gain.gain.setTargetAtTime(0.22, ctx.currentTime, 0.02);
+    } else if (!on && this.hornGain) {
+      const gain = this.hornGain;
+      const stopAt = ctx.currentTime + 0.12;
+      gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+      for (const node of this.hornNodes) {
+        try {
+          node.stop(stopAt);
+        } catch {
+          // already stopped
+        }
+      }
+      this.hornNodes = [];
+      this.hornGain = null;
+    }
   }
 
   // One-shot low thump for an engine stall — a quick downward sine sweep.

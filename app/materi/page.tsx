@@ -1,29 +1,32 @@
-import Link from "next/link";
-import { MATERI_LIST } from "@/lib/materi-data";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { TheoryCatalog } from "@/components/materi/TheoryCatalog";
+import { ModuleDetailModal } from "@/components/materi/ModuleDetailModal";
+import { TheoryModule } from "@/types/ui";
 
 export default function MateriPage() {
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-3xl font-bold">Materi Kursus</h1>
-      <p className="mt-2 text-neutral-500">
-        Pahami teori dasar sebelum mencoba simulasi mengemudi.
-      </p>
+  const router = useRouter();
+  const [activeModule, setActiveModule] = useState<TheoryModule | null>(null);
 
-      <div className="mt-8 space-y-4">
-        {MATERI_LIST.map((m) => (
-          <Link
-            key={m.slug}
-            href={`/materi/${m.slug}`}
-            className="block rounded-xl border border-neutral-200 p-5 transition hover:border-blue-400 dark:border-neutral-800"
-          >
-            <span className="text-xs font-medium uppercase tracking-wide text-blue-600">
-              {m.category}
-            </span>
-            <div className="mt-1 text-lg font-semibold">{m.title}</div>
-            <p className="mt-1 text-sm text-neutral-500">{m.summary}</p>
-          </Link>
-        ))}
-      </div>
+  const handleTestInSimulator = () => {
+    setActiveModule(null);
+    router.push("/simulasi");
+  };
+
+  return (
+    <div className="min-h-screen">
+      <TheoryCatalog
+        onSelectModule={(module) => setActiveModule(module)}
+        onOpenSimulator={() => router.push("/simulasi")}
+      />
+
+      <ModuleDetailModal
+        module={activeModule}
+        onClose={() => setActiveModule(null)}
+        onTestInSimulator={handleTestInSimulator}
+      />
     </div>
   );
 }

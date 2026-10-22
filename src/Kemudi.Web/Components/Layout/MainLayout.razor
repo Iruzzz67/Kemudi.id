@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+
+<div class="kemudi-app">
+    <NavMenu />
+
+    <main class="kemudi-main">
+        <div class="container">
+            @Body
+        </div>
+    </main>
+
+    <footer class="kemudi-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <span class="footer-brand">🚗 Kemudi.id</span>
+                <span class="footer-text">Belajar mengemudi dengan aman sebelum turun ke jalan.</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui" class="blazor-error-ui" data-nosnippet>
+    Terjadi kesalahan tak terduga.
+    <a href="" class="reload">Muat ulang</a>
+    <a class="dismiss">🗙</a>
+</div>

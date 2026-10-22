@@ -1,0 +1,12 @@
+@page "/admin/logout"
+@using Kemudi.Web.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Auth.LogoutAsync();
+        Nav.NavigateTo("/admin/login", forceLoad: true);
+    }
+}

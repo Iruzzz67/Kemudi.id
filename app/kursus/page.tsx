@@ -1,118 +1,107 @@
-import Link from "next/link";
-import { COURSE_PACKAGES, MENTORS, SCHEDULE_SLOTS, WHAT_YOU_GET, formatRupiah } from "@/lib/kursus-data";
-import { VEHICLES } from "@/lib/vehicles";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { CoursePackages } from "@/components/kursus/CoursePackages";
 import { MentorSelector } from "@/components/kursus/MentorSelector";
+import { RegistrationModal } from "@/components/kursus/RegistrationModal";
+import { COURSE_PACKAGES, MENTORS } from "@/data/mockData";
+import { CoursePackage, Mentor, StudentProfile } from "@/types/ui";
+import { ShieldCheck, Award, Users } from "lucide-react";
 
 export default function KursusPage() {
+  const router = useRouter();
+  const { studentProfile, updateProfile } = useAuth();
+
+  const [selectedPackage, setSelectedPackage] = useState<CoursePackage>(COURSE_PACKAGES[1]);
+  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(MENTORS[0]);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+
+  const handleSelectPackage = (pkg: CoursePackage) => {
+    setSelectedPackage(pkg);
+    setIsRegistrationModalOpen(true);
+  };
+
+  const handleSelectMentor = (mentor: Mentor) => {
+    setSelectedMentor(mentor);
+    setIsRegistrationModalOpen(true);
+  };
+
+  const handleCompleteRegistration = (updatedProfile: StudentProfile) => {
+    updateProfile(updatedProfile);
+    router.push("/dashboard");
+  };
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold">Kursus Mengemudi</h1>
-      <p className="mt-2 max-w-2xl text-neutral-500">
-        Pilih paket kursus, jadwal, dan mentor sesuai kebutuhan Anda. Semua paket sudah termasuk
-        akses simulasi 3D interaktif Kemudi.id.
-      </p>
-
-      {/* Daftar kursus & estimasi harga */}
-      <section id="paket" className="mt-12">
-        <h2 className="text-2xl font-bold">Daftar Kursus & Estimasi Harga</h2>
-        <p className="mt-1 text-neutral-500">
-          Harga di bawah adalah estimasi per paket, sudah termasuk seluruh sesi dan materi.
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+      {/* Page Header */}
+      <div className="text-center max-w-3xl mx-auto space-y-3">
+        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+          Kurikulum Standar Perhubungan RI
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Paket Kursus Mengemudi & Pilihan Mentor
+        </h1>
+        <p className="text-sm text-slate-600 dark:text-neutral-400 leading-relaxed">
+          Dapatkan bimbingan intensif dari instruktur berlisensi resmi BNSP. Akses simulator 3D gratis tanpa batas selama masa kursus untuk memastikan kelulusan ujian SIM perdana Anda.
         </p>
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {COURSE_PACKAGES.map((pkg) => {
-            const vehicle = VEHICLES[pkg.vehicleType];
-            return (
-              <div
-                key={pkg.id}
-                className="flex flex-col rounded-xl border border-neutral-200 p-5 dark:border-neutral-800"
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
-                    style={{ backgroundColor: vehicle.color }}
-                  >
-                    {vehicle.label}
-                  </span>
-                  <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-                    {pkg.level}
-                  </span>
-                </div>
+      </div>
 
-                <div className="mt-3 text-lg font-semibold">{pkg.label}</div>
-                <p className="mt-1 text-sm text-neutral-500">{pkg.description}</p>
-
-                <div className="mt-4 text-2xl font-bold text-blue-600">{formatRupiah(pkg.price)}</div>
-                <div className="text-xs text-neutral-400">
-                  {pkg.sessions}x sesi &middot; {pkg.sessionDurationMin} menit/sesi
-                </div>
-
-                <ul className="mt-4 space-y-1.5 text-sm text-neutral-600 dark:text-neutral-400">
-                  {pkg.includes.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span className="text-blue-600">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href="#mentor"
-                  className="mt-5 rounded-full bg-blue-600 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  Pilih Paket Ini
-                </Link>
-              </div>
-            );
-          })}
+      {/* Trust Badges */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-6 px-6 rounded-2xl bg-slate-50 dark:bg-neutral-900/60 border border-slate-200 dark:border-neutral-800">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white">Garansi Lulus Ujian SIM</div>
+            <div className="text-[11px] text-slate-500 dark:text-neutral-400">Didampingi hingga memperoleh SIM</div>
+          </div>
         </div>
-      </section>
 
-      {/* Jadwal */}
-      <section id="jadwal" className="mt-14">
-        <h2 className="text-2xl font-bold">Jadwal Tersedia</h2>
-        <p className="mt-1 text-neutral-500">
-          Sesi dijadwalkan ulang dengan mentor Anda setelah pendaftaran, sesuai slot berikut.
-        </p>
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {SCHEDULE_SLOTS.map((slot) => (
-            <div
-              key={slot.id}
-              className="rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
-            >
-              <div className="font-semibold">{slot.days}</div>
-              <div className="text-sm text-neutral-500">{slot.time}</div>
-              {slot.note && (
-                <div className="mt-1 text-xs font-medium text-blue-600">{slot.note}</div>
-              )}
-            </div>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white">Instruktur Senior BNSP</div>
+            <div className="text-[11px] text-slate-500 dark:text-neutral-400">Sabar, ramah, dan berpengalaman 8+ tahun</div>
+          </div>
         </div>
-      </section>
 
-      {/* Apa yang didapatkan */}
-      <section className="mt-14">
-        <h2 className="text-2xl font-bold">Apa yang Anda Dapatkan</h2>
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {WHAT_YOU_GET.map((item) => (
-            <div key={item} className="flex items-start gap-3 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
-              <span className="mt-0.5 text-blue-600">✓</span>
-              <span className="text-sm text-neutral-700 dark:text-neutral-300">{item}</span>
-            </div>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Award className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-900 dark:text-white">Sertifikat Digital Resmi</div>
+            <div className="text-[11px] text-slate-500 dark:text-neutral-400">Verifikasi QR-Code internasional</div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      {/* Mentor */}
-      <section id="mentor" className="mt-14 scroll-mt-20">
-        <h2 className="text-2xl font-bold">Pilih Mentor Anda</h2>
-        <p className="mt-1 text-neutral-500">
-          Setiap mentor mendampingi Anda selama kursus berlangsung. Lihat portofolio masing-masing
-          sebelum memilih.
-        </p>
-        <div className="mt-6">
-          <MentorSelector mentors={MENTORS} />
-        </div>
-      </section>
+      {/* Course Packages */}
+      <CoursePackages
+        selectedPackage={selectedPackage}
+        onSelectPackage={handleSelectPackage}
+      />
+
+      {/* Mentor Selector */}
+      <MentorSelector
+        selectedMentor={selectedMentor}
+        onSelectMentor={handleSelectMentor}
+      />
+
+      {/* Registration Modal */}
+      <RegistrationModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        selectedPackage={selectedPackage}
+        selectedMentor={selectedMentor}
+        studentProfile={studentProfile}
+        onCompleteRegistration={handleCompleteRegistration}
+      />
     </div>
   );
 }

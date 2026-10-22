@@ -1,144 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/AuthProvider";
 import { Scene } from "./Scene";
 import { Hud } from "./Hud";
 import { WalkingHud } from "./WalkingHud";
-import { HandlingSettingsPanel } from "./HandlingSettingsPanel";
+import { SimulationGarage } from "./SimulationGarage";
+import { VRSessionButton } from "./xr/VRSessionButton";
 import { useSimStore } from "@/store/simStore";
-import { VEHICLE_ORDER, VEHICLES, VehicleType } from "@/lib/vehicles";
 import { vehicleAudio } from "./audio/vehicleAudio";
 
-function VehicleSelectScreen() {
-  const vehicle = useSimStore((s) => s.vehicle);
-  const setVehicle = useSimStore((s) => s.setVehicle);
-  const startWalking = useSimStore((s) => s.startWalking);
-  const transmissionMode = useSimStore((s) => s.transmissionMode);
-  const setTransmissionMode = useSimStore((s) => s.setTransmissionMode);
-  const [muted, setMuted] = useState(false);
-  const [showHandling, setShowHandling] = useState(false);
-
-  const handleStart = () => {
-    // Unlock the AudioContext now (must happen from a user gesture); the
-    // engine itself stays silent until the player actually turns the key.
-    vehicleAudio.start();
-    vehicleAudio.setMuted(muted);
-    startWalking();
-  };
-
-  return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-4 text-center">
-      <div>
-        <h1 className="text-3xl font-bold">Pilih Kendaraan</h1>
-        <p className="mt-2 text-neutral-500">
-          Setiap kendaraan punya karakteristik berbeda: kecepatan, akselerasi, dan radius putar.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {VEHICLE_ORDER.map((type: VehicleType) => {
-          const cfg = VEHICLES[type];
-          const selected = vehicle === type;
-          return (
-            <button
-              key={type}
-              onClick={() => setVehicle(type)}
-              className={`w-56 rounded-xl border-2 p-5 text-left transition ${
-                selected
-                  ? "border-blue-600 bg-blue-50 dark:bg-blue-950/40"
-                  : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-400"
-              }`}
-            >
-              <div
-                className="mb-3 h-3 w-12 rounded-full"
-                style={{ backgroundColor: cfg.color }}
-              />
-              <div className="text-lg font-semibold">{cfg.label}</div>
-              <div className="mt-1 text-sm text-neutral-500">{cfg.description}</div>
-              <div className="mt-3 text-xs text-neutral-400">
-                Top speed: {Math.round(cfg.maxSpeed * 3.6)} km/j
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <div>
-        <div className="text-sm font-medium text-neutral-500">Jenis Transmisi</div>
-        <div className="mt-2 inline-flex rounded-full border border-neutral-200 p-1 dark:border-neutral-800">
-          <button
-            onClick={() => setTransmissionMode("automatic")}
-            className={`rounded-full px-5 py-1.5 text-sm font-medium transition ${
-              transmissionMode === "automatic"
-                ? "bg-blue-600 text-white"
-                : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-            }`}
-          >
-            Automatic
-          </button>
-          <button
-            onClick={() => setTransmissionMode("manual")}
-            className={`rounded-full px-5 py-1.5 text-sm font-medium transition ${
-              transmissionMode === "manual"
-                ? "bg-blue-600 text-white"
-                : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
-            }`}
-          >
-            Manual
-          </button>
-        </div>
-        {transmissionMode === "manual" && (
-          <p className="mt-2 max-w-sm text-xs text-neutral-400">
-            Tahan <kbd className="rounded border px-1 py-0.5 font-mono">Shift</kbd> (kopling)
-            sebelum oper gigi dengan <kbd className="rounded border px-1 py-0.5 font-mono">Q</kbd>/
-            <kbd className="rounded border px-1 py-0.5 font-mono">E</kbd>. Oper gigi tanpa kopling
-            akan merusak girboks dan bisa membuat mesin mati.
-          </p>
-        )}
-      </div>
-
-      <button
-        onClick={() => setShowHandling(true)}
-        className="rounded-full border border-neutral-300 px-5 py-2 text-sm font-medium hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
-      >
-        Pengaturan Handling
-      </button>
-
-      <div className="flex items-center gap-4">
-        <button
-          onClick={handleStart}
-          className="rounded-full bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700"
-        >
-          Mulai Simulasi
-        </button>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-neutral-500">
-          <input
-            type="checkbox"
-            checked={muted}
-            onChange={(e) => setMuted(e.target.checked)}
-            className="h-4 w-4"
-          />
-          Bisukan suara
-        </label>
-      </div>
-
-      <p className="max-w-md text-xs text-neutral-400">
-        Anda akan muncul di area parkir dan berjalan kaki menuju kendaraan. Dekati pintu pengemudi
-        untuk masuk, lalu tekan <kbd className="rounded border px-1.5 py-0.5 font-mono">I</kbd> untuk
-        menyalakan mesin. Sebelum berjalan, selesaikan checklist di kiri layar: pasang sabuk (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">B</kbd>), lepas rem tangan (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">Space</kbd>), atur kursi (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">[</kbd>/
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">]</kbd>) dan spion (
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">M</kbd>). Tekan{" "}
-        <kbd className="rounded border px-1.5 py-0.5 font-mono">C</kbd> untuk ganti sudut kamera.
-      </p>
-
-      {showHandling && <HandlingSettingsPanel onClose={() => setShowHandling(false)} />}
-    </div>
-  );
-}
 
 function FinishedScreen() {
   const score = useSimStore((s) => s.score);
@@ -149,9 +20,11 @@ function FinishedScreen() {
   const reset = useSimStore((s) => s.reset);
   const startDriving = useSimStore((s) => s.startDriving);
 
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
 
   // Safety net: VehicleController already silences audio the instant it
   // detects the finish line, but that only helps if it got to run before
@@ -163,20 +36,48 @@ function FinishedScreen() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(null);
+    setSaveNote(null);
+    const payload = {
+      vehicleType: vehicle,
+      score,
+      timeTakenMs: elapsedMs,
+      violations,
+      offRoadCount,
+      completed: true,
+    };
     try {
-      await fetch("/api/progress", {
+      const res = await fetch("/api/progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehicleType: vehicle,
-          score,
-          timeTakenMs: elapsedMs,
-          violations,
-          offRoadCount,
-          completed: true,
-        }),
+        body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        throw new Error(`Server menolak penyimpanan (HTTP ${res.status})`);
+      }
       setSaved(true);
+    } catch (err) {
+      // Backend demo/offline (mis. /api/progress 404): jangan klaim
+      // "Tersimpan" palsu — fallback ke localStorage dengan status jelas.
+      try {
+        const localRecord = {
+          ...payload,
+          savedAt: new Date().toISOString(),
+          offline: true,
+        };
+        const key = "kemudi_last_score_offline";
+        const prevRaw = localStorage.getItem(key);
+        const prev = prevRaw ? JSON.parse(prevRaw) : [];
+        const list = Array.isArray(prev) ? prev : [prev];
+        list.push(localRecord);
+        localStorage.setItem(key, JSON.stringify(list));
+        setSaved(true);
+        setSaveNote("Tersimpan lokal (offline/demo) — server tidak tersedia.");
+      } catch {
+        setSaveError(
+          err instanceof Error ? err.message : "Gagal menyimpan skor. Coba lagi."
+        );
+      }
     } finally {
       setSaving(false);
     }
@@ -208,7 +109,7 @@ function FinishedScreen() {
         >
           Ganti Kendaraan
         </button>
-        {session ? (
+        {user ? (
           <button
             onClick={handleSave}
             disabled={saving || saved}
@@ -225,6 +126,13 @@ function FinishedScreen() {
           </a>
         )}
       </div>
+
+      {saveError && (
+        <p className="max-w-md text-sm font-medium text-red-600">{saveError}</p>
+      )}
+      {saveNote && (
+        <p className="max-w-md text-sm font-medium text-amber-600">{saveNote}</p>
+      )}
     </div>
   );
 }
@@ -270,14 +178,15 @@ export function SimulationApp() {
   const phase = useSimStore((s) => s.phase);
   const vehicle = useSimStore((s) => s.vehicle);
 
-  if (phase === "selecting") return <VehicleSelectScreen />;
+  if (phase === "selecting") return <SimulationGarage />;
   if (phase === "finished") return <FinishedScreen />;
   if (phase === "failed") return <FailedScreen />;
 
   return (
-    <div className="relative h-[calc(100vh-4rem)] w-full">
+    <div className="relative h-[calc(100dvh-4rem)] w-full">
       <Scene vehicle={vehicle} />
       {phase === "walking" ? <WalkingHud /> : <Hud />}
+      <VRSessionButton />
     </div>
   );
 }

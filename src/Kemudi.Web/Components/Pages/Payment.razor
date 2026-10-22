@@ -1,0 +1,131 @@
+@page "/kursus/payment"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+@if (_loading)
+{
+    <div class="loading">Memuat instruksi pembayaran...</div>
+}
+else if (_registration is null)
+{
+    <div class="empty">Pendaftaran tidak ditemukan. <a href="kursus">Kembali ke kursus</a>.</div>
+}
+else
+{
+    <div class="section-head">
+        <div>
+            <h1 class="section-title">Instruksi Pembayaran</h1>
+            <p class="section-sub">Selesaikan pembayaran untuk mengaktifkan kursusmu.</p>
+        </div>
+    </div>
+
+    <div class="two-col mt-2">
+        <div class="card">
+            <h3>Detail Pendaftaran</h3>
+            <div class="list-item"><span class="muted">Nama</span><br /><strong>@_registration.Name</strong></div>
+            <div class="list-item"><span class="muted">Metode</span><br /><strong>@MethodLabel(_registration.PaymentMethod)</strong></div>
+            <div class="list-item"><span class="muted">Mulai Kursus</span><br /><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></div>
+            <div class="list-item"><span class="muted">Jumlah</span><br /><span class="price">Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span></div>
+        </div>
+
+        <div class="card">
+            <h3>@MethodLabel(_registration.PaymentMethod)</h3>
+
+            @if (_registration.PaymentMethod == "transfer")
+            {
+                <div class="payment-box">
+                    <div class="list-item"><strong>BCA</strong><br /><span class="muted">1234-5678-901</span></div>
+                    <div class="list-item"><strong>BNI</strong><br /><span class="muted">9876-5432-100</span></div>
+                    <div class="list-item"><strong>a.n. Kemudi.id</strong></div>
+                    <p class="muted mt-1">Transfer sesuai jumlah di atas, lalu konfirmasi di bawah.</p>
+                </div>
+            }
+            else if (_registration.PaymentMethod == "e-wallet")
+            {
+                <div class="payment-box flex">
+                    <div class="qris">QRIS<br />Kemudi.id</div>
+                    <div>
+                        <strong>QRIS / E-Wallet</strong>
+                        <div class="muted">Scan QR pada aplikasi dompet digital Anda.</div>
+                        <div class="mt-1 muted">OVO / GoPay / Dana: <strong>0812-3456-7890</strong></div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="payment-box">
+                    <p>Bayar di tempat saat verifikasi pada tanggal:</p>
+                    <p><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></p>
+                    <p class="muted">Jumlah: <strong>Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</strong></p>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <div class="error-box mt-2">@_error</div>
+            }
+
+            <div class="flex mt-2">
+                <button class="btn btn-success" disabled="@_busy" @onclick="ConfirmAsync">@(_busy ? "Memproses..." : "Saya sudah bayar")</button>
+                <a class="btn btn-outline" href="kursus">Batalkan</a>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery] public string? Registration { get; set; }
+    [SupplyParameterFromQuery] public string? Method { get; set; }
+
+    private CourseRegistrationDto? _registration;
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+
+    private static string MethodLabel(string method) => method switch
+    {
+        "transfer" => "Transfer Bank",
+        "e-wallet" => "E-Wallet / QRIS",
+        "cash" => "Bayar di Tempat",
+        _ => method
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Registration))
+        {
+            _loading = false;
+            return;
+        }
+
+        _registration = await Api.GetAsync<CourseRegistrationDto>($"/api/course-registration/{Registration}");
+        _loading = false;
+    }
+
+    private async Task ConfirmAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            var method = Method ?? _registration?.PaymentMethod ?? "transfer";
+            var result = await Api.PostAsync<PaymentRequest, PaymentDto>(
+                "/api/payment",
+                new PaymentRequest(Registration!, method, "konfirmasi-online"));
+
+            if (result is null)
+            {
+                _error = "Konfirmasi gagal. Silakan coba lagi.";
+                return;
+            }
+
+            Nav.NavigateTo("/dashboard", forceLoad: true);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

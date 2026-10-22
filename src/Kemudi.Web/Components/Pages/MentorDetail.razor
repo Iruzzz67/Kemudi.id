@@ -1,0 +1,61 @@
+@page "/kursus/mentor/{Slug}"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+
+@if (_mentor is null)
+{
+    <div class="loading">Memuat profil mentor...</div>
+}
+else
+{
+    <div class="detail-hero">
+        <span class="avatar" style="width:64px;height:64px;font-size:1.25rem;background:@_mentor.AvatarColor">@_mentor.Initials</span>
+        <div>
+            <h1>@_mentor.Name</h1>
+            <p>@_mentor.Title · ★ @_mentor.Rating.ToString("0.0") · @_mentor.ExperienceYears tahun pengalaman</p>
+        </div>
+    </div>
+
+    <p>@_mentor.Bio</p>
+
+    <div class="grid grid-2 mt-2">
+        <div class="card">
+            <h3>Sertifikasi</h3>
+            @foreach (var c in _mentor.Portfolio.Certifications)
+            {
+                <div class="list-item">✓ @c</div>
+            }
+        </div>
+        <div class="card">
+            <h3>Prestasi</h3>
+            @foreach (var a in _mentor.Portfolio.Achievements)
+            {
+                <div class="list-item">🏆 @a</div>
+            }
+        </div>
+    </div>
+
+    <div class="card mt-2">
+        <h3>Testimoni Murid</h3>
+        @foreach (var t in _mentor.Portfolio.Testimonials)
+        {
+            <blockquote class="quote">"@t.Quote" <br /><span class="muted">— @t.Name</span></blockquote>
+        }
+    </div>
+
+    <div class="mt-3">
+        <a class="btn btn-primary" href="kursus/personal?mentor=@_mentor.Id">Lanjutkan Pendaftaran</a>
+        <a class="btn btn-outline" href="kursus">Kembali ke Kursus</a>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+    private MentorDto? _mentor;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _mentor = await Api.GetAsync<MentorDto>($"/api/mentors/{Slug}");
+    }
+}

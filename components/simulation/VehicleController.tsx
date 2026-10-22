@@ -2,13 +2,16 @@
 
 import { CuboidCollider, RigidBody, RapierRigidBody } from "@react-three/rapier";
 import { useFrame } from "@react-three/fiber";
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
+import { RectObstacle, rectCollides, removeObstacle, setObstacle } from "@/lib/obstacles";
 import { VehicleConfig, pivotHeightOf } from "@/lib/vehicles";
 import { VehicleMesh } from "./VehicleMesh";
-import { useKeyboard } from "./useKeyboard";
+import { VehicleLights } from "./VehicleLights";
+import { vehicleGearEdges } from "./inputEdges";
 import { useSimStore } from "@/store/simStore";
-import { FINISH_Z, ROAD_HALF_WIDTH, START_Z, distanceToRoadCenterline } from "@/lib/track";
+import { FINISH_Z, PAR_TIME_S, ROAD_HALF_WIDTH, distanceToRoadCenterline } from "@/lib/track";
+import { isInPotholeZone } from "@/lib/scenery";
 import { VehicleTransform } from "./transform";
 import { vehicleAudio } from "./audio/vehicleAudio";
 import { REVERSE, NEUTRAL, topSpeedInGear, accelInGear, autoGearFor } from "@/lib/transmission";
@@ -16,11 +19,38 @@ import { createSteeringState, updateSteering, createYawState, stepYaw } from "@/
 
 const OFF_ROAD_FRICTION_MULT = 2.2;
 const OFF_ROAD_MAX_SPEED_MULT = 0.4;
+// Zona lubang/area jalan rusak: kecepatan & handling terganggu (bukan stop).
+const POTHOLE_SPEED_MULT = 0.55;
+const POTHOLE_FRICTION_MULT = 1.7;
 const OVER_REV_SHIFT_TOLERANCE = 1.08;
 const STOP_THRESHOLD = 0.5; // m/s, "basically stopped" for gear-direction changes
 const ANTI_ROLL_BASELINE = 5000; // reference point where antiRollForce has no extra effect
 const HANDBRAKE_DAMP_RATE = 6; // 1/s, how hard the handbrake fights any speed
 const HANDBRAKE_WARN_COOLDOWN_MS = 2500;
+// Solid-collision stepping: the vehicle is kinematic, so Rapier never pushes
+// it back — the per-frame move is walked in substeps and the vehicle stops
+// flush against the first solid obstacle (pedestrian, pole, ...). Eight
+// substeps keep the maximum one-frame overshoot under ~5cm at top speed.
+const COLLISION_SUBSTEPS = 8;
+const SELF_OBSTACLE_ID = "player-vehicle";
+// Temp reuse: hindari `new THREE.Quaternion/Vector3` per-frame di loop fisik.
+const Y_UP = new THREE.Vector3(0, 1, 0);
+const FRAME_QUAT = new THREE.Quaternion();
+// Akumulasi HUD 10 Hz: speed/elapsed/gear hanya didorong ke store tiap 100 ms
+// agar Hud tidak re-render 60 fps; timer tetap akurat karena diakumulasi.
+const HUD_PUSH_MS = 100;
+
+function vehicleRect(config: VehicleConfig, x: number, z: number, yaw: number): RectObstacle {
+  return {
+    shape: "rect",
+    kind: "vehicle",
+    x,
+    z,
+    yaw,
+    halfW: config.dimensions.width / 2,
+    halfL: config.dimensions.length / 2,
+  };
+}
 
 export function VehicleController({
   config,
@@ -29,7 +59,6 @@ export function VehicleController({
   config: VehicleConfig;
   transform: VehicleTransform;
 }) {
-  const { keys, consumeEdge } = useKeyboard();
   const rigidBody = useRef<RapierRigidBody>(null);
   const visualRoot = useRef<THREE.Group>(null);
   const visualGroup = useRef<THREE.Group>(null);
@@ -50,10 +79,30 @@ export function VehicleController({
   const handbrakeLastWarnAt = useRef(0);
   const wasOffRoad = useRef(false);
   const hasFinished = useRef(false);
+  const hasHitPedestrian = useRef(false);
+  // Rintangan yang sudah dihitung sebagai hit (satu kali per objek per run)
+  // — cone/barrier/kendaraan parkir tidak boleh menambah skor berulang kali
+  // selama kendaraan masih menempel di objek yang sama.
+  const hitObstacleIds = useRef(new Set<string>());
+  const lastHudPush = useRef(0);
+  const pendingElapsedMs = useRef(0);
+
+  // Unregister this vehicle's solid obstacle whenever it unmounts (phase
+  // flips to finished/failed) so the registry never holds a stale rect, and
+  // cut any still-honking horn so it can't linger after the drive.
+  useEffect(
+    () => () => {
+      removeObstacle(SELF_OBSTACLE_ID);
+      vehicleAudio.setHorn(false);
+    },
+    []
+  );
 
   const setSpeedKmh = useSimStore((s) => s.setSpeedKmh);
   const setIsOffRoad = useSimStore((s) => s.setIsOffRoad);
   const registerOffRoadEvent = useSimStore((s) => s.registerOffRoadEvent);
+  const registerObstacleHit = useSimStore((s) => s.registerObstacleHit);
+  const registerAIVehicleHit = useSimStore((s) => s.registerAIVehicleHit);
   const tickElapsed = useSimStore((s) => s.tickElapsed);
   const finish = useSimStore((s) => s.finish);
   const phase = useSimStore((s) => s.phase);
@@ -67,36 +116,61 @@ export function VehicleController({
   const registerClutchMistake = useSimStore((s) => s.registerClutchMistake);
   const stallEngine = useSimStore((s) => s.stallEngine);
   const raiseWarning = useSimStore((s) => s.raiseWarning);
+  const failSimulation = useSimStore((s) => s.failSimulation);
 
   useFrame((_, rawDelta) => {
+    // Keep the registry's copy of this vehicle's rect in sync every frame so
+    // pedestrians (and any other solid object) stop against it instead of
+    // walking through — the vehicle blocks them, and they block it back.
+    setObstacle(SELF_OBSTACLE_ID, vehicleRect(config, transform.position.x, transform.position.z, yaw.current));
+
     const body = rigidBody.current;
     if (!body || phase !== "driving") {
       vehicleAudio.silence();
+      vehicleAudio.setHorn(false);
+      vehicleGearEdges.clear();
+      return;
+    }
+
+    // The merged input snapshot published by InputManager each frame — the
+    // single source of truth whether the driver is on keyboard, VR controller,
+    // or a desktop gamepad.
+    const state = useSimStore.getState();
+    const vi = state.vehicleInput;
+
+    // Pause freezes the whole drive loop: no movement, no timer, no warnings.
+    if (state.paused) {
+      vehicleAudio.silence();
+      vehicleAudio.setHorn(false);
+      vehicleGearEdges.clear();
       return;
     }
 
     // Engine off (still in ignition ACC/ON/START, or stalled): the car is a
     // stationary shell — no movement, no timer, no engine note — until the
     // player actually starts it. Matches "mesin harus menyala dulu" in spec.
+    // The horn still works here (it runs off the battery, like a real car).
     if (!engineRunning) {
       vehicleAudio.silence();
+      vehicleAudio.setHorn(vi.horn);
       return;
     }
 
     const delta = Math.min(rawDelta, 0.05);
-    const k = keys.current;
-    const throttle = k.forward ? 1 : 0;
+    const throttle = vi.throttle;
     const throttleOn = throttle > 0;
-    const brakePedal = k.brake;
+    const brakePedal = vi.brake > 0.1;
+    const isClutchHeld = vi.clutch;
+    vehicleAudio.setHorn(vi.horn);
 
     // Clutch bookkeeping (manual only): ticks the checklist the first time
     // it's pressed, and — on release — stalls the engine if the driver let it
     // out fully, in gear, at a standstill, with no gas ("kopling dilepas
     // terlalu cepat saat mulai berjalan").
     if (transmissionMode === "manual") {
-      if (k.clutch) markClutchedOnce();
-      const justReleased = clutchWasHeld.current && !k.clutch;
-      clutchWasHeld.current = k.clutch;
+      if (isClutchHeld) markClutchedOnce();
+      const justReleased = clutchWasHeld.current && !isClutchHeld;
+      clutchWasHeld.current = isClutchHeld;
       if (justReleased && gear.current >= 0 && Math.abs(speed.current) < STOP_THRESHOLD && !throttleOn) {
         stallEngine("Mesin mati! Kopling dilepas terlalu cepat tanpa gas.");
         vehicleAudio.stallThud();
@@ -104,11 +178,13 @@ export function VehicleController({
         return;
       }
     } else {
-      clutchWasHeld.current = k.clutch;
+      clutchWasHeld.current = isClutchHeld;
     }
 
     const currentPos = transform.position;
     const offRoad = distanceToRoadCenterline(currentPos.x, currentPos.z) > ROAD_HALF_WIDTH;
+    // Zona lubang/jalan rusak (visual + efek handling di lib/scenery.ts).
+    const inPothole = isInPotholeZone(currentPos.x, currentPos.z);
 
     if (offRoad && !wasOffRoad.current) {
       registerOffRoadEvent();
@@ -116,8 +192,16 @@ export function VehicleController({
     wasOffRoad.current = offRoad;
     setIsOffRoad(offRoad);
 
-    const maxSpeed = offRoad ? config.maxSpeed * OFF_ROAD_MAX_SPEED_MULT : config.maxSpeed;
-    const friction = offRoad ? config.friction * OFF_ROAD_FRICTION_MULT : config.friction;
+    const maxSpeed = offRoad
+      ? config.maxSpeed * OFF_ROAD_MAX_SPEED_MULT
+      : inPothole
+        ? config.maxSpeed * POTHOLE_SPEED_MULT
+        : config.maxSpeed;
+    const friction = offRoad
+      ? config.friction * OFF_ROAD_FRICTION_MULT
+      : inPothole
+        ? config.friction * POTHOLE_FRICTION_MULT
+        : config.friction;
 
     let accelInput = 0;
     let rpmRatio = 0;
@@ -135,13 +219,15 @@ export function VehicleController({
       else vehicleAudio.stallThud();
     };
 
-    if (transmissionMode === "manual") {
-      const wantsShiftUp = consumeEdge("shiftUp");
-      const wantsShiftDown = consumeEdge("shiftDown");
-      const wantsReverse = consumeEdge("reverse");
+    // Gear edges are shared across modes — consume them once, up front.
+    const wantsShiftUp = vehicleGearEdges.delete("gearUp");
+    const wantsShiftDown = vehicleGearEdges.delete("gearDown");
+    const wantsReverse = vehicleGearEdges.delete("reverse");
+    const wantsNeutral = vehicleGearEdges.delete("neutral");
 
+    if (transmissionMode === "manual") {
       if (wantsShiftUp || wantsShiftDown) {
-        if (!k.clutch) {
+        if (!isClutchHeld) {
           rejectUngatedShift();
         } else {
           const dir = wantsShiftUp ? 1 : -1;
@@ -163,8 +249,15 @@ export function VehicleController({
         const canRequestReverse =
           (gear.current === NEUTRAL || gear.current === 0) && Math.abs(speed.current) < STOP_THRESHOLD;
         if (canRequestReverse) {
-          if (!k.clutch) rejectUngatedShift();
+          if (!isClutchHeld) rejectUngatedShift();
           else gear.current = REVERSE;
+        }
+      } else if (wantsNeutral) {
+        // Netral (N): only while basically stopped, still clutch-gated.
+        if (!isClutchHeld) {
+          rejectUngatedShift();
+        } else if (Math.abs(speed.current) < STOP_THRESHOLD) {
+          gear.current = NEUTRAL;
         }
       }
 
@@ -197,7 +290,7 @@ export function VehicleController({
       // forward/reverse drivetrain direction (like a PRND selector) while
       // nearly stopped; gear.current is mirrored to REVERSE purely so the
       // HUD's gearLabel() can show "R" the same way it does in manual mode.
-      if (consumeEdge("reverse") && Math.abs(speed.current) < STOP_THRESHOLD) {
+      if (wantsReverse && Math.abs(speed.current) < STOP_THRESHOLD) {
         reverseGearAuto.current = !reverseGearAuto.current;
       }
 
@@ -252,8 +345,7 @@ export function VehicleController({
     // while easing back toward center), then extra-smoothed — see
     // lib/vehicleDynamics.ts. Speed already makes the available angle
     // shrink (heavier at speed); downforce keeps more of it available.
-    const steerInput = (k.left ? 1 : 0) - (k.right ? 1 : 0);
-    const smoothedSteerAngle = updateSteering(steering.current, steerInput, speed.current, config, delta);
+    const smoothedSteerAngle = updateSteering(steering.current, vi.steer, speed.current, config, delta);
 
     // Visually turn the handlebar/front-wheel assembly (see GltfVehicleMesh)
     // to match — reusing the already-damped angle keeps it in lockstep with
@@ -290,13 +382,78 @@ export function VehicleController({
     const nextX = currentPos.x + forwardX * speed.current * delta + rightX * yawStep.lateralOffset;
     const nextZ = currentPos.z + forwardZ * speed.current * delta + rightZ * yawStep.lateralOffset;
 
-    const quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw.current);
+    const quat = FRAME_QUAT.setFromAxisAngle(Y_UP, yaw.current);
 
-    body.setNextKinematicTranslation({ x: nextX, y: 0, z: nextZ });
+    // Solid collision: walk the move in substeps and keep only the portion up
+    // to the first registered solid obstacle. The body is kinematic, so this
+    // explicit blocking is what keeps the vehicle from tunneling through
+    // poles, pedestrians, etc.
+    let finalX = nextX;
+    let finalZ = nextZ;
+    const moveX = nextX - currentPos.x;
+    const moveZ = nextZ - currentPos.z;
+    if (moveX !== 0 || moveZ !== 0) {
+      const rect = vehicleRect(config, 0, 0, yaw.current);
+      for (let i = 1; i <= COLLISION_SUBSTEPS; i++) {
+        const t = i / COLLISION_SUBSTEPS;
+        rect.x = currentPos.x + moveX * t;
+        rect.z = currentPos.z + moveZ * t;
+        const hit = rectCollides(rect, { ignoreId: SELF_OBSTACLE_ID });
+        if (hit) {
+          const { id, obstacle } = hit;
+          // Contacting a pedestrian is an accident — same outcome the
+          // pedestrian's own sensor used to enforce, now guaranteed by the
+          // blocking itself (the vehicle never ghosts through first).
+          if (obstacle.kind === "pedestrian" && !hasHitPedestrian.current) {
+            hasHitPedestrian.current = true;
+            vehicleAudio.silence();
+            failSimulation("Latihan dihentikan karena terjadi kecelakaan dengan pejalan kaki.");
+          }
+          // Setiap rintangan yang disentuh dihitung SATU KALI per objek per
+          // run (dedupe by id) — cone/barrier/kendaraan parkir tidak boleh
+          // menambah skor berulang kali selama kendaraan masih menempel.
+          // Damping kecepatan juga hanya diterapkan sekali di sini: jika
+          // diterapkan per substep, sebuah cone yang dilalui kendaraan
+          // (bodies menimpa rintangan selama puluhan substep) akan
+          // mengerem kendaraan hampir berhenti total.
+          if (obstacle.kind !== "pedestrian" && !hitObstacleIds.current.has(id)) {
+            hitObstacleIds.current.add(id);
+            if (id.startsWith("ai-")) {
+              // Tabrakan dengan kendaraan AI: pelanggaran berat + kerusakan kendaraan
+              registerAIVehicleHit();
+              speed.current = THREE.MathUtils.damp(speed.current, 0, 10, delta);
+            } else {
+              registerObstacleHit();
+              if (obstacle.soft) {
+                // Rintangan lunak (cone lalu lintas, kios pedagang): kendaraan
+                // menerobos dengan sedikit kehilangan kecepatan — bukan tembok.
+                speed.current *= 0.85;
+              } else {
+                // Objek solid (barrier, tiang, kendaraan parkir): berhenti rapat
+                // di tepinya. Settle the displayed speed toward 0 instead of
+                // revving at full speed while glued in place.
+                speed.current = THREE.MathUtils.damp(speed.current, 0, 8, delta);
+              }
+            }
+          }
+          // Rintangan lunak: terus maju (tanpa break). Rintangan solid:
+          // berhenti di tepinya (finalX/finalZ tetap pada substep terakhir
+          // yang bebas).
+          if (!obstacle.soft) break;
+        }
+        finalX = rect.x;
+        finalZ = rect.z;
+      }
+    }
+
+    body.setNextKinematicTranslation({ x: finalX, y: 0, z: finalZ });
     body.setNextKinematicRotation(quat);
 
-    transform.position.set(nextX, 0, nextZ);
+    transform.position.set(finalX, 0, finalZ);
     transform.quaternion.copy(quat);
+
+    // Keep the registered rect glued to the pose we just committed to.
+    setObstacle(SELF_OBSTACLE_ID, vehicleRect(config, finalX, finalZ, yaw.current));
 
     // Drive the VISIBLE model directly from the transform we just computed,
     // instead of letting it come from RigidBody's own child-mesh sync. That
@@ -370,9 +527,19 @@ export function VehicleController({
       visualGroup.current.position.y = pivotHeightOf(config) + suspensionOffset.current;
     }
 
-    setSpeedKmh(Math.abs(speed.current) * 3.6);
-    tickElapsed(delta * 1000);
-    setGearState(gear.current, rpmRatio);
+    // Throttle 10 Hz: dorong speed/elapsed/gear ke store tiap 100 ms agar Hud
+    // tidak re-render 60 fps; timer tetap akurat karena delta diakumulasi.
+    pendingElapsedMs.current += delta * 1000;
+    const hudNow = performance.now();
+    if (hudNow - lastHudPush.current >= HUD_PUSH_MS) {
+      lastHudPush.current = hudNow;
+      setSpeedKmh(Math.abs(speed.current) * 3.6);
+      if (pendingElapsedMs.current > 0) {
+        tickElapsed(pendingElapsedMs.current);
+        pendingElapsedMs.current = 0;
+      }
+      setGearState(gear.current, rpmRatio);
+    }
 
     // Skid noise is reserved for genuinely aggressive inputs — steering pushed
     // past ~70% of full lock at speed, hard braking, or the tire-grip model
@@ -392,20 +559,33 @@ export function VehicleController({
       skidIntensity: Math.max(corneringSlip, brakingSlip, actualGripSlip),
     });
 
-    if (!hasFinished.current && nextZ <= FINISH_Z) {
+    if (!hasFinished.current && finalZ <= FINISH_Z) {
       hasFinished.current = true;
       // Scene/VehicleController unmounts the instant phase flips to
       // "finished" (SimulationApp swaps to <FinishedScreen>), so this is the
       // last chance this component gets to run — silence here, synchronously,
       // before that unmount happens, or the engine note is left hanging.
       vehicleAudio.silence();
-      const state = useSimStore.getState();
-      const elapsedS = state.elapsedMs / 1000;
-      const parTime = 45;
-      const timePenalty = Math.max(0, elapsedS - parTime) * 1;
+      vehicleAudio.setHorn(false);
+      // Flush sisa akumulasi timer agar skor waktu finish akurat.
+      if (pendingElapsedMs.current > 0) {
+        tickElapsed(pendingElapsedMs.current);
+        pendingElapsedMs.current = 0;
+      }
+      setSpeedKmh(Math.abs(speed.current) * 3.6);
+      setGearState(gear.current, rpmRatio);
+      const finishState = useSimStore.getState();
+      const elapsedS = finishState.elapsedMs / 1000;
+      const timePenalty = Math.max(0, elapsedS - PAR_TIME_S) * 1;
       const score = Math.max(
         0,
-        Math.round(100 - state.violations * 8 - state.offRoadCount * 5 - timePenalty)
+        Math.round(
+          100 -
+            finishState.violations * 8 -
+            finishState.offRoadCount * 5 -
+            finishState.obstacleHits * 3 -
+            timePenalty
+        )
       );
       finish(score);
     }
@@ -421,7 +601,8 @@ export function VehicleController({
         ref={rigidBody}
         type="kinematicPosition"
         colliders={false}
-        position={[0, 0, START_Z]}
+        position={transform.position}
+        rotation={new THREE.Euler().setFromQuaternion(transform.quaternion)}
         name="vehicle"
       >
         <CuboidCollider
@@ -432,10 +613,13 @@ export function VehicleController({
           ]}
         />
       </RigidBody>
-      <group ref={visualRoot} position={[0, 0, START_Z]}>
+      <group ref={visualRoot} position={transform.position} quaternion={transform.quaternion}>
         <Suspense fallback={null}>
-          <VehicleMesh config={config} leanRef={visualGroup} steerRef={steerGroups} />
+          <VehicleMesh config={config} leanRef={visualGroup} steerRef={steerGroups} speedRef={speed} />
         </Suspense>
+        {/* Headlights / high beam / signal blinkers live on the visible model
+            so they follow the exact same pose the camera sees. */}
+        <VehicleLights config={config} />
       </group>
     </>
   );

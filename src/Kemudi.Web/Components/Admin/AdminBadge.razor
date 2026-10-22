@@ -1,0 +1,30 @@
+@code {
+    [Parameter, EditorRequired] public string? Value { get; set; }
+    [Parameter] public string? Text { get; set; }
+
+    private string Label => Text ?? (Value ?? "") switch
+    {
+        "pending" or "PENDING" => "Pending",
+        "paid" or "PAID" => "Dikonfirmasi",
+        "rejected" or "REJECTED" or "Cancelled" or "CANCELLED" => "Ditolak",
+        "active" or "ACTIVE" => "Aktif",
+        "inactive" or "INACTIVE" => "Nonaktif",
+        "AVAILABLE" => "Tersedia",
+        "FULL" => "Penuh",
+        "COMPLETED" => "Selesai",
+        "Admin" or "ADMIN" => "Admin",
+        "User" or "USER" => "User",
+        _ => Value ?? ""
+    };
+
+    private string Class => (Value ?? "").ToUpperInvariant() switch
+    {
+        "PENDING" or "INACTIVE" => "badge-amber",
+        "PAID" or "ACTIVE" or "COMPLETED" or "ADMIN" or "AVAILABLE" => "badge-green",
+        "REJECTED" or "CANCELLED" => "badge-red",
+        "FULL" => "badge-blue",
+        _ => "badge-gray"
+    };
+}
+
+<span class="badge @Class">@Label</span>

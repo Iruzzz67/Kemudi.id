@@ -1,0 +1,164 @@
+@page "/admin/pengguna"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Manajemen Pengguna</h1>
+<p class="page-sub">Kelola akun pengguna — ubah role, aktifkan/nonaktifkan, dan lihat detail.</p>
+
+@if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+
+<div class="admin-panel">
+    <div class="admin-toolbar">
+        <input type="text" placeholder="Cari nama / email..." value="@_q" @oninput="OnSearch" />
+        <select value="@_roleFilter" @onchange="OnFilter">
+            <option value="">Semua Role</option>
+            <option value="ADMIN">Admin</option>
+            <option value="USER">User</option>
+        </select>
+        <span class="spacer"></span>
+        <span class="admin-count">@_users.Count pengguna</span>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Registrasi</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var u in _users)
+                {
+                    <tr>
+                        <td><strong>@(u.Name ?? "—")</strong>@(u.Id == _me?.Id ? " (akun Anda)" : "")</td>
+                        <td>@u.Email</td>
+                        <td>
+                            <select value="@(u.IsAdmin ? "ADMIN" : "USER")"
+                                    disabled="@(_busy || u.Id == _me?.Id)"
+                                    @onchange="@((e) => SetRole(u, e.Value?.ToString() ?? ""))"
+                                    class="admin-select">
+                                <option value="USER">User</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
+                        </td>
+                        <td><AdminBadge Value="@(u.IsActive ? "active" : "inactive")" /></td>
+                        <td>@u.Registrations</td>
+                        <td>
+                            <div class="admin-actions">
+                                <button class="btn btn-outline" @onclick="() => ShowDetail(u)">Detail</button>
+                                @if (u.Id != _me?.Id)
+                                {
+                                    <button class="btn btn-outline" disabled="@_busy" @onclick="() => ToggleActive(u)">
+                                        @(u.IsActive ? "Nonaktifkan" : "Aktifkan")
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (_users.Count == 0)
+    {
+        <p class="empty">Tidak ada pengguna.</p>
+    }
+</div>
+
+@if (_detail is not null)
+{
+    <div class="admin-modal">
+        <div class="admin-modal-box">
+            <h3>Detail Pengguna</h3>
+            <dl class="admin-dl">
+                <div><dt>Nama</dt><dd>@(_detail.Name ?? "—")</dd></div>
+                <div><dt>Email</dt><dd>@_detail.Email</dd></div>
+                <div><dt>Role</dt><dd><AdminBadge Value="@(_detail.IsAdmin ? "ADMIN" : "USER")" /></dd></div>
+                <div><dt>Status</dt><dd><AdminBadge Value="@(_detail.IsActive ? "active" : "inactive")" /></dd></div>
+                <div><dt>Registrasi</dt><dd>@_detail.CreatedAt.ToLocalTime().ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("id-ID"))</dd></div>
+                <div><dt>Riwayat Simulasi</dt><dd>@_detail.Attempts</dd></div>
+                <div><dt>Pendaftaran Kursus</dt><dd>@_detail.Registrations</dd></div>
+            </dl>
+            <div class="admin-actions" style="justify-content:flex-end;margin-top:1rem">
+                <button class="btn btn-outline" @onclick="CloseDetail">Tutup</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AdminUserDto> _users = new();
+    private AdminUserDetailDto? _detail;
+    private string _q = "";
+    private string _roleFilter = "";
+    private bool _busy;
+    private string? _error;
+    private AdminAccountDto? _me;
+
+    private async Task Load()
+    {
+        _error = null;
+        var query = new List<string>();
+        if (!string.IsNullOrWhiteSpace(_q)) query.Add($"q={Uri.EscapeDataString(_q.Trim())}");
+        if (!string.IsNullOrEmpty(_roleFilter)) query.Add($"role={_roleFilter}");
+        var path = "/api/admin/users" + (query.Count > 0 ? "?" + string.Join("&", query) : "");
+        _users = await Api.GetAsync<List<AdminUserDto>>(path) ?? new();
+    }
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        _q = e.Value?.ToString() ?? "";
+        _ = Load();
+    }
+
+    private void OnFilter(ChangeEventArgs e)
+    {
+        _roleFilter = e.Value?.ToString() ?? "";
+        _ = Load();
+    }
+
+    private async Task SetRole(AdminUserDto u, string role)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.PatchVoidAsync($"/api/admin/users/{u.Id}", new { role });
+        if (!result.Success) _error = result.Error;
+        await Load();
+        _busy = false;
+    }
+
+    private async Task ToggleActive(AdminUserDto u)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.PatchVoidAsync($"/api/admin/users/{u.Id}", new { isActive = !u.IsActive });
+        if (!result.Success) _error = result.Error;
+        await Load();
+        _busy = false;
+    }
+
+    private async Task ShowDetail(AdminUserDto u)
+    {
+        _detail = await Api.GetAsync<AdminUserDetailDto>($"/api/admin/users/{u.Id}");
+    }
+
+    private void CloseDetail() => _detail = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+
+        _me = await Api.GetAsync<AdminAccountDto>("/api/admin/auth/me");
+        await Load();
+    }
+}

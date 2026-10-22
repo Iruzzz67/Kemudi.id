@@ -3,20 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { useKeyboard } from "./useKeyboard";
 import { useSimStore } from "@/store/simStore";
 import { VehicleTransform } from "./transform";
+import { circleCollides } from "@/lib/obstacles";
 
 const WALK_SPEED = 2.4; // m/s
 const WALK_BACK_SPEED = 1.4; // m/s
 const TURN_RATE = 2.4; // rad/s
 const ENTER_RADIUS = 2.0; // m, how close to the driver door before "Masuk Kendaraan" appears
+// Horizontal radius of the character's solid footprint.
+const CHARACTER_RADIUS = 0.4;
 
 const UP_AXIS = new THREE.Vector3(0, 1, 0);
 
 function CharacterFigure() {
-  const [gltf, setGltf] = useState<any | null>(null);
+  const [gltf, setGltf] = useState<{ scene: THREE.Object3D } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -28,7 +31,7 @@ function CharacterFigure() {
       if (i >= paths.length) return;
       loader.load(
         paths[i],
-        (data) => {
+        (data: { scene: THREE.Object3D }) => {
           if (!mounted) return;
           setGltf(data);
         },
@@ -101,13 +104,19 @@ export function Character({
 
     let speed = 0;
     if (canMove) {
+      // VR/gamepad input (walking with a thumbstick) takes precedence over the
+      // keyboard while it is active; otherwise fall back to W/A/S/D. Read via
+      // getState() inside useFrame (no subscription) so the per-frame override
+      // updates never trigger a React re-render.
+      const ovr = useSimStore.getState().characterInputOverride;
       const k = keys.current;
-      const turn = (k.left ? 1 : 0) - (k.right ? 1 : 0);
+      const turn = ovr
+        ? (ovr.left ? 1 : 0) - (ovr.right ? 1 : 0)
+        : (k.left ? 1 : 0) - (k.right ? 1 : 0);
       heading.current += turn * TURN_RATE * delta;
-      // Reuses the vehicle's brake input (S/ArrowDown) as "walk backward" —
-      // same physical key, different meaning depending on whether the player
-      // is on foot or already in the driver's seat.
-      speed = k.forward ? WALK_SPEED : k.brake ? -WALK_BACK_SPEED : 0;
+      const forward = ovr ? ovr.forward : k.forward;
+      const back = ovr ? ovr.back : k.brake;
+      speed = forward ? WALK_SPEED : back ? -WALK_BACK_SPEED : 0;
     }
 
     // Written via .set() (never a direct `transform.position.x +=`) so the
@@ -117,7 +126,16 @@ export function Character({
     const forwardZ = -Math.cos(heading.current);
     const nextX = transform.position.x + forwardX * speed * delta;
     const nextZ = transform.position.z + forwardZ * speed * delta;
-    transform.position.set(nextX, 0, nextZ);
+
+    // Solid obstacles (parked car, traffic-light pole, pedestrians): don't
+    // walk through them. Turning in place stays allowed, and a spawn overlap
+    // (the wasInside case) lets the player walk out instead of being stuck.
+    const wasInside =
+      circleCollides(transform.position.x, transform.position.z, CHARACTER_RADIUS) !== null;
+    const willHit = circleCollides(nextX, nextZ, CHARACTER_RADIUS) !== null;
+    if (!willHit || wasInside) {
+      transform.position.set(nextX, 0, nextZ);
+    }
     transform.quaternion.setFromAxisAngle(UP_AXIS, heading.current);
     group.position.copy(transform.position);
     group.quaternion.copy(transform.quaternion);

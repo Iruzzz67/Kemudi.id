@@ -1,0 +1,128 @@
+@page "/admin/pembayaran"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Verifikasi Pembayaran</h1>
+<p class="page-sub">Verifikasi bukti pembayaran sebelum mengubah status.</p>
+
+@if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+
+<div class="admin-panel">
+    <div class="admin-toolbar">
+        <select value="@_statusFilter" @onchange="OnFilter">
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Berhasil</option>
+            <option value="cancelled">Ditolak</option>
+        </select>
+        <span class="admin-count">@_payments.Count transaksi</span>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="loading">Memuat data...</div>
+    }
+    else if (_payments.Count == 0)
+    {
+        <p class="empty">Tidak ada pembayaran.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Tanggal</th><th>Peserta</th><th>Metode</th><th>Nominal</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in _payments)
+                    {
+                        <tr>
+                            <td>@p.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                            <td><strong>@p.RegistrantName</strong><br /><span class="muted">@p.RegistrantEmail</span></td>
+                            <td>@PaymentMethodLabel(p.Method)</td>
+                            <td>@FormatRp(p.Amount)</td>
+                            <td><AdminBadge Value="@p.Status" /></td>
+                            <td>
+                                <div class="admin-actions">
+                                    @if (p.Status != "paid")
+                                    {
+                                        <button class="btn btn-success" disabled="@_busy" @onclick="@(() => SetStatus(p, "paid"))">Verifikasi</button>
+                                    }
+                                    @if (p.Status != "cancelled" && p.Status != "paid")
+                                    {
+                                        <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" disabled="@_busy" @onclick="@(() => SetStatus(p, "cancelled"))">Tolak</button>
+                                    }
+                                    @if (p.Status == "paid")
+                                    {
+                                        <button class="btn btn-outline" disabled="@_busy" @onclick="@(() => SetStatus(p, "pending"))">Buka Kembali</button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<AdminPaymentDto> _payments = new();
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+    private string _statusFilter = "";
+
+    private async Task SetStatus(AdminPaymentDto p, string status)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.PatchVoidAsync($"/api/admin/payments/{p.Id}", new { status });
+        if (!result.Success) _error = result.Error;
+        await Load();
+        _busy = false;
+    }
+
+    private void OnFilter(ChangeEventArgs e)
+    {
+        _statusFilter = e.Value?.ToString() ?? "";
+        _ = Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        _error = null;
+        var path = "/api/admin/payments" + (string.IsNullOrEmpty(_statusFilter) ? "" : $"?status={_statusFilter}");
+        _payments = await Api.GetAsync<List<AdminPaymentDto>>(path) ?? new();
+        _loading = false;
+    }
+
+    private static string FormatRp(decimal amount) => $"Rp {amount.ToString("N0", CultureInfo.GetCultureInfo("id-ID"))}";
+
+    private static string PaymentMethodLabel(string method) => method switch
+    {
+        "transfer" => "Transfer Bank",
+        "e-wallet" => "E-Wallet / QRIS",
+        "cash" => "Bayar di Tempat",
+        _ => method
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+        await Load();
+    }
+}

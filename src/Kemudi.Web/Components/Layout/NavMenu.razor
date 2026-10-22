@@ -1,0 +1,27 @@
+@using Microsoft.AspNetCore.Components.Routing
+@inject Kemudi.Web.Services.AuthService Auth
+
+<header class="kemudi-navbar">
+    <div class="container navbar-inner">
+        <NavLink class="navbar-brand" href="" Match="NavLinkMatch.All">
+            🚗 <strong>Kemudi.id</strong>
+        </NavLink>
+
+        <nav class="navbar-links">
+            <NavLink class="nav-link" href="">Beranda</NavLink>
+            <NavLink class="nav-link" href="simulasi">Simulasi</NavLink>
+            <NavLink class="nav-link" href="kursus">Kursus</NavLink>
+            <NavLink class="nav-link" href="materi">Materi</NavLink>
+            @if (Auth.IsAuthenticated)
+            {
+                <NavLink class="nav-link" href="dashboard">Dashboard</NavLink>
+                <a class="btn btn-outline" href="/logout">Keluar</a>
+            }
+            else
+            {
+                <NavLink class="nav-link" href="login">Masuk</NavLink>
+                <NavLink class="btn btn-primary" href="register">Daftar</NavLink>
+            }
+        </nav>
+    </div>
+</header>

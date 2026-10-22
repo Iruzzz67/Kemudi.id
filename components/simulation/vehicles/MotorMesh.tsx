@@ -20,7 +20,7 @@ export function MotorMesh({
   const hubY = wheelRadius;
 
   return (
-    <group ref={leanRef} rotation={[0, Math.PI, 0]}>
+    <group ref={leanRef} rotation={[0, 0, 0]}>
       <mesh castShadow position={[0, hubY * 1.15, 0]}>
         <boxGeometry args={[w * 0.55, h * 0.26, l * 0.22]} />
         <meshStandardMaterial color="#27272a" metalness={0.4} roughness={0.5} />

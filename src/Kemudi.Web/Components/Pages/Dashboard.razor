@@ -1,0 +1,105 @@
+@page "/dashboard"
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+@if (!Auth.IsAuthenticated)
+{
+    <div class="text-center" style="padding:3rem 0">
+        <h1 class="section-title">Dashboard</h1>
+        <p class="muted mt-1">Silakan <a href="login">masuk</a> untuk melihat progres latihanmu.</p>
+    </div>
+}
+else if (_loading)
+{
+    <div class="loading">Memuat dashboard...</div>
+}
+else
+{
+    <h1 class="section-title">Dashboard</h1>
+    <p class="section-sub">Halo, @_email. Ini progres latihanmu.</p>
+
+    <div class="stats-grid mt-3">
+        <div class="stat-card">
+            <div class="stat-label">Total Percobaan</div>
+            <div class="stat-value">@_attempts.Count</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Skor Terbaik</div>
+            <div class="stat-value">@(_attempts.Count == 0 ? "-" : _attempts.Max(a => a.Score).ToString())</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Rata-rata Skor</div>
+            <div class="stat-value">@(_attempts.Count == 0 ? "-" : Math.Round(_attempts.Average(a => a.Score)).ToString())</div>
+        </div>
+    </div>
+
+    <div class="mt-4 flex-between">
+        <h2 class="section-title" style="font-size:1.25rem">Riwayat Latihan</h2>
+        <a class="btn btn-primary" href="simulasi">Latihan lagi</a>
+    </div>
+
+    @if (_attempts.Count == 0)
+    {
+        <p class="empty">Belum ada percobaan. Yuk mulai simulasi pertamamu!</p>
+    }
+    else
+    {
+        <div class="table-wrap card mt-2">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Kendaraan</th>
+                        <th>Skor</th>
+                        <th>Waktu</th>
+                        <th>Pelanggaran</th>
+                        <th>Keluar Jalur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in _attempts)
+                    {
+                        <tr>
+                            <td>@a.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                            <td>@VehicleLabel(a.VehicleType)</td>
+                            <td><strong>@a.Score</strong></td>
+                            <td>@((a.TimeTakenMs / 1000.0).ToString("0.0"))s</td>
+                            <td>@a.Violations</td>
+                            <td>@a.OffRoadCount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private List<SimulationAttemptDto> _attempts = new();
+    private bool _loading = true;
+    private string _email = "";
+
+    private static string VehicleLabel(string type) => type switch
+    {
+        "MOTOR" => "Motor",
+        "MOBIL" => "Mobil",
+        "TRUK" => "Truk",
+        _ => type
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated) { _loading = false; return; }
+
+        _attempts = await Api.GetAsync<List<SimulationAttemptDto>>("/api/progress") ?? new();
+
+        // Ambil profil user untuk sapaan di header dashboard.
+        var me = await Api.GetAsync<UserProfileDto>("/api/auth/me");
+        _email = me?.Email ?? "";
+        _loading = false;
+    }
+}

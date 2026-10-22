@@ -9,10 +9,12 @@ export function VehicleMesh({
   config,
   leanRef,
   steerRef,
+  speedRef,
 }: {
   config: VehicleConfig;
   leanRef: RefObject<THREE.Group | null>;
   steerRef: RefObject<THREE.Object3D[]>;
+  speedRef?: RefObject<number>;
 }) {
-  return <GltfVehicleMesh config={config} leanRef={leanRef} steerRef={steerRef} />;
+  return <GltfVehicleMesh config={config} leanRef={leanRef} steerRef={steerRef} speedRef={speedRef} />;
 }

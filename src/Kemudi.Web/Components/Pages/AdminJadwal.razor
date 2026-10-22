@@ -1,0 +1,194 @@
+@page "/admin/jadwal"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Jadwal Kursus</h1>
+<p class="page-sub">Kelola jadwal kursus per mentor.</p>
+
+@if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+
+<div class="admin-panel">
+    <div class="admin-toolbar">
+        <span class="admin-count">@_schedules.Count jadwal</span>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" @onclick="NewSchedule">+ Tambah Jadwal</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Tanggal</th><th>Jam</th><th>Mentor</th><th>Kendaraan</th><th>Lokasi</th><th>Slot</th><th>Status</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in _schedules)
+                {
+                    <tr>
+                        <td>@s.Date.ToLocalTime().ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("id-ID"))</td>
+                        <td>@s.StartTime – @s.EndTime</td>
+                        <td>@s.MentorName</td>
+                        <td>@VehicleLabel(s.VehicleType)</td>
+                        <td>@s.Location</td>
+                        <td>@s.FilledSlots/@s.TotalSlots</td>
+                        <td><AdminBadge Value="@s.Status" /></td>
+                        <td>
+                            <div class="admin-actions">
+                                <button class="btn btn-outline" @onclick="() => EditSchedule(s)">Edit</button>
+                                <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" @onclick="() => DeleteSchedule(s)">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (_schedules.Count == 0)
+    {
+        <p class="empty">Belum ada jadwal.</p>
+    }
+</div>
+
+@if (_editing is not null)
+{
+    <div class="admin-modal">
+        <div class="admin-modal-box admin-modal-wide">
+            <h3>@(_editing.Id == Guid.Empty ? "Tambah Jadwal" : "Edit Jadwal")</h3>
+            <div class="form form-wide">
+                <div class="two-col">
+                    <div class="field"><label>Mentor</label>
+                        <select @bind="_form.MentorId">
+                            @foreach (var m in _mentors)
+                            {
+                                <option value="@m.Id">@m.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field"><label>Tanggal</label><input type="date" value="@_formDate" @onchange="@((e) => _formDate = e.Value?.ToString() ?? "")" /></div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Mulai</label><input type="time" value="@_form.StartTime" @onchange="@((e) => _form.StartTime = e.Value?.ToString() ?? "")" /></div>
+                    <div class="field"><label>Selesai</label><input type="time" value="@_form.EndTime" @onchange="@((e) => _form.EndTime = e.Value?.ToString() ?? "")" /></div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Kendaraan</label>
+                        <select @bind="_form.VehicleType">
+                            <option value="MOTOR">Motor</option>
+                            <option value="MOBIL">Mobil</option>
+                            <option value="TRUK">Truk</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Lokasi</label><input @bind="_form.Location" /></div>
+                </div>
+                <div class="two-col">
+                    <div class="field"><label>Total Slot</label><input type="number" @bind="_form.TotalSlots" /></div>
+                    <div class="field"><label>Slot Terisi</label><input type="number" @bind="_form.FilledSlots" /></div>
+                </div>
+                <div class="field"><label>Status</label>
+                    <select @bind="_form.Status">
+                        <option value="AVAILABLE">Tersedia</option>
+                        <option value="FULL">Penuh</option>
+                        <option value="CANCELLED">Dibatalkan</option>
+                        <option value="COMPLETED">Selesai</option>
+                    </select>
+                </div>
+                <div class="admin-actions" style="justify-content:flex-end">
+                    <button class="btn btn-outline" @onclick="CancelEdit">Batal</button>
+                    <button class="btn btn-primary" disabled="@_busy" @onclick="SaveSchedule">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AdminScheduleDto> _schedules = new();
+    private List<AdminMentorDto> _mentors = new();
+    private AdminScheduleDto? _editing;
+    private bool _busy;
+    private string? _error;
+    private string _formDate = DateTime.Today.ToString("yyyy-MM-dd");
+
+    private AdminScheduleUpsertRequest _form = new(
+        Guid.Empty, DateTime.Today, "08:00", "10:00", "MOTOR", "", 4, 0, "AVAILABLE");
+
+    private static string VehicleLabel(string type) => type switch
+    {
+        "MOTOR" => "Motor",
+        "MOBIL" => "Mobil",
+        "TRUK" => "Truk",
+        _ => type
+    };
+
+    private void NewSchedule()
+    {
+        _editing = new AdminScheduleDto(Guid.Empty, Guid.Empty, "", DateTime.Today, "08:00", "10:00", "MOTOR", "", 4, 0, "AVAILABLE");
+        _form = new AdminScheduleUpsertRequest(
+            _mentors.FirstOrDefault()?.Id ?? Guid.Empty, DateTime.Today,
+            "08:00", "10:00", "MOTOR", "", 4, 0, "AVAILABLE");
+        _formDate = DateTime.Today.ToString("yyyy-MM-dd");
+    }
+
+    private void EditSchedule(AdminScheduleDto s)
+    {
+        _editing = s;
+        _form = new AdminScheduleUpsertRequest(
+            s.MentorId, s.Date, s.StartTime, s.EndTime, s.VehicleType,
+            s.Location, s.TotalSlots, s.FilledSlots, s.Status);
+        _formDate = s.Date.ToString("yyyy-MM-dd");
+    }
+
+    private void CancelEdit() => _editing = null;
+
+    private async Task SaveSchedule()
+    {
+        if (!DateTime.TryParse(_formDate, out var date)) date = DateTime.Today;
+        _form.Date = date;
+
+        _busy = true;
+        _error = null;
+        (bool Success, string? Error) result =
+            _editing?.Id == Guid.Empty
+                ? await Api.PostVoidAsync("/api/admin/schedules", _form)
+                : await Api.PutVoidAsync($"/api/admin/schedules/{_editing!.Id}", _form);
+        if (!result.Success) _error = result.Error;
+        else
+        {
+            _editing = null;
+            await Load();
+        }
+        _busy = false;
+    }
+
+    private async Task DeleteSchedule(AdminScheduleDto s)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.DeleteVoidAsync($"/api/admin/schedules/{s.Id}");
+        if (!result.Success) _error = result.Error;
+        else await Load();
+        _busy = false;
+    }
+
+    private async Task Load()
+    {
+        _schedules = await Api.GetAsync<List<AdminScheduleDto>>("/api/admin/schedules") ?? new();
+        _mentors = await Api.GetAsync<List<AdminMentorDto>>("/api/admin/mentors") ?? new();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+        await Load();
+    }
+}
