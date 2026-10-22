@@ -18,6 +18,12 @@ namespace Kemudi.Simulation.Transmission
         public bool IsNeutral => CurrentGear == Neutral;
         public string GearLabel => CurrentGear == Reverse ? "R" : CurrentGear == Neutral ? "N" : (CurrentGear + 1).ToString();
 
+        /// <summary>
+        /// Wire konfigurasi kendaraan — dipakai scene bootstrap (komponen dibuat
+        /// saat runtime sehingga tidak bisa di-assign lewat Inspector).
+        /// </summary>
+        public void SetConfig(Vehicles.VehicleConfig vehicleConfig) => config = vehicleConfig;
+
         public abstract void ShiftUp(EngineController engine);
         public abstract void ShiftDown(EngineController engine);
         public abstract void RequestReverse(EngineController engine);

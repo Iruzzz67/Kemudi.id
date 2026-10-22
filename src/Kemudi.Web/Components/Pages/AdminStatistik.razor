@@ -14,7 +14,7 @@
 {
     <div class="loading">Memuat statistik...</div>
 }
-else if (_stats is not null)
+else
 {
     <h2 style="margin-top:1.5rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b">Statistik Pengguna</h2>
     <div class="admin-cards">
@@ -79,8 +79,8 @@ else if (_stats is not null)
     private AdminStatsDto? _stats;
     private bool _loading = true;
 
-    private int MaxVehicle => _stats?.AttemptsByVehicle is { Length: > 0 } arr
-        ? arr.Max(p => p.Value)
+    private int MaxVehicle => _stats?.AttemptsByVehicle.Length > 0
+        ? _stats.AttemptsByVehicle.Max(p => p.Value)
         : 1;
 
     private static int MiniBar(int value, int max) => max <= 0 ? 4 : Math.Max(4, (int)(value * 100.0 / max));

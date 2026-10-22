@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Kemudi.Simulation.Rules
@@ -18,7 +19,7 @@ namespace Kemudi.Simulation.Rules
             WrongWay,           // melawan arus
             Collision,          // menabrak
             NoSignal,           // tidak memakai sein saat berbelok
-            ObstacleHit         // menabrak rintangan lintasan (§62: obstacleHits)
+            ObstacleHit         // menabrak rintangan lintasan (cone/barrier/kendaraan parkir)
         }
 
         public readonly struct Violation
@@ -39,21 +40,28 @@ namespace Kemudi.Simulation.Rules
         public event Action<Violation>? ViolationOccurred;
         public int Count { get; private set; }
 
-        // Hitungan per tipe — dipakai laporan hasil (§62): obstacles dan
-        // off-road dilaporkan terpisah dari pelanggaran aturan lalu lintas.
-        private readonly System.Collections.Generic.Dictionary<ViolationType, int> _counts = new();
+        private readonly Dictionary<ViolationType, int> _byType = new();
 
-        /// <summary>Jumlah kejadian untuk satu tipe (0 bila belum pernah terjadi).</summary>
-        public int CountOf(ViolationType type) => _counts.TryGetValue(type, out var value) ? value : 0;
+        /// <summary>Jumlah pelanggaran per tipe — dipakai laporan hasil (§62).</summary>
+        public int CountOf(ViolationType type) =>
+            _byType.TryGetValue(type, out var count) ? count : 0;
 
-        /// <summary>Mulai percobaan baru: bersihkan semua catatan.</summary>
+        /// <summary>
+        /// Reset sebelum percobaan baru — dipanggil SimulationManager.BeginPreDrive
+        /// agar laporan hasil (§62) tidak terakumulasi antar percobaan.
+        /// </summary>
         public void Reset()
         {
             Count = 0;
-            _counts.Clear();
+            _byType.Clear();
         }
 
         /// <summary>Daftarkan satu pelanggaran; severity default per tipe.</summary>
+        /// <remarks>
+        /// ObstacleHit sengaja severity 1 (bobot ringan): penalti skornya dipotong
+        /// lewat ScoringSystem.AddObstacleHit (-3 poin, konsisten dengan web),
+        /// bukan lewat AddViolation(severity).
+        /// </remarks>
         public void Register(ViolationType type, Vector3 position, string? description = null)
         {
             var severity = type switch
@@ -65,7 +73,7 @@ namespace Kemudi.Simulation.Rules
             };
 
             Count++;
-            _counts[type] = CountOf(type) + 1;
+            _byType[type] = (_byType.TryGetValue(type, out var existing) ? existing : 0) + 1;
             ViolationOccurred?.Invoke(new Violation(
                 type, severity, Time.time, position,
                 description ?? DefaultDescription(type)));

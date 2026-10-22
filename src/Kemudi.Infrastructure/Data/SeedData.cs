@@ -28,7 +28,7 @@ public static class SeedData
                 Description = "Lincah dan cepat, tapi sempit dan rawan oleng.",
                 Color = "#f97316",
                 Length = 1.8, Width = 0.6, Height = 1.1,
-                MaxSpeed = 26, ReverseMaxSpeed = 4, Acceleration = 9, Braking = 12,
+                MaxSpeed = 19.44, ReverseMaxSpeed = 4, Acceleration = 9, Braking = 12, // 70 km/j maksimum
                 Friction = 3.5, Wheelbase = 1.1,
                 MaxSteerAngle = 0.6, SteerRate = 6, TireGrip = 9, LeanAmount = 0.35,
                 GearCount = 4,
@@ -43,7 +43,7 @@ public static class SeedData
                 Description = "Seimbang antara kecepatan dan kendali.",
                 Color = "#3b82f6",
                 Length = 4.2, Width = 1.8, Height = 1.4,
-                MaxSpeed = 22, ReverseMaxSpeed = 6, Acceleration = 6, Braking = 9,
+                MaxSpeed = 19.44, ReverseMaxSpeed = 6, Acceleration = 6, Braking = 9, // 70 km/j maksimum
                 Friction = 2.5, Wheelbase = 2.6,
                 MaxSteerAngle = 0.55, SteerRate = 4.5, TireGrip = 9, LeanAmount = 0.08,
                 GearCount = 5,
@@ -58,7 +58,7 @@ public static class SeedData
                 Description = "Besar dan berat, radius putar lebar, jarak rem panjang.",
                 Color = "#16a34a",
                 Length = 7.5, Width = 2.4, Height = 2.6,
-                MaxSpeed = 16, ReverseMaxSpeed = 4, Acceleration = 3.2, Braking = 4.5,
+                MaxSpeed = 19.44, ReverseMaxSpeed = 4, Acceleration = 3.2, Braking = 4.5, // 70 km/j maksimum
                 Friction = 1.8, Wheelbase = 4.5,
                 MaxSteerAngle = 0.4, SteerRate = 2, TireGrip = 6, LeanAmount = 0.04,
                 GearCount = 6,

@@ -35,11 +35,11 @@ public sealed class ProgressController : ControllerBase
         if (userId is null) return Unauthorized();
 
         if (!ValidVehicles.Contains(request.VehicleType) ||
-            request.Score < 0 || request.Score > 1000 ||
+            request.Score < 0 || request.Score > 100 ||   // §8: validasi 0..100
             request.TimeTakenMs < 0 ||
             request.Violations < 0 ||
             request.OffRoadCount < 0 ||
-            request.CollisionCount < 0)
+            request.ObstacleHits < 0)
         {
             return BadRequest(new { error = "Data tidak valid." });
         }
@@ -48,11 +48,11 @@ public sealed class ProgressController : ControllerBase
         {
             UserId = userId,
             VehicleType = Enum.Parse<VehicleType>(request.VehicleType),
-            Score = Math.Clamp(request.Score, 0, 100),  // jangan percaya score mentah dari klien
+            Score = request.Score,  // sudah divalidasi 0..100; tidak percaya nilai mentah (§8)
             TimeTakenMs = Math.Max(0, request.TimeTakenMs),
             Violations = Math.Max(0, request.Violations),
             OffRoadCount = Math.Max(0, request.OffRoadCount),
-            CollisionCount = Math.Max(0, request.CollisionCount),
+            ObstacleHits = Math.Max(0, request.ObstacleHits),
             Completed = request.Completed,
             TrainingMode = request.TrainingMode is null
                 ? null
@@ -93,7 +93,7 @@ public sealed class ProgressController : ControllerBase
         TimeTakenMs: a.TimeTakenMs,
         Violations: a.Violations,
         OffRoadCount: a.OffRoadCount,
-        CollisionCount: a.CollisionCount,
+        ObstacleHits: a.ObstacleHits,
         Completed: a.Completed,
         CreatedAt: a.CreatedAt);
 }

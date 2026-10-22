@@ -5,13 +5,11 @@ using UnityEngine;
 namespace Kemudi.Simulation.Scene
 {
     /// <summary>
-    /// HUD IMGUI ringan untuk scene #1 — menampilkan petunjuk tiap fase
-    /// (berjalan kaki, masuk kabin, checklist pra-jalan §43), speed/gear/RPM
-    /// saat mengemudi, skor, dan layar hasil.
+    /// HUD IMGUI ringan untuk scene #1 — menampilkan fase, checklist pra-jalan
+    /// (§43), speed/gear/RPM saat mengemudi, skor, dan layar hasil.
     ///
-    /// Juga menangani input global: penalti waktu (§45), siklus kamera (C),
-    /// dan restart (R). Transisi checklist → mengemudi ditangani
-    /// SimulationManager (ChecklistCompleted), bukan lagi polling di sini.
+    /// Juga menjembatani alur: checklist selesai → CompletePreDrive → Driving,
+    /// penalti waktu (scoring.TickTime), siklus kamera (C), dan restart (R).
     ///
     /// Ini pengganti sementara HudController (Canvas) sampai scene dibuat
     /// penuh di Editor dengan UI aset.
@@ -29,17 +27,20 @@ namespace Kemudi.Simulation.Scene
             var sim = _bootstrap.Simulation;
             if (sim == null) return;
 
+            // Checklist selesai → mulai mengemudi.
+            if (sim.CurrentPhase == SimulationManager.Phase.PreDrive &&
+                _bootstrap.Checklist != null && _bootstrap.Checklist.IsComplete)
+            {
+                sim.CompletePreDrive();
+            }
+
             // Penalti waktu saat mengemudi (§45).
             if (sim.CurrentPhase == SimulationManager.Phase.Driving && _bootstrap.Scoring != null)
                 _bootstrap.Scoring.TickTime(Time.deltaTime);
 
-            // Siklus kamera TPV ↔ FPV ↔ TopDown (§34) saat berkendara.
-            if (sim.CurrentPhase == SimulationManager.Phase.Driving
-                && _bootstrap.Input != null && _bootstrap.Input.Current.CameraCycle
-                && _bootstrap.CameraRig != null)
-            {
+            // Siklus kamera TPV ↔ FPV (§34).
+            if (_bootstrap.Input != null && _bootstrap.Input.Current.CameraCycle && _bootstrap.CameraRig != null)
                 _bootstrap.CameraRig.CycleMode();
-            }
 
             // Restart saat selesai/gagal.
             if (UnityEngine.Input.GetKeyDown(KeyCode.R))
@@ -59,12 +60,6 @@ namespace Kemudi.Simulation.Scene
 
             switch (sim.CurrentPhase)
             {
-                case SimulationManager.Phase.Walking:
-                    DrawWalking(sim);
-                    break;
-                case SimulationManager.Phase.Entering:
-                    DrawEntering();
-                    break;
                 case SimulationManager.Phase.PreDrive:
                     DrawChecklist(sim);
                     break;
@@ -80,49 +75,6 @@ namespace Kemudi.Simulation.Scene
             }
         }
 
-        /// <summary>Langkah 2: berjalan kaki menuju kendaraan.</summary>
-        private void DrawWalking(SimulationManager sim)
-        {
-            var nearDoor = _bootstrap.Walker != null && _bootstrap.Walker.IsNearVehicle;
-
-            _sb.Clear();
-            _sb.AppendLine("MODE BERJALAN KAKI");
-            _sb.AppendLine();
-            _sb.AppendLine("Gerak   : W A S D / panah");
-            _sb.AppendLine("Lari    : Shift");
-            _sb.AppendLine("Lihat   : gerakkan mouse (klik kanan bila kursor bebas)");
-            _sb.AppendLine("Masuk   : [E] saat berada di dekat kendaraan");
-            _sb.AppendLine();
-            _sb.AppendLine(nearDoor
-                ? "▶ Dekat kendaraan — tekan [E] untuk masuk kabin."
-                : "Dekati kendaraan yang diparkir di depan Anda.");
-
-            GUI.Box(new Rect(12f, 60f, 420f, 170f), GUIContent.none);
-            GUI.Label(new Rect(24f, 68f, 400f, 155f), _sb.ToString());
-
-            // Prompt besar saat sudah di pintu.
-            if (nearDoor)
-            {
-                const float w = 420f;
-                var x = Screen.width * 0.5f - w * 0.5f;
-                var y = Screen.height * 0.72f;
-                GUI.Box(new Rect(x, y, w, 46f), GUIContent.none);
-                GUI.Label(new Rect(x + 16f, y + 13f, w - 32f, 24f),
-                    $"Tekan [E] untuk masuk {sim.CurrentVehicleType}");
-            }
-        }
-
-        /// <summary>Langkah 3: masuk ke kabin (animasi pintu berjalan singkat).</summary>
-        private void DrawEntering()
-        {
-            const float w = 360f;
-            var x = Screen.width * 0.5f - w * 0.5f;
-            var y = Screen.height * 0.5f - 30f;
-            GUI.Box(new Rect(x, y, w, 60f), GUIContent.none);
-            GUI.Label(new Rect(x + 20f, y + 20f, w - 40f, 24f), "Masuk ke kabin...");
-        }
-
-        /// <summary>Langkah 4: checklist pra-jalan (§43).</summary>
         private void DrawChecklist(SimulationManager sim)
         {
             var checklist = _bootstrap.Checklist;
@@ -137,15 +89,13 @@ namespace Kemudi.Simulation.Scene
             }
             _sb.AppendLine();
             _sb.AppendLine("Mesin [I] · Rem tangan [Space] · Kopling [Shift] · Gigi [E]/[Q]");
-            _sb.AppendLine("Sabuk [B] · Kursi [ · Spion ] atau [M]");
-            _sb.AppendLine("Helm/Jaket/Sarung/Sepatu [H/J/G/F]");
+            _sb.AppendLine("Sabuk [B] · Kursi: key '[' · Spion: key ']' · Helm/Jaket/Sarung/Sepatu [H/J/G/F]");
             _sb.AppendLine("Gas [W] · Rem [S] · Setir [A]/[D] · Kamera [C] · Pause [P]");
 
-            GUI.Box(new Rect(12f, 60f, 470f, 240f), GUIContent.none);
-            GUI.Label(new Rect(24f, 68f, 450f, 225f), _sb.ToString());
+            GUI.Box(new Rect(12f, 60f, 440f, 210f), GUIContent.none);
+            GUI.Label(new Rect(24f, 68f, 420f, 195f), _sb.ToString());
         }
 
-        /// <summary>Langkah 5–6: HUD berkendara.</summary>
         private void DrawDriving()
         {
             _sb.Clear();
@@ -160,7 +110,6 @@ namespace Kemudi.Simulation.Scene
             GUI.Label(new Rect(24f, 68f, 230f, 135f), _sb.ToString());
         }
 
-        /// <summary>Langkah 7–8: skor & hasil akhir.</summary>
         private void DrawResult(SimulationManager sim, bool finished)
         {
             var title = finished ? "✅ SIMULASI SELESAI" : "❌ SIMULASI GAGAL";
@@ -174,16 +123,14 @@ namespace Kemudi.Simulation.Scene
             _sb.AppendLine($"Skor      : {score}/100");
             _sb.AppendLine($"Waktu     : {time:F1} s");
             _sb.AppendLine($"Pelanggaran: {violations}");
-            if (!finished && !string.IsNullOrEmpty(sim.FailReason))
-                _sb.AppendLine($"Alasan    : {sim.FailReason}");
             _sb.AppendLine();
             _sb.AppendLine("Tekan [R] untuk mengulang.");
 
-            var w = 380f;
+            var w = 340f;
             var x = Screen.width * 0.5f - w * 0.5f;
-            var y = Screen.height * 0.5f - 100f;
-            GUI.Box(new Rect(x, y, w, 200f), GUIContent.none);
-            GUI.Label(new Rect(x + 24f, y + 18f, w - 48f, 170f), _sb.ToString());
+            var y = Screen.height * 0.5f - 90f;
+            GUI.Box(new Rect(x, y, w, 180f), GUIContent.none);
+            GUI.Label(new Rect(x + 24f, y + 18f, w - 48f, 150f), _sb.ToString());
         }
 
         private float SpeedKmh()

@@ -72,18 +72,6 @@ namespace Kemudi.Simulation.Core
         }
 
         /// <summary>
-        /// Wire sumber data hasil — dipakai KemudiSceneBootstrap karena
-        /// komponen simulasi dibuat saat runtime (bukan lewat Inspector).
-        /// </summary>
-        public void Wire(SimulationManager simulationManager, Rules.ScoringSystem scoringSystem,
-            ViolationSystem violationSystem)
-        {
-            simulation = simulationManager;
-            scoring = scoringSystem;
-            violations = violationSystem;
-        }
-
-        /// <summary>
         /// Kirim hasil simulasi saat Finished/Failed. Nilai diambil dari
         /// SimulationManager (fase & waktu), ScoringSystem, ViolationSystem.
         /// </summary>

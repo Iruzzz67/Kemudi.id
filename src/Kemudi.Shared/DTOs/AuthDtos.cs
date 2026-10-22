@@ -18,4 +18,4 @@ public sealed record AuthResponse(
     string? Name,
     string Email,
     DateTime ExpiresAt,
-    string[]? Roles = null);
+    string[] Roles);

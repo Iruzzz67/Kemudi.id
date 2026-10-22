@@ -35,7 +35,7 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.TimeTakenMs).HasDefaultValue(0);
             e.Property(x => x.Violations).HasDefaultValue(0);
             e.Property(x => x.OffRoadCount).HasDefaultValue(0);
-            e.Property(x => x.CollisionCount).HasDefaultValue(0);
+            e.Property(x => x.ObstacleHits).HasDefaultValue(0);
             e.Property(x => x.Completed).HasDefaultValue(false);
             e.Property(x => x.VehicleType).HasConversion<string>();
             e.Property(x => x.TrainingMode)
@@ -133,6 +133,7 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.MentorId);
+            e.HasIndex(x => x.Date);
             e.Property(x => x.VehicleType).HasConversion<string>();
             e.HasOne(x => x.Mentor)
                 .WithMany()
@@ -144,6 +145,7 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.HasKey(x => x.Id);
             e.HasIndex(x => x.CreatedAt);
+            e.HasIndex(x => x.AdminEmail);
         });
     }
 }

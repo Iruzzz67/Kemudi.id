@@ -1,10 +1,8 @@
 using System.Text;
 using Kemudi.Infrastructure;
 using Kemudi.Infrastructure.Auth;
-using Kemudi.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -12,9 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Kemudi.Infrastructure: EF Core + Identity + JWT token service
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// TimeProvider (required by Identity in .NET 8+)
-builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -79,60 +74,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Auto-create database + seed users
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
-
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    // Ensure Admin role exists
-    if (!await roleManager.RoleExistsAsync("Admin"))
-        await roleManager.CreateAsync(new IdentityRole("Admin"));
-
-    // Seed admin user
-    var adminEmail = "admin@kemudi.id";
-    if (await userManager.FindByEmailAsync(adminEmail) is null)
-    {
-        var admin = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            FullName = "Admin Kemudi",
-            IsActive = true
-        };
-        var result = await userManager.CreateAsync(admin, "admin123");
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(admin, "Admin");
-            Console.WriteLine($"[Seed] Admin created: {adminEmail}");
-        }
-        else
-        {
-            Console.WriteLine($"[Seed] Failed to create admin: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
-    }
-
-    // Seed test user
-    var testEmail = "test@kemudi.id";
-    if (await userManager.FindByEmailAsync(testEmail) is null)
-    {
-        var testUser = new ApplicationUser
-        {
-            UserName = testEmail,
-            Email = testEmail,
-            FullName = "Test User",
-            IsActive = true
-        };
-        var result = await userManager.CreateAsync(testUser, "test123");
-        if (result.Succeeded)
-            Console.WriteLine($"[Seed] Test user created: {testEmail}");
-        else
-            Console.WriteLine($"[Seed] Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-    }
-}
+// Pastikan role "Admin" dan akun admin awal selalu ada (dibuat bila belum).
+await SeedAdminRoleAsync(app.Services, builder.Configuration);
 
 if (app.Environment.IsDevelopment())
 {
@@ -147,3 +90,37 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>
+/// Menjamin role "Admin" ada dan membuat akun admin default bila belum ada
+/// (konfigurasi <c>Admin:Email</c>/<c>Admin:Password</c>, default
+/// admin@kemudi.id / admin1234).
+/// </summary>
+static async Task SeedAdminRoleAsync(IServiceProvider services, IConfiguration configuration)
+{
+    using var scope = services.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    if (!await roleManager.RoleExistsAsync(Kemudi.Api.Controllers.AdminAuthController.AdminRole))
+    {
+        await roleManager.CreateAsync(new IdentityRole(Kemudi.Api.Controllers.AdminAuthController.AdminRole));
+    }
+
+    var email = configuration["Admin:Email"] ?? "admin@kemudi.id";
+    if (await userManager.FindByEmailAsync(email) is not null) return;
+
+    var admin = new ApplicationUser
+    {
+        UserName = email,
+        Email = email,
+        FullName = "Admin Kemudi",
+        IsActive = true
+    };
+    var password = configuration["Admin:Password"] ?? "admin1234";
+    var result = await userManager.CreateAsync(admin, password);
+    if (result.Succeeded)
+    {
+        await userManager.AddToRoleAsync(admin, Kemudi.Api.Controllers.AdminAuthController.AdminRole);
+    }
+}

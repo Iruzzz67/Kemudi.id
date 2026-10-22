@@ -8,10 +8,6 @@ namespace Kemudi.Simulation.Vehicles
     /// <summary>
     /// Orkestrator kendaraan — BUKAN monolith. Ia membaca input universal lalu
     /// mengarahkan sub-sistem (engine, transmisi, kemudi, rem, fisika, audio).
-    ///
-    /// Kontrol juga mencatat item checklist pra-berkendara (§43) yang memang
-    /// berasal dari tindakan pengemudi: kopling, gigi satu, mesin menyala, dan
-    /// rem tangan dilepas.
     /// </summary>
     [RequireComponent(typeof(VehiclePhysics))]
     public sealed class VehicleController : MonoBehaviour
@@ -21,58 +17,49 @@ namespace Kemudi.Simulation.Vehicles
         [SerializeField] private VehicleConfig config = null!;
         [SerializeField] private EngineController engine = null!;
         [SerializeField] private TransmissionController transmission = null!;
-        [SerializeField] private ChecklistManager? checklist;
+        [SerializeField] private ChecklistManager checklist = null!;
 
         public VehicleInputState Input => inputSystem != null ? inputSystem.Current : VehicleInputState.Empty;
         public EngineController Engine => engine;
         public TransmissionController Transmission => transmission;
         public VehicleConfig Config => config;
-        public ChecklistManager? Checklist => checklist;
-
-        /// <summary>
-        /// Kontrol hanya aktif saat pengguna berada di kendaraan (fase
-        /// Entering/PreDrive/Driving). Di fase berjalan kaki input diabaikan.
-        /// </summary>
-        public bool ControlsEnabled { get; set; } = true;
 
         private float _speedMetersPerSecond;
 
         /// <summary>Diupdate VehiclePhysics setiap FixedUpdate.</summary>
         public void SetSpeed(float metersPerSecond) => _speedMetersPerSecond = metersPerSecond;
 
-        // Hasil kalkulasi yang dipakai fisika & UI
-        public float SteeringInput { get; private set; }
-
-        /// <summary>Rem tangan — aktif saat pengguna baru masuk kabin (padanan web).</summary>
-        public bool HandbrakeActive { get; private set; } = true;
-
         private void Awake()
         {
-            if (config == null)
-                Debug.LogError("VehicleController: VehicleConfig belum di-assign.", this);
-
             if (engine == null) engine = GetComponentInChildren<EngineController>();
             if (transmission == null) transmission = GetComponentInChildren<TransmissionController>();
+            if (checklist == null) checklist = GetComponentInChildren<ChecklistManager>();
+
+            // Rem tangan aktif saat mulai (§43: "lepas rem tangan" adalah item checklist).
+            HandbrakeActive = true;
         }
 
         /// <summary>
-        /// Wire dependency — dipakai KemudiSceneBootstrap karena komponen
-        /// kendaraan dibuat saat runtime (bukan lewat Inspector).
+        /// Wire dependency — dipakai scene bootstrap (komponen dibuat saat
+        /// runtime sehingga tidak bisa di-assign lewat Inspector).
         /// </summary>
         public void Configure(UniversalInputSystem input, VehicleConfig vehicleConfig,
             EngineController engineController, TransmissionController transmissionController,
-            ChecklistManager? checklistManager)
+            ChecklistManager checklistManager)
         {
             inputSystem = input;
             config = vehicleConfig;
             engine = engineController;
             transmission = transmissionController;
             checklist = checklistManager;
-
-            // Pengguna masuk kabin dengan rem tangan terpasang.
-            HandbrakeActive = true;
-            SteeringInput = 0f;
+            // Transmisi butuh config sendiri (protected [SerializeField] — tidak
+            // bisa diisi lewat Inspector pada komponen runtime).
+            transmissionController?.SetConfig(vehicleConfig);
         }
+
+        // Hasil kalkulasi yang dipakai fisika & UI
+        public float SteeringInput { get; private set; }
+        public bool HandbrakeActive { get; private set; }
 
         /// <summary>
         /// Disampling di Update (bukan FixedUpdate): input harus se-responsif
@@ -81,7 +68,7 @@ namespace Kemudi.Simulation.Vehicles
         private void Update()
         {
             var input = Input;
-            if (!ControlsEnabled) return;
+            if (config == null || inputSystem == null) return; // belum di-Configure
 
             if (engine != null)
                 engine.SetRpmFromRatio(transmission != null
@@ -94,28 +81,42 @@ namespace Kemudi.Simulation.Vehicles
             if (input.GearDown) transmission?.ShiftDown(engine);
             if (input.ReverseRequested) transmission?.RequestReverse(engine);
             if (input.NeutralRequested) transmission?.RequestNeutral();
-            if (input.HandbrakePressed) HandbrakeActive = !HandbrakeActive;
+            if (input.HandbrakePressed)
+            {
+                HandbrakeActive = !HandbrakeActive;
+                if (!HandbrakeActive) checklist?.MarkDone(ChecklistManager.Item.HandbrakeReleased);
+            }
+
+            UpdateChecklist(input);
 
             // Kemudi: rate-limited menuju target + speed-sensitive falloff.
             SteeringInput = Mathf.MoveTowards(
                 SteeringInput,
                 input.Steering,
                 (input.Steering != 0f ? config.SteerRate : config.ReturnRate) * Time.deltaTime);
-
-            MarkChecklistFromControls(input);
         }
 
         /// <summary>
-        /// Item checklist yang berasal langsung dari aksi pengemudi (§43):
-        /// kopling, gigi satu, mesin menyala, rem tangan dilepas.
+        /// Checklist pra-jalan (§43): item dari tombol B/H/J/G/F serta item
+        /// yang dideteksi otomatis (mesin, kopling, gigi satu).
         /// </summary>
-        private void MarkChecklistFromControls(VehicleInputState input)
+        private void UpdateChecklist(VehicleInputState input)
         {
             if (checklist == null) return;
 
-            if (input.Clutch > 0.1f) checklist.MarkDone(ChecklistManager.Item.ClutchEngaged);
-            if (engine != null && engine.IsRunning) checklist.MarkDone(ChecklistManager.Item.EngineOn);
-            if (!HandbrakeActive) checklist.MarkDone(ChecklistManager.Item.HandbrakeReleased);
+            if (input.ToggleSeatbelt) checklist.MarkDone(ChecklistManager.Item.Seatbelt);
+            if (input.ToggleHelmet) checklist.MarkDone(ChecklistManager.Item.Helmet);
+            if (input.ToggleJacket) checklist.MarkDone(ChecklistManager.Item.Jacket);
+            if (input.ToggleGloves) checklist.MarkDone(ChecklistManager.Item.Gloves);
+            if (input.ToggleBoots) checklist.MarkDone(ChecklistManager.Item.Boots);
+            if (input.AdjustSeat) checklist.MarkDone(ChecklistManager.Item.SeatAdjusted);
+            if (input.AdjustMirrors) checklist.MarkDone(ChecklistManager.Item.MirrorsAdjusted);
+
+            // Deteksi otomatis dari sistem lain.
+            if (engine != null && engine.IsRunning)
+                checklist.MarkDone(ChecklistManager.Item.EngineOn);
+            if (input.Clutch > 0.1f)
+                checklist.MarkDone(ChecklistManager.Item.ClutchEngaged);
             if (transmission != null && transmission.CurrentGear == 0)
                 checklist.MarkDone(ChecklistManager.Item.FirstGearEngaged);
         }

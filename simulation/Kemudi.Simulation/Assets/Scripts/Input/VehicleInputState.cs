@@ -34,6 +34,17 @@ namespace Kemudi.Simulation.Input
         public bool TurnSignalRight;
         public bool HornHeld;
 
+        // Checklist pra-jalan (§43): B (sabuk), H (helm), J (jaket),
+        // G (sarung tangan), F (sepatu), [ (kursi), ] (spion). Rising-edge
+        // sekali per tekan.
+        public bool ToggleSeatbelt;
+        public bool ToggleHelmet;
+        public bool ToggleJacket;
+        public bool ToggleGloves;
+        public bool ToggleBoots;
+        public bool AdjustSeat;
+        public bool AdjustMirrors;
+
         public static VehicleInputState Empty => new VehicleInputState();
 
         public readonly bool IsIdle =>
@@ -44,6 +55,8 @@ namespace Kemudi.Simulation.Input
             !HandbrakePressed && !GearUp && !GearDown &&
             !ReverseRequested && !NeutralRequested && !CameraCycle &&
             !Pause && !Ignition && !HeadlightToggle && !HighBeamToggle &&
-            !HazardToggle && !TurnSignalLeft && !TurnSignalRight && !HornHeld;
+            !HazardToggle && !TurnSignalLeft && !TurnSignalRight && !HornHeld &&
+            !ToggleSeatbelt && !ToggleHelmet && !ToggleJacket &&
+            !ToggleGloves && !ToggleBoots && !AdjustSeat && !AdjustMirrors;
     }
 }

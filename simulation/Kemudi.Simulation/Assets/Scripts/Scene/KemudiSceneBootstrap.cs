@@ -6,13 +6,12 @@ using Kemudi.Simulation.Rules;
 using Kemudi.Simulation.Traffic;
 using Kemudi.Simulation.Transmission;
 using Kemudi.Simulation.Vehicles;
-using Kemudi.Simulation.XR;
 using UnityEngine;
 
 namespace Kemudi.Simulation.Scene
 {
     /// <summary>
-    /// Bootstrap scene #1 — PHASE 4-5 (termasuk VR).
+    /// Bootstrap scene #1 — PHASE 4-5.
     ///
     /// Membangun seluruh hierarki simulasi SAAT RUNTIME dari kode, sehingga
     /// scene pertama cukup berisi 1 GameObject dengan komponen ini (atau
@@ -21,10 +20,9 @@ namespace Kemudi.Simulation.Scene
     /// Yang dibangun:
     ///   - Kamera utama + directional light + ground sederhana
     ///   - SimulationManager + ViolationSystem + ScoringSystem + ChecklistManager
-    ///   - UniversalInputSystem + KeyboardInputProvider (+ XRInputProvider bila VR)
+    ///   - UniversalInputSystem + KeyboardInputProvider
     ///   - TrackBuilder (1 mesh jalan + collider + zona off-road & finish)
     ///   - Kendaraan (VehicleController + VehiclePhysics + Engine + Transmisi)
-    ///   - XR systems (XRManager, XRComfortSystem, XRDashboard) bila VR aktif
     ///
     /// Alur: Selecting → PreDrive → Driving → Finished/Failed (§10, §35).
     /// Gunakan Editor/KemudiSceneGenerator untuk membuat Assets/Scenes/Main.unity.
@@ -45,13 +43,6 @@ namespace Kemudi.Simulation.Scene
         public CameraManager CameraRig { get; private set; } = null!;
         public VehicleController Vehicle { get; private set; } = null!;
         public VehicleConfig SelectedConfig { get; private set; } = null!;
-        public WalkingController? Walker { get; private set; }
-        public SimulationResultReporter? Reporter { get; private set; }
-
-        // ── XR/VR Systems ─────────────────────────────────────────────────
-        public XRManager XrManager { get; private set; } = null!;
-        public XRComfortSystem? XrComfort { get; private set; }
-        public XRDashboard? XrDashboard { get; private set; }
 
         private Transform[] _waypoints = System.Array.Empty<Transform>();
 
@@ -69,31 +60,15 @@ namespace Kemudi.Simulation.Scene
             BuildScenery();
             BuildTrafficSystem();
             BuildCameraRig();
-            BuildXrSystem();
-            BuildParkingArea();
-            BuildFlowSystems();
 
             // UI sederhana (IMGUI, tanpa aset Canvas).
-            // Di VR, MainMenuUI menggunakan world-space canvas.
             var menu = gameObject.AddComponent<MainMenuUI>();
             menu.Bind(this);
             var hud = gameObject.AddComponent<SceneHud>();
             hud.Bind(this);
-
-            // Transisi fase mengatur walker, kontrol kendaraan, kamera, laporan.
-            Simulation.PhaseChanged += OnPhaseChanged;
         }
 
-        private void OnDestroy()
-        {
-            if (Simulation != null) Simulation.PhaseChanged -= OnPhaseChanged;
-        }
-
-        /// <summary>
-        /// Mulai percobaan baru dari layar pilih kendaraan — SIMULASI.md §5
-        /// langkah 1–2: kendaraan disiapkan di area parkir, lalu pengguna
-        /// muncul dalam mode berjalan kaki.
-        /// </summary>
+        /// <summary>Mulai percobaan baru dari layar pilih kendaraan.</summary>
         public void PrepareRun(VehicleConfig.VehicleType type, bool manualTransmission)
         {
             Simulation.CurrentVehicleType = type;
@@ -102,123 +77,19 @@ namespace Kemudi.Simulation.Scene
             if (Vehicle != null) Destroy(Vehicle.gameObject);
 
             Vehicle = BuildVehicle(type, manualTransmission);
-            Vehicle.ControlsEnabled = false; // pengguna masih di luar kendaraan
             CameraRig.Configure(UnityEngine.Camera.main, Vehicle.transform);
-            CameraRig.SetVehicleTarget(Vehicle.transform);
-
-            // VR: rig mengikuti titik duduk kendaraan, kamera desktop dilepas.
-            if (XrManager != null && XrManager.IsVrActive)
-            {
-                XrManager.SetVehicleTarget(Vehicle.transform);
-                CameraRig.EnableVrMode();
-            }
-
-            Simulation.StartSimulation(); // → fase Walking
-            SpawnWalker();
+            Simulation.StartSimulation();
             RunStarted = true;
         }
 
         /// <summary>Hancurkan kendaraan & kembali ke layar pilih (restart).</summary>
         public void Restart()
         {
-            if (Walker != null)
-            {
-                Destroy(Walker.gameObject);
-                Walker = null;
-            }
-
             if (Vehicle != null) Destroy(Vehicle.gameObject);
             Vehicle = null!;
             SelectedConfig = null!;
             Simulation.ReturnToSelecting();
             RunStarted = false;
-        }
-
-        /// <summary>
-        /// Reaksi perubahan fase (SIMULASI.md §5): walker hanya hidup di fase
-        /// Walking, kontrol kendaraan hidup sejak pengguna masuk kabin, dan
-        /// hasil dikirim ke API saat simulasi berakhir.
-        /// </summary>
-        private void OnPhaseChanged(SimulationManager.Phase phase)
-        {
-            if (Vehicle != null)
-                Vehicle.ControlsEnabled = phase == SimulationManager.Phase.Entering
-                    || phase == SimulationManager.Phase.PreDrive
-                    || phase == SimulationManager.Phase.Driving;
-
-            CameraRig?.SetWalkMode(phase == SimulationManager.Phase.Walking);
-
-            // Begitu masuk kabin, kamera pindah ke sudut pengemudi (FPV) —
-            // padanan cameraMode 'fpv' saat mulai berkendara di versi web.
-            if (phase == SimulationManager.Phase.Entering)
-                CameraRig?.SetMode(CameraManager.CameraMode.Fpv);
-
-            if (Walker != null)
-            {
-                if (phase == SimulationManager.Phase.Walking) Walker.gameObject.SetActive(true);
-                else
-                {
-                    Walker.Stop();
-                    Walker.gameObject.SetActive(false);
-                }
-            }
-
-            // Kursor terkunci hanya saat berjalan kaki (mouse look); di kabin
-            // kamera dikendalikan CameraManager sehingga kursor bebas.
-            LockCursor(phase == SimulationManager.Phase.Walking);
-
-            if (phase == SimulationManager.Phase.Finished || phase == SimulationManager.Phase.Failed)
-                Reporter?.SendResult();
-        }
-
-        private static void LockCursor(bool locked)
-        {
-            Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
-            Cursor.visible = !locked;
-        }
-
-        /// <summary>
-        /// Spawn pemain di area parkir dekat kendaraan, menghadap kendaraan
-        /// (langkah 2 alur simulasi).
-        /// </summary>
-        private void SpawnWalker()
-        {
-            if (Walker != null) Destroy(Walker.gameObject);
-
-            var go = new GameObject("Player_Walker");
-            var controller = go.AddComponent<CharacterController>();
-            controller.height = 1.8f;
-            controller.radius = 0.3f;
-            controller.center = new Vector3(0f, 0.9f, 0f);
-            // Aspal berada ±0.5 m di atas rumput — pemain harus bisa naik.
-            controller.stepOffset = 0.6f;
-
-            Walker = go.AddComponent<WalkingController>();
-            Walker.Initialize(Simulation, UnityEngine.Camera.main,
-                ParkingSpawnPosition(out var yaw), yaw,
-                Vehicle != null ? Vehicle.transform : null);
-        }
-
-        /// <summary>Posisi awal pemain: di samping-belakang kendaraan yang diparkir.</summary>
-        private Vector3 ParkingSpawnPosition(out float yaw)
-        {
-            var vehicle = Vehicle != null ? Vehicle.transform : null;
-            if (vehicle == null)
-            {
-                yaw = 0f;
-                return new Vector3(4.5f, 1.1f, 24f);
-            }
-
-            var forward = vehicle.forward;
-            var spawn = vehicle.position - forward * 6.5f + vehicle.right * 4.5f;
-            spawn.y = 1.1f;
-
-            var look = vehicle.position - spawn;
-            look.y = 0f;
-            yaw = look.sqrMagnitude > 0.001f
-                ? Quaternion.LookRotation(look).eulerAngles.y
-                : vehicle.eulerAngles.y;
-            return spawn;
         }
 
         // ── Lingkungan ──────────────────────────────────────────────────────
@@ -245,27 +116,21 @@ namespace Kemudi.Simulation.Scene
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Directional;
             light.intensity = 1.1f;
-            light.color = new Color(1f, .94f, .84f);
             light.shadows = LightShadows.Soft; // §27: satu directional utama
 
-            RenderSettings.ambientLight = new Color(0.55f, 0.63f, 0.65f);
-            RenderSettings.fog = true;
-            RenderSettings.fogColor = new Color(.77f, .86f, .89f);
-            RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogStartDistance = 90f;
-            RenderSettings.fogEndDistance = 420f;
+            RenderSettings.ambientLight = new Color(0.42f, 0.45f, 0.5f);
+            RenderSettings.fog = false;
         }
 
         private void BuildGround()
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Plane);
             go.name = "Ground";
-            go.transform.position = Vector3.up * .45f;
             // Bidang luas menutupi seluruh lintasan ±916 m (z = +16 s/d -900).
             go.transform.localScale = new Vector3(150f, 1f, 1000f);
             AssignMaterial(go.GetComponent<MeshRenderer>(), groundMaterial != null
                 ? groundMaterial
-                : CreateMaterial(new Color(0.47f, 0.55f, 0.36f), "Grass"));
+                : CreateMaterial(new Color(0.16f, 0.2f, 0.13f), "Grass"));
         }
 
         // ── Manager & input ─────────────────────────────────────────────────
@@ -282,8 +147,7 @@ namespace Kemudi.Simulation.Scene
             var inputGo = new GameObject("Input");
             Input = inputGo.AddComponent<UniversalInputSystem>();
             Input.Register(inputGo.AddComponent<KeyboardInputProvider>());
-            // XRInputProvider didaftarkan oleh XRManager di BuildXrSystem().
-            // Lihat docs/VR_INPUT_MAP.md untuk mapping lengkap.
+            // Gamepad & XR bisa didaftarkan di sini — lihat docs/VR_INPUT_MAP.md.
         }
 
         private void BuildTrack()
@@ -566,121 +430,6 @@ namespace Kemudi.Simulation.Scene
             CameraRig.Configure(UnityEngine.Camera.main, null); // target di-set saat kendaraan dibuat
         }
 
-        // ── XR/VR System ──────────────────────────────────────────────────
-
-        /// <summary>
-        /// Bangun XR system: XRManager, comfort, dashboard.
-        /// XRInputProvider didaftarkan ke UniversalInputSystem bila VR aktif.
-        /// Semua berjalan otomatis — desktop mode sebagai fallback.
-        /// </summary>
-        private void BuildXrSystem()
-        {
-            // 1) XR Manager — deteksi VR, setup rig, register input.
-            var xrGo = new GameObject("XR Manager");
-            XrManager = xrGo.AddComponent<XRManager>();
-            XrManager.Initialize(Input, CameraRig);
-
-            // 2) Comfort system — anti motion sickness.
-            XrComfort = xrGo.AddComponent<XRComfortSystem>();
-            XrComfort.SystemActive = XrManager.IsVrActive;
-
-            // 3) Dashboard world-space — VR cockpit display.
-            XrDashboard = xrGo.AddComponent<XRDashboard>();
-            XrDashboard.gameObject.SetActive(XrManager.IsVrActive);
-
-            // 4) Hand tracking manager (default OFF per §32).
-            var handTracking = xrGo.AddComponent<HandTrackingManager>();
-            handTracking.SetEnabledByUser(false);
-
-            if (XrManager.IsVrActive)
-            {
-                Debug.Log("[Kemudi.XR] VR systems siap: XRManager + Comfort + Dashboard + HandTracking.");
-            }
-            else
-            {
-                Debug.Log("[Kemudi.XR] Desktop mode — VR systems dormant.");
-            }
-        }
-
-        /// <summary>
-        /// Area parkir di bahu jalan dekat titik start (SIMULASI.md §3) —
-        /// tempat pengguna muncul dalam mode berjalan kaki, lengkap dengan
-        /// marka petak dan beberapa kendaraan sekitar.
-        /// </summary>
-        private void BuildParkingArea()
-        {
-            var root = new GameObject("ParkingArea");
-            root.transform.SetParent(transform, false);
-
-            // Pelat aspal (visual saja — permukaan jalan tetap di y = 0.5).
-            var lot = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            lot.name = "Lot";
-            lot.transform.SetParent(root.transform, false);
-            lot.transform.position = new Vector3(7.5f, 0.03f, 22f);
-            lot.transform.localScale = new Vector3(9f, 0.06f, 26f);
-            AssignMaterial(lot.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.17f, 0.17f, 0.19f), "ParkingAsphalt"));
-            Object.Destroy(lot.GetComponent<Collider>());
-
-            // Marka petak parkir.
-            var lineMat = CreateMaterial(new Color(0.92f, 0.92f, 0.92f), "ParkingLine");
-            for (var i = 0; i < 4; i++)
-            {
-                var line = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                line.name = "BayLine" + i;
-                line.transform.SetParent(root.transform, false);
-                line.transform.position = new Vector3(3.5f + i * 3f, 0.07f, 22f);
-                line.transform.localScale = new Vector3(0.12f, 0.02f, 5.5f);
-                AssignMaterial(line.GetComponent<MeshRenderer>(), lineMat);
-                Object.Destroy(line.GetComponent<Collider>());
-            }
-
-            // Kendaraan sekitar yang diparkir (rintangan bila tertabrak).
-            BuildParkedVehicle(root.transform, "ParkedCarA", new Vector3(4.8f, 0f, 18f), new Color(0.85f, 0.75f, 0.2f));
-            BuildParkedVehicle(root.transform, "ParkedCarB", new Vector3(7.8f, 0f, 26f), new Color(0.75f, 0.2f, 0.2f));
-        }
-
-        /// <summary>Mobil parkir statis — body + kabin + SceneryObstacle (§62).</summary>
-        private void BuildParkedVehicle(Transform parent, string name, Vector3 position, Color color)
-        {
-            var root = new GameObject(name);
-            root.transform.SetParent(parent, false);
-            root.transform.position = position;
-            root.transform.rotation = Quaternion.Euler(0f, 90f, 0f); // menghadap jalan
-
-            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            body.name = "Body";
-            body.transform.SetParent(root.transform, false);
-            body.transform.localPosition = new Vector3(0f, 0.75f, 0f);
-            body.transform.localScale = new Vector3(1.8f, 0.9f, 4.2f);
-            AssignMaterial(body.GetComponent<MeshRenderer>(), CreateMaterial(color, name + "Body"));
-
-            var cabin = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cabin.name = "Cabin";
-            cabin.transform.SetParent(root.transform, false);
-            cabin.transform.localPosition = new Vector3(0f, 1.45f, 0.2f);
-            cabin.transform.localScale = new Vector3(1.6f, 0.6f, 2.2f);
-            AssignMaterial(cabin.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.7f, 0.85f, 0.95f), name + "Glass"));
-            Object.Destroy(cabin.GetComponent<Collider>());
-
-            root.AddComponent<SceneryObstacle>();
-        }
-
-        /// <summary>
-        /// Sistem pendukung alur: checklist pra-berkendara (§43) dan pelaporan
-        /// hasil ke Kemudi.Api saat simulasi berakhir (§61-62).
-        /// </summary>
-        private void BuildFlowSystems()
-        {
-            var flowGo = new GameObject("Flow");
-            flowGo.transform.SetParent(transform, false);
-
-            var preDrive = flowGo.AddComponent<PreDriveChecklistController>();
-            preDrive.Initialize(Simulation, Checklist);
-
-            Reporter = flowGo.AddComponent<SimulationResultReporter>();
-            Reporter.Wire(Simulation, Scoring, Violations);
-        }
-
         // ── Kendaraan ───────────────────────────────────────────────────────
 
         private VehicleController BuildVehicle(VehicleConfig.VehicleType type, bool manual)
@@ -695,7 +444,7 @@ namespace Kemudi.Simulation.Scene
             var rb = go.AddComponent<Rigidbody>();
             rb.mass = SelectedConfig.Mass;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.drag = 0f;
+            rb.linearDamping = 0f;
 
             var box = go.AddComponent<BoxCollider>();
             box.center = new Vector3(0f, SelectedConfig.Height * 0.5f, 0f);
@@ -740,7 +489,7 @@ namespace Kemudi.Simulation.Scene
             {
                 case VehicleConfig.VehicleType.Motor:
                     config.Label = "Motor";
-                    config.Length = 1.9f; config.Width = 0.78f; config.Height = 1.35f;
+                    config.Length = 2.0f; config.Width = 0.75f; config.Height = 1.15f;
                     config.WheelBase = 1.3f; config.TrackWidth = 0.6f;
                     config.Mass = 180f;
                     config.MaxSpeed = 19.44f; config.ReverseMaxSpeed = 3f;  // 70 km/j maksimum
@@ -752,8 +501,8 @@ namespace Kemudi.Simulation.Scene
                     break;
                 case VehicleConfig.VehicleType.Truk:
                     config.Label = "Truk";
-                    config.Length = 6.7f; config.Width = 2.4f; config.Height = 2.9f;
-                    config.WheelBase = 4.15f; config.TrackWidth = 2.06f;
+                    config.Length = 6.0f; config.Width = 2.5f; config.Height = 3.0f;
+                    config.WheelBase = 4.0f; config.TrackWidth = 2.1f;
                     config.Mass = 5500f;
                     config.MaxSpeed = 19.44f; config.ReverseMaxSpeed = 4f;  // 70 km/j maksimum
                     config.Acceleration = 3f; config.BrakeForce = 12f; config.HandbrakeForce = 6f;
@@ -764,7 +513,7 @@ namespace Kemudi.Simulation.Scene
                     break;
                 default: // Mobil — nilai default VehicleConfig sudah sesuai
                     config.Label = "Mobil";
-                    config.Length = 4.22f; config.Width = 1.86f; config.Height = 1.5f;
+                    config.Length = 4.2f; config.Width = 1.8f; config.Height = 1.4f;
                     config.WheelBase = 2.6f; config.TrackWidth = 1.5f;
                     config.Mass = 1300f;
                     config.MaxSpeed = 19.44f; config.ReverseMaxSpeed = 6f;  // 70 km/j maksimum
@@ -793,10 +542,58 @@ namespace Kemudi.Simulation.Scene
                 : Quaternion.identity;
         }
 
-        /// <summary>Authored motor, RHD hatchback and truck with independent animated wheels.</summary>
+        /// <summary>Visual sederhana (kotak) — cukup sebagai placeholder sampai model GLB diimpor.</summary>
         private static void BuildVehicleVisual(GameObject root, VehicleConfig config, VehicleConfig.VehicleType type)
         {
-            AuthoredVehicleVisual.Build(root, config);
+            var bodyColor = type switch
+            {
+                VehicleConfig.VehicleType.Motor => new Color(0.85f, 0.2f, 0.2f),
+                VehicleConfig.VehicleType.Truk => new Color(0.2f, 0.6f, 0.25f),
+                _ => new Color(0.2f, 0.45f, 0.9f)
+            };
+            var bodyMat = CreateMaterial(bodyColor, "Body");
+            var darkMat = CreateMaterial(new Color(0.08f, 0.08f, 0.1f), "Rubber");
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "Body";
+            body.transform.SetParent(root.transform, false);
+            body.transform.localPosition = new Vector3(0f, config.Height * 0.55f, 0f);
+            body.transform.localScale = new Vector3(config.Width, config.Height * 0.6f, config.Length);
+            AssignMaterial(body.GetComponent<MeshRenderer>(), bodyMat);
+            Object.Destroy(body.GetComponent<Collider>());
+
+            // Kabin / kokpit (placeholder).
+            var cabin = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cabin.name = "Cabin";
+            cabin.transform.SetParent(root.transform, false);
+            cabin.transform.localPosition = new Vector3(0f, config.Height * 0.95f, config.Length * 0.12f);
+            cabin.transform.localScale = new Vector3(config.Width * 0.85f, config.Height * 0.45f, config.Length * 0.45f);
+            AssignMaterial(cabin.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.7f, 0.85f, 0.95f), "Glass"));
+            Object.Destroy(cabin.GetComponent<Collider>());
+
+            // 4 roda (Mobil/Truk); 2 roda untuk Motor.
+            var wheels = type == VehicleConfig.VehicleType.Motor ? 2 : 4;
+            var wheelRadius = type == VehicleConfig.VehicleType.Motor ? 0.35f : 0.4f;
+            var axleOffsets = type == VehicleConfig.VehicleType.Motor
+                ? new[] { -0.5f, 0.5f }
+                : new[] { -0.6f, -0.6f, 0.6f, 0.6f };
+            var sideOffsets = type == VehicleConfig.VehicleType.Motor
+                ? new[] { 0f, 0f }
+                : new[] { -1f, 1f, -1f, 1f };
+
+            for (var i = 0; i < wheels; i++)
+            {
+                var wheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                wheel.name = "Wheel" + i;
+                wheel.transform.SetParent(root.transform, false);
+                wheel.transform.localPosition = new Vector3(
+                    sideOffsets[i] * config.Width * 0.38f,
+                    wheelRadius,
+                    axleOffsets[i] * config.WheelBase * 0.5f);
+                wheel.transform.localScale = new Vector3(wheelRadius * 1.1f, wheelRadius * 0.6f, wheelRadius * 1.1f);
+                AssignMaterial(wheel.GetComponent<MeshRenderer>(), darkMat);
+                Object.Destroy(wheel.GetComponent<Collider>());
+            }
         }
 
         // ── Lalu lintas & pejalan kaki (§36-39) ──────────────────────────────
@@ -1008,13 +805,24 @@ namespace Kemudi.Simulation.Scene
             var go = new GameObject("TrafficVehiclePrefab");
             go.transform.SetParent(parent, false);
 
-            AuthoredVehicleVisual.BuildAsset(go, "KemudiVehicles/mobil");
-            go.AddComponent<TrafficWheelVisual>();
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "Body";
+            body.transform.SetParent(go.transform, false);
+            body.transform.localPosition = new Vector3(0f, 0.8f, 0f);
+            body.transform.localScale = new Vector3(1.8f, 0.7f, 4.2f);
+            AssignMaterial(body.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.8f, 0.7f, 0.2f), "TrafficBody"));
+            Object.Destroy(body.GetComponent<Collider>());
+
+            var roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            roof.name = "Roof";
+            roof.transform.SetParent(go.transform, false);
+            roof.transform.localPosition = new Vector3(0f, 1.35f, -0.3f);
+            roof.transform.localScale = new Vector3(1.6f, 0.5f, 2f);
+            AssignMaterial(roof.GetComponent<MeshRenderer>(), CreateMaterial(new Color(0.7f, 0.6f, 0.15f), "TrafficRoof"));
+            Object.Destroy(roof.GetComponent<Collider>());
 
             go.AddComponent<Rigidbody>();  // kinematic di-set oleh TrafficVehicle.Awake
-            var trafficCollider = go.AddComponent<BoxCollider>();
-            trafficCollider.center = new Vector3(0, .75f, 0);
-            trafficCollider.size = new Vector3(1.86f, 1.5f, 4.22f);
+            go.AddComponent<BoxCollider>(); // rintangan fisik bagi pemain (§16)
             go.AddComponent<SceneryObstacle>(); // tabrak kendaraan AI = obstacleHits (konsisten web)
 
             go.AddComponent<TrafficVehicle>();

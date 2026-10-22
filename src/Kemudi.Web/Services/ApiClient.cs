@@ -21,8 +21,26 @@ public sealed class ApiClient
         _httpContext = httpContext;
     }
 
-    public string? Token =>
-        _httpContext.HttpContext?.Request.Cookies[TokenCookie];
+    // Token dicache dari cookie pada render awal (prerender) agar tetap tersedia
+    // saat sirkuit Blazor Server berjalan (HttpContext null di dalam circuit).
+    private string? _cachedToken;
+
+    public string? Token
+    {
+        get
+        {
+            var fromCookie = _httpContext.HttpContext?.Request.Cookies[TokenCookie];
+            if (!string.IsNullOrEmpty(fromCookie))
+            {
+                _cachedToken = fromCookie;
+                return fromCookie;
+            }
+            return _cachedToken;
+        }
+    }
+
+    /// <summary>Bersihkan token cache di sirkuit (dipakai saat logout).</summary>
+    public void ClearToken() => _cachedToken = null;
 
     public async Task<T?> GetAsync<T>(string path, CancellationToken ct = default)
     {
@@ -43,38 +61,40 @@ public sealed class ApiClient
 
     public async Task<(bool Success, string? Error)> PostVoidAsync<TBody>(
         string path, TBody body, CancellationToken ct = default)
-    {
-        using var request = CreateRequest(HttpMethod.Post, path, body);
-        using var response = await _http.SendAsync(request, ct);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await ExtractErrorAsync(response, ct));
-    }
+        => await SendVoidAsync(HttpMethod.Post, path, body, ct);
 
     public async Task<(bool Success, string? Error)> PutVoidAsync<TBody>(
         string path, TBody body, CancellationToken ct = default)
-    {
-        using var request = CreateRequest(HttpMethod.Put, path, body);
-        using var response = await _http.SendAsync(request, ct);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await ExtractErrorAsync(response, ct));
-    }
+        => await SendVoidAsync(HttpMethod.Put, path, body, ct);
 
     public async Task<(bool Success, string? Error)> PatchVoidAsync<TBody>(
         string path, TBody body, CancellationToken ct = default)
-    {
-        using var request = CreateRequest(new HttpMethod("PATCH"), path, body);
-        using var response = await _http.SendAsync(request, ct);
-        if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await ExtractErrorAsync(response, ct));
-    }
+        => await SendVoidAsync(HttpMethod.Patch, path, body, ct);
 
     public async Task<(bool Success, string? Error)> DeleteVoidAsync(
         string path, CancellationToken ct = default)
+        => await SendVoidAsync<object?>(HttpMethod.Delete, path, null, ct);
+
+    private async Task<(bool Success, string? Error)> SendVoidAsync<TBody>(
+        HttpMethod method, string path, TBody body, CancellationToken ct)
     {
-        using var request = CreateRequest(HttpMethod.Delete, path);
+        using var request = CreateRequest(method, path, body);
         using var response = await _http.SendAsync(request, ct);
         if (response.IsSuccessStatusCode) return (true, null);
-        return (false, await ExtractErrorAsync(response, ct));
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+        var error = string.Empty;
+        try
+        {
+            using var doc = JsonDocument.Parse(content);
+            if (doc.RootElement.TryGetProperty("error", out var err))
+                error = err.GetString();
+        }
+        catch
+        {
+            error = content;
+        }
+        return (false, string.IsNullOrWhiteSpace(error) ? $"HTTP {(int)response.StatusCode}" : error);
     }
 
     private HttpRequestMessage CreateRequest(HttpMethod method, string path, object? body = null)
@@ -92,18 +112,5 @@ public sealed class ApiClient
         }
 
         return request;
-    }
-
-    private static async Task<string?> ExtractErrorAsync(HttpResponseMessage response, CancellationToken ct)
-    {
-        var content = await response.Content.ReadAsStringAsync(ct);
-        try
-        {
-            using var doc = JsonDocument.Parse(content);
-            if (doc.RootElement.TryGetProperty("error", out var err))
-                return err.GetString();
-        }
-        catch { }
-        return string.IsNullOrWhiteSpace(content) ? $"HTTP {(int)response.StatusCode}" : content;
     }
 }

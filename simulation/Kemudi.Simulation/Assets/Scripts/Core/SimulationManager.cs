@@ -1,49 +1,37 @@
 using System;
 using Kemudi.Simulation.Rules;
-using Kemudi.Simulation.Vehicles;
 using UnityEngine;
 
 namespace Kemudi.Simulation.Core
 {
     /// <summary>
-    /// Orkestrator fase simulasi (padanan <c>simStore.phase</c> di versi web).
+    /// Orkestrator fase simulasi (padanan <c>simStore.phase</c>).
     ///
-    /// Alur mengikuti SIMULASI.md §5:
-    ///   1. Selecting   — pilih kendaraan &amp; transmisi (MainMenuUI)
-    ///   2. Walking     — berjalan kaki menuju kendaraan
-    ///   3. Entering    — masuk ke kabin (animasi pintu)
-    ///   4. PreDrive    — checklist pra-berkendara
-    ///   5. Driving     — mesin menyala &amp; lintasan dijalani
-    ///   6. Finished / Failed — skor &amp; hasil akhir
+    /// Alur DEFAULT (performa-first, dokumen migrasi §10 & §35):
+    ///     Selecting → PreDrive → Driving → Finished/Failed
+    ///
+    /// Fase Walking (karakter berjalan ke kendaraan) BUKAN fitur wajib — ia
+    /// menambah karakter 3D, animasi, collision, dan kamera ekstra. Diaktifkan
+    /// hanya lewat <see cref="ImmersiveEntry"/>:
+    ///     Selecting → Walking → Entering → PreDrive → Driving → Finished/Failed
     /// </summary>
     public sealed class SimulationManager : MonoBehaviour
     {
         public enum Phase { Selecting, Walking, Entering, PreDrive, Driving, Finished, Failed }
 
-        /// <summary>Lama fase Entering (buka → masuk → tutup pintu) sebelum checklist.</summary>
-        private const float EnteringDurationSeconds = 0.9f;
-
         public event Action<Phase>? PhaseChanged;
+
+        /// <summary>Alur immersive (walking dulu) — default OFF (§35).</summary>
+        [Header("Alur Simulasi")]
+        [Tooltip("Default OFF: Selecting → PreDrive → Driving. ON menambahkan fase berjalan kaki ke kendaraan.")]
+        [SerializeField] private bool immersiveEntry;
+
+        /// <summary>Durasi animasi masuk kendaraan (detik) sebelum ke PreDrive.</summary>
+        [SerializeField] private float enteringDuration = 2f;
 
         public Phase CurrentPhase { get; private set; } = Phase.Selecting;
         public float ElapsedMs { get; private set; }
-        public string FailReason { get; private set; } = string.Empty;
-
-        /// <summary>Percobaan sudah dimulai (menu pilih kendaraan disembunyikan).</summary>
-        public bool RunStarted => CurrentPhase != Phase.Selecting;
-
-        // ── Konfigurasi percobaan (dipilih di layar Selecting) ─────────────
-        public VehicleConfig.VehicleType CurrentVehicleType { get; set; } = VehicleConfig.VehicleType.Mobil;
-        public bool IsManualTransmission { get; set; }
-
-        // ── Sub-sistem (di-wire oleh KemudiSceneBootstrap) ─────────────────
-        public ViolationSystem Violations { get; private set; } = null!;
-        public ScoringSystem Scoring { get; private set; } = null!;
-        public ChecklistManager Checklist { get; private set; } = null!;
-
-        [Header("Batas gagal")]
-        [Tooltip("Pelanggaran aturan (tanpa rintangan) yang membuat latihan dihentikan.")]
-        [SerializeField] private int failViolationLimit = 6;
+        public bool ImmersiveEntry => immersiveEntry;
 
         private float _enteringTimer;
 
@@ -51,146 +39,149 @@ namespace Kemudi.Simulation.Core
         {
             switch (CurrentPhase)
             {
-                case Phase.Entering:
-                    _enteringTimer += Time.deltaTime;
-                    if (_enteringTimer >= EnteringDurationSeconds) BeginPreDrive();
-                    break;
-
                 case Phase.Driving:
                     ElapsedMs += Time.deltaTime * 1000f;
+                    break;
+                case Phase.Entering:
+                    _enteringTimer += Time.deltaTime;
+                    if (_enteringTimer >= enteringDuration)
+                        BeginPreDrive(CurrentVehicleType, IsManualTransmission);
                     break;
             }
         }
 
-        private void OnDestroy()
-        {
-            if (Violations != null) Violations.ViolationOccurred -= OnViolation;
-            if (Checklist != null) Checklist.ChecklistCompleted -= OnChecklistCompleted;
-        }
-
-        public void Configure(ViolationSystem violations, ScoringSystem scoring, ChecklistManager checklist)
-        {
-            Violations = violations;
-            Scoring = scoring;
-            Checklist = checklist;
-
-            if (Violations != null) Violations.ViolationOccurred += OnViolation;
-            if (Checklist != null) Checklist.ChecklistCompleted += OnChecklistCompleted;
-        }
-
-        // ── Alur §5 ────────────────────────────────────────────────────────
-
-        /// <summary>Langkah 1→2: setelah memilih kendaraan, mulai dari mode berjalan kaki.</summary>
+        /// <summary>Mulai simulasi dari layar pilih kendaraan.</summary>
         public void StartSimulation()
         {
-            ResetRun();
-            BeginWalking();
+            ElapsedMs = 0f;
+            if (immersiveEntry)
+            {
+                SetPhase(Phase.Walking);
+            }
+            else
+            {
+                // Default: langsung ke PreDrive (checklist) — walk tidak wajib.
+                BeginPreDrive(CurrentVehicleType, IsManualTransmission);
+            }
         }
 
-        /// <summary>Langkah 2: pengguna muncul di area parkir dan berjalan kaki.</summary>
-        public void BeginWalking() => SetPhase(Phase.Walking);
+        /// <summary>Jenis kendaraan yang sedang dipilih (disetel UI/scene).</summary>
+        public Vehicles.VehicleConfig.VehicleType CurrentVehicleType { get; set; } = Vehicles.VehicleConfig.VehicleType.Mobil;
 
-        /// <summary>Langkah 3: masuk ke kabin (dipanggil WalkingController saat di pintu).</summary>
+        /// <summary>Apakah transmisi manual (menambah item checklist kopling/gigi satu).</summary>
+        public bool IsManualTransmission { get; set; }
+
+        /// <summary>Hanya dipakai saat <see cref="ImmersiveEntry"/> aktif.</summary>
+        public void StartWalking() => SetPhase(Phase.Walking);
+
+        /// <summary>Karakter sampai di pintu kendaraan → animasi masuk.</summary>
         public void EnterVehicle()
         {
-            if (CurrentPhase != Phase.Walking) return;
             _enteringTimer = 0f;
             SetPhase(Phase.Entering);
         }
 
-        /// <summary>Langkah 4: checklist pra-berkendara (§43).</summary>
-        public void BeginPreDrive()
+        /// <summary>
+        /// Memulai fase PreDrive (checklist). Reset checklist sesuai kendaraan
+        /// & transmisi, lalu tandai item "masuk kendaraan" + "tutup pintu"
+        /// (pemain sudah berada di dalam kabin saat fase ini).
+        /// </summary>
+        public void BeginPreDrive(Vehicles.VehicleConfig.VehicleType vehicleType, bool manualTransmission)
         {
-            if (CurrentPhase != Phase.PreDrive && CurrentPhase != Phase.Entering) return;
+            // Reset semua sistem penilaian untuk percobaan baru (§45-46).
+            violationSystem?.Reset();
+            scoringSystem?.Reset();
 
-            if (Checklist != null)
-            {
-                Checklist.MarkDone(ChecklistManager.Item.EnteredVehicle);
-                Checklist.MarkDone(ChecklistManager.Item.DoorClosed);
-            }
-
+            checklist?.Reset(vehicleType, manualTransmission);
+            checklist?.MarkDone(Rules.ChecklistManager.Item.EnteredVehicle);
+            checklist?.MarkDone(Rules.ChecklistManager.Item.DoorClosed);
             SetPhase(Phase.PreDrive);
         }
 
-        /// <summary>Langkah 5: checklist selesai → berkendara (timer mulai).</summary>
-        public void CompletePreDrive()
+        /// <summary>Checklist pra-jalan selesai → mengemudi dimulai.</summary>
+        public void CompletePreDrive() => StartDriving();
+
+        public void StartDriving()
         {
-            if (CurrentPhase != Phase.PreDrive) return;
             ElapsedMs = 0f;
             SetPhase(Phase.Driving);
         }
 
-        /// <summary>Langkah 7a: melewati garis finish.</summary>
-        public void Finish()
-        {
-            if (CurrentPhase == Phase.Finished || CurrentPhase == Phase.Failed) return;
-            Scoring?.Finish();
-            SetPhase(Phase.Finished);
-        }
+        public void Finish() => SetPhase(Phase.Finished);
 
-        /// <summary>Langkah 7b: latihan dihentikan (mis. terlalu banyak pelanggaran).</summary>
+        /// <summary>Kembali ke layar pilih kendaraan (untuk restart percobaan).</summary>
+        public void ReturnToSelecting() => SetPhase(Phase.Selecting);
+
         public void Fail(string reason)
         {
-            if (CurrentPhase == Phase.Finished || CurrentPhase == Phase.Failed) return;
-            FailReason = reason;
-            Debug.LogWarning($"[Kemudi.Sim] Simulasi dihentikan: {reason}");
-            Scoring?.Fail();
+            Debug.LogWarning($"Simulasi dihentikan: {reason}");
+            scoringSystem?.Fail(); // skor jadi 0 agar layar hasil mencerminkan kegagalan
             SetPhase(Phase.Failed);
         }
 
-        /// <summary>Langkah 8 selesai → kembali ke layar pilih kendaraan.</summary>
-        public void ReturnToSelecting()
-        {
-            ElapsedMs = 0f;
-            FailReason = string.Empty;
-            SetPhase(Phase.Selecting);
-        }
+        // ── Wiring sistem aturan (event-driven, §45-46) ────────────────────
+        // ViolationSystem (deteksi, event-based) → ScoringSystem (pencatatan).
+        // Tidak ada pengecekan "semua aturan setiap frame" di sini — pemicu
+        // datang dari TriggerZone / TrafficLightController / VehicleController.
 
-        // ── Internal ───────────────────────────────────────────────────────
+        [SerializeField] private ViolationSystem violationSystem = null!;
+        [SerializeField] private ScoringSystem scoringSystem = null!;
+        [SerializeField] private Rules.ChecklistManager checklist = null!;
 
-        private void ResetRun()
-        {
-            ElapsedMs = 0f;
-            FailReason = string.Empty;
-            Violations?.Reset();
-            Scoring?.Reset();
-            Checklist?.Reset(CurrentVehicleType, IsManualTransmission);
-        }
-
-        private void OnChecklistCompleted()
-        {
-            if (CurrentPhase != Phase.PreDrive) return;
-            Scoring?.AddChecklistBonus();
-            CompletePreDrive();
-        }
+        private bool _wired;
 
         /// <summary>
-        /// Pelanggaran → skor (rintangan dipisah dari pelanggaran aturan,
-        /// konsisten dengan laporan hasil §62) dan cek batas gagal.
+        /// Wire sistem aturan — dipakai scene bootstrap (komponen dibuat saat
+        /// runtime sehingga tidak bisa di-assign lewat Inspector).
         /// </summary>
+        public void Configure(ViolationSystem violationSystem, ScoringSystem scoringSystem, Rules.ChecklistManager checklist)
+        {
+            if (this.violationSystem != null)
+                this.violationSystem.ViolationOccurred -= OnViolation;
+
+            this.violationSystem = violationSystem;
+            this.scoringSystem = scoringSystem;
+            this.checklist = checklist;
+
+            if (this.violationSystem != null)
+                this.violationSystem.ViolationOccurred += OnViolation;
+            _wired = this.violationSystem != null;
+        }
+
+        private void OnEnable()
+        {
+            if (violationSystem != null && scoringSystem != null && !_wired)
+            {
+                violationSystem.ViolationOccurred += OnViolation;
+                _wired = true;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (violationSystem != null && _wired)
+            {
+                violationSystem.ViolationOccurred -= OnViolation;
+                _wired = false;
+            }
+        }
+
         private void OnViolation(ViolationSystem.Violation violation)
         {
-            switch (violation.Type)
+            // ObstacleHit punya bobot ringan sendiri (-3 poin, konsisten web),
+            // bukan lewat AddViolation(severity) yang lebih berat.
+            if (violation.Type == ViolationSystem.ViolationType.ObstacleHit)
             {
-                case ViolationSystem.ViolationType.ObstacleHit:
-                    Scoring?.AddObstacleHit();
-                    break;
-                case ViolationSystem.ViolationType.OffRoad:
-                    Scoring?.AddOffRoad();
-                    break;
-                case ViolationSystem.ViolationType.Collision:
-                    Scoring?.AddCollision();
-                    break;
-                default:
-                    Scoring?.AddViolation(violation.Severity);
-                    break;
+                scoringSystem?.AddObstacleHit();
+                return;
             }
 
-            if (CurrentPhase != Phase.Driving || Violations == null) return;
+            scoringSystem?.AddViolation(violation.Severity);
 
-            var ruleViolations = Violations.Count - Violations.CountOf(ViolationSystem.ViolationType.ObstacleHit);
-            if (ruleViolations >= failViolationLimit)
-                Fail($"Terlalu banyak pelanggaran ({ruleViolations}). Latihan dihentikan.");
+            // Gagal bila pelanggaran lalu lintas mencapai ambang batas
+            // (failThresholdViolations di ScoringSystem, default 3).
+            if (scoringSystem != null && scoringSystem.TotalViolations >= scoringSystem.FailThreshold)
+                Fail("Pelanggaran mencapai ambang batas (" + scoringSystem.FailThreshold + ").");
         }
 
         private void SetPhase(Phase phase)

@@ -27,7 +27,7 @@ namespace Kemudi.Simulation.Vehicles
         public float Mass = 1300f;          // kg
 
         [Header("Performa (m/s & m/s²)")]
-        public float MaxSpeed = 22f;
+        public float MaxSpeed = 19.44f;   // 70 km/j (batas maksimum semua kendaraan)
         public float ReverseMaxSpeed = 6f;
         public float Acceleration = 6f;
         public float BrakeForce = 9f;

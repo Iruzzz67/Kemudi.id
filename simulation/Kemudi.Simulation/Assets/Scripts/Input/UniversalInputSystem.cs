@@ -24,10 +24,7 @@ namespace Kemudi.Simulation.Input
 
         private void Update()
         {
-            // Flag sekali-tekan dibersihkan setiap frame: provider hanya
-            // meng-OR-kan tekanan barunya, bukan menyimpan status lama
-            // (kalau tidak, aksi seperti siklus kamera akan terulang terus).
-            var next = ClearEdgeFlags(Current);
+            var next = Current;
             foreach (var provider in _providers)
             {
                 if (!provider.IsActive) continue;
@@ -35,25 +32,6 @@ namespace Kemudi.Simulation.Input
                 next = Merge(next, contributed);
             }
             Current = next;
-        }
-
-        private static VehicleInputState ClearEdgeFlags(VehicleInputState state)
-        {
-            state.HandbrakePressed = false;
-            state.GearUp = false;
-            state.GearDown = false;
-            state.ReverseRequested = false;
-            state.NeutralRequested = false;
-            state.CameraCycle = false;
-            state.Pause = false;
-            state.Ignition = false;
-            state.HeadlightToggle = false;
-            state.HighBeamToggle = false;
-            state.HazardToggle = false;
-            state.TurnSignalLeft = false;
-            state.TurnSignalRight = false;
-            state.HornHeld = false;
-            return state;
         }
 
         public void Register(IInputProvider provider)
@@ -90,6 +68,14 @@ namespace Kemudi.Simulation.Input
             merged.TurnSignalLeft |= b.TurnSignalLeft;
             merged.TurnSignalRight |= b.TurnSignalRight;
             merged.HornHeld |= b.HornHeld;
+
+            merged.ToggleSeatbelt |= b.ToggleSeatbelt;
+            merged.ToggleHelmet |= b.ToggleHelmet;
+            merged.ToggleJacket |= b.ToggleJacket;
+            merged.ToggleGloves |= b.ToggleGloves;
+            merged.ToggleBoots |= b.ToggleBoots;
+            merged.AdjustSeat |= b.AdjustSeat;
+            merged.AdjustMirrors |= b.AdjustMirrors;
             return merged;
         }
     }

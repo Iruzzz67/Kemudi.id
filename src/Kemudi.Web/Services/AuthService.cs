@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Kemudi.Shared.DTOs;
 using Microsoft.JSInterop;
@@ -6,13 +7,13 @@ namespace Kemudi.Web.Services;
 
 /// <summary>
 /// State autentikasi sisi server (Blazor Server). Token JWT disimpan di cookie
-/// httpOnly <c>kemudi_token</c>; halaman membaca properti <see cref="IsAuthenticated"/>.
+/// <c>kemudi_token</c>; halaman membaca properti <see cref="IsAuthenticated"/>.
 /// </summary>
 public sealed class AuthService
 {
     private readonly ApiClient _api;
     private readonly IHttpContextAccessor _httpContext;
-    private readonly IJSRuntime _js;
+    private readonly IJSRuntime? _js;
 
     public AuthService(ApiClient api, IHttpContextAccessor httpContext, IJSRuntime js)
     {
@@ -21,40 +22,25 @@ public sealed class AuthService
         _js = js;
     }
 
-    public bool IsAuthenticated => !string.IsNullOrEmpty(_api.Token) || HasSessionCookie;
+    public bool IsAuthenticated => !string.IsNullOrEmpty(_api.Token);
 
-    public string? Email
+    /// <summary>Apakah token yang tersimpan berperan Admin (klaim role di JWT).</summary>
+    public bool IsAdmin => HasRole("Admin");
+
+    /// <summary>Email pengguna yang tersimpan di token.</summary>
+    public string Email => DecodeClaim("email") ?? "";
+
+    /// <summary>Login khusus admin — user biasa ditolak oleh API (403).</summary>
+    public async Task<(bool Success, string? Error)> LoginAdminAsync(
+        string email, string password, CancellationToken ct = default)
     {
-        get
-        {
-            var session = GetSessionData();
-            if (session == null) return null;
-            try
-            {
-                var user = session.Value.GetProperty("user");
-                return user.TryGetProperty("email", out var e) ? e.GetString() : null;
-            }
-            catch { return null; }
-        }
-    }
+        var result = await _api.PostAsync<LoginRequest, AuthResponse>(
+            "/api/admin/auth/login", new LoginRequest(email, password), ct);
+        if (result is null) return (false, "Login gagal. Periksa email dan password.");
 
-    public bool IsAdmin
-    {
-        get
-        {
-            var session = GetSessionData();
-            if (session == null) return false;
-            try
-            {
-                var user = session.Value.GetProperty("user");
-                return user.TryGetProperty("isAdmin", out var admin) && admin.GetBoolean();
-            }
-            catch { return false; }
-        }
+        await SetTokenCookieAsync(result.Token);
+        return (true, null);
     }
-
-    private bool HasSessionCookie =>
-        _httpContext.HttpContext?.Request.Cookies.ContainsKey("kemudi_session") == true;
 
     public async Task<(bool Success, string? Error, AuthResponse? Data)> LoginAsync(
         string email, string password, CancellationToken ct = default)
@@ -65,18 +51,6 @@ public sealed class AuthService
 
         await SetTokenCookieAsync(result.Token);
         return (true, null, result);
-    }
-
-    public async Task<(bool Success, string? Error)> LoginAdminAsync(
-        string email, string password, CancellationToken ct = default)
-    {
-        var result = await _api.PostAsync<LoginBody, AuthResponse>(
-            "/api/admin/login", new LoginBody(email, password), ct);
-        if (result is null)
-            return (false, "Login admin gagal. Pastikan akun memiliki role ADMIN.");
-
-        await SetTokenCookieAsync(result.Token);
-        return (true, null);
     }
 
     public async Task<(bool Success, string? Error)> RegisterAsync(
@@ -92,31 +66,64 @@ public sealed class AuthService
 
     public async Task LogoutAsync()
     {
-        await _api.PostVoidAsync("/api/auth/signout", new { });
-        await _js.InvokeVoidAsync("kemudiAuth.clearToken");
+        // Hapus cache token di sirkuit agar IsAuthenticated langsung false.
+        _api.ClearToken();
+        try
+        {
+            if (_js is not null)
+                await _js.InvokeVoidAsync("clearAuthCookie", ApiClient.TokenCookie);
+        }
+        catch (InvalidOperationException)
+        {
+            // Prerender — JS belum tersedia; cookie dibersihkan pada render interaktif.
+        }
     }
 
-    public async Task LogoutAsyncWithoutApi()
+    private bool HasRole(string role)
     {
-        await _js.InvokeVoidAsync("kemudiAuth.clearToken");
+        var claim = DecodeClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+        if (claim == role) return true;
+        // Fallback untuk klaim bernama pendek "role".
+        return DecodeClaim("role") == role;
+    }
+
+    private string? DecodeClaim(string claimName)
+    {
+        var token = _api.Token;
+        if (string.IsNullOrEmpty(token)) return null;
+        try
+        {
+            var parts = token.Split('.');
+            if (parts.Length < 2) return null;
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+            using var doc = JsonDocument.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(payload)));
+            if (doc.RootElement.TryGetProperty(claimName, out var value))
+                return value.GetString();
+        }
+        catch
+        {
+            // Token rusak — perlakukan sebagai tidak login.
+        }
+        return null;
     }
 
     private async Task SetTokenCookieAsync(string token)
     {
-        await _js.InvokeVoidAsync("kemudiAuth.setToken", token);
-    }
-
-    private JsonElement? GetSessionData()
-    {
-        if (_httpContext.HttpContext?.Request.Cookies.TryGetValue("kemudi_session", out var json) != true)
-            return null;
         try
         {
-            return JsonSerializer.Deserialize<JsonElement>(json!);
+            // Respons HTTP sudah terkirim saat event handler sirkuit berjalan,
+            // jadi cookie ditulis dari klien via js/auth.js (lihat catatan di file).
+            if (_js is not null)
+                await _js.InvokeVoidAsync("setAuthCookie", ApiClient.TokenCookie, token, 7);
         }
-        catch { return null; }
+        catch (InvalidOperationException)
+        {
+            // Prerender — sirkuit belum interaktif; cookie di-set pada render interaktif.
+        }
     }
-
-    // Internal DTOs
-    private record LoginBody(string Email, string Password);
 }

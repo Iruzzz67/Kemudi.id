@@ -22,13 +22,6 @@ namespace Kemudi.Simulation.Transmission
         private bool _running;
         private float _crankTimer;
         private VehicleConfigProvider _config = null!;
-        private Vehicles.VehicleConfig? _vehicleConfig;
-
-        /// <summary>Idle/redline dari ScriptableObject kendaraan (dipanggil bootstrap).</summary>
-        public void Configure(Vehicles.VehicleConfig config) => _vehicleConfig = config;
-
-        private float IdleRpm => _vehicleConfig != null ? _vehicleConfig.EngineIdleRpm : _config?.EngineIdleRpm ?? 800f;
-        private float RedlineRpm => _vehicleConfig != null ? _vehicleConfig.EngineRedlineRpm : _config?.EngineRedlineRpm ?? 7000f;
 
         // Dibuat terpisah agar EngineController tidak bergantung langsung pada
         // ScriptableObject (memudahkan unit test).
@@ -36,6 +29,25 @@ namespace Kemudi.Simulation.Transmission
         {
             float EngineIdleRpm { get; }
             float EngineRedlineRpm { get; }
+        }
+
+        /// <summary>
+        /// Wire konfigurasi — dipakai scene bootstrap (komponen dibuat saat
+        /// runtime sehingga tidak bisa di-assign lewat Inspector).
+        /// </summary>
+        public void Configure(Vehicles.VehicleConfig config)
+        {
+            _config = new VehicleConfigAdapter(config);
+        }
+
+        private sealed class VehicleConfigAdapter : VehicleConfigProvider
+        {
+            private readonly Vehicles.VehicleConfig _config;
+
+            public VehicleConfigAdapter(Vehicles.VehicleConfig config) => _config = config;
+
+            public float EngineIdleRpm => _config.EngineIdleRpm;
+            public float EngineRedlineRpm => _config.EngineRedlineRpm;
         }
 
         private void Update()
@@ -54,8 +66,8 @@ namespace Kemudi.Simulation.Transmission
 
             if (!_running) return;
 
-            var idle = IdleRpm;
-            var redline = RedlineRpm;
+            var idle = _config?.EngineIdleRpm ?? 800f;
+            var redline = _config?.EngineRedlineRpm ?? 7000f;
             // TODO: RPM sebenarnya bergantung beban (gas) & gigi — disetel oleh
             // TransmissionController. Di sini hanya fallback idle→redline.
             Rpm = Mathf.Lerp(idle, redline, Mathf.Clamp01(Time.time * 0.01f));
@@ -85,7 +97,9 @@ namespace Kemudi.Simulation.Transmission
         /// <summary>Setel RPM dari rasio (0..1) yang dihitung transmisi.</summary>
         public void SetRpmFromRatio(float ratio)
         {
-            Rpm = Mathf.Lerp(IdleRpm, RedlineRpm, Mathf.Clamp01(ratio));
+            var idle = _config?.EngineIdleRpm ?? 800f;
+            var redline = _config?.EngineRedlineRpm ?? 7000f;
+            Rpm = Mathf.Lerp(idle, redline, Mathf.Clamp01(ratio));
         }
 
         public void Stall(string reason = "Mesin mati (stall)!")

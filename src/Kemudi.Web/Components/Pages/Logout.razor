@@ -8,14 +8,9 @@
 </div>
 
 @code {
-    private bool _redirected;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (!firstRender || _redirected) return;
-
-        _redirected = true;
-        await Auth.LogoutAsyncWithoutApi();
+        await Auth.LogoutAsync();
         Nav.NavigateTo("/", forceLoad: true);
     }
 }

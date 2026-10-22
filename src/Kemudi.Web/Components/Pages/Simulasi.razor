@@ -2,202 +2,161 @@
 @using Kemudi.Shared.DTOs
 @using Kemudi.Web.Services
 @inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+@inject IHttpClientFactory HttpClientFactory
 
-<!-- Simulation Header -->
-<section class="sim-hero" style="background:var(--black);padding:3rem 2rem 2rem;color:#fff;position:relative;overflow:hidden;">
-    <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.03) 60px,rgba(255,255,255,0.03) 61px);pointer-events:none;"></div>
-    <div style="max-width:900px;margin:0 auto;position:relative;z-index:1;">
-        <div class="sim-street-label" style="margin-bottom:1rem;">SIMULASI</div>
-        <h1 style="font-size:2.25rem;letter-spacing:-0.03em;margin:0;line-height:1.1;">
-            Simulasi Mengemudi 3D
-        </h1>
-        <p style="color:rgba(255,255,255,0.5);margin:0.75rem 0 0;max-width:520px;font-size:1.05rem;">
-            Pilih kendaraan, pilih rute, dan mulai latihan. Fisika beneran, jalan virtual.
-        </p>
-    </div>
+<section class="hero">
+    <h1>Simulasi <span>3D Mengemudi</span></h1>
+    <p>
+        Berlatih mengemudi di lintasan ala Kota Bogor (±916 m) — motor, mobil, atau truk —
+        lengkap dengan lalu lintas, pejalan kaki, lampu merah, rintangan, dan skor akhir.
+        Simulasi dibuat dengan <strong>Unity (C#)</strong> dan bisa dimainkan langsung di browser (WebGL)
+        atau di aplikasi desktop/VR (OpenXR).
+    </p>
 </section>
 
-<!-- Vehicle Selection -->
-<section class="sim-section" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
-    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">1</span>
-        <h2 style="margin:0;font-size:1.15rem;">Pilih Kendaraan</h2>
-    </div>
-
-    @if (_vehicles is null)
-    {
-        <div class="loading">Memuat kendaraan...</div>
-    }
-    else
-    {
-        <div class="sim-vehicle-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+@if (_vehicles is null)
+{
+    <div class="loading">Memuat kendaraan...</div>
+}
+else
+{
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">1. Pilih Kendaraan</h2>
+        <div class="grid grid-3 mt-2">
             @foreach (var v in _vehicles)
             {
-                <button class="sim-vehicle-btn @(_selectedType == v.Type ? "selected" : "")"
-                        @onclick="() => SelectVehicle(v.Type)">
-                    <div class="sim-vehicle-icon">
-                        @(v.Type == "MOTOR" ? "🏍️" : v.Type == "MOBIL" ? "🚗" : "🚛")
+                <div class="card @(v.Type == _selectedVehicle ? "selected" : "")" style="@(v.Type == _selectedVehicle ? "outline:2px solid var(--accent,#2563eb)" : "")">
+                    <span class="chip" style="background:@v.Color"></span>
+                    <h3>@v.Label</h3>
+                    <p>@v.Description</p>
+                    <div class="meta mt-1">
+                        <span>Top speed: @Math.Round(v.MaxSpeed * 3.6) km/j</span>
+                        <span>@v.GearCount gigi</span>
                     </div>
-                    <div class="sim-vehicle-name">@v.Label</div>
-                    <div class="sim-vehicle-meta">@Math.Round(v.MaxSpeed * 3.6) km/j · @v.GearCount gigi</div>
-                </button>
+                    <button class="btn @(v.Type == _selectedVehicle ? "btn-primary" : "btn-outline") mt-1"
+                            @onclick="() => SelectVehicle(v.Type)">
+                        @(v.Type == _selectedVehicle ? "✓ Dipilih" : "Pilih")
+                    </button>
+                </div>
             }
         </div>
-    }
-</section>
+    </section>
 
-<!-- Route / Track Selection -->
-<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
-    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">2</span>
-        <h2 style="margin:0;font-size:1.15rem;">Pilih Rute</h2>
-    </div>
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">2. Mainkan</h2>
 
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
-        @foreach (var r in _routes)
+        @if (_webGlAvailable == null)
         {
-            <button class="sim-route-btn @(_selectedRoute == r.Id ? "selected" : "")"
-                    @onclick="() => _selectedRoute = r.Id">
-                <div class="sim-route-top">
-                    <span class="sim-route-icon">🛣️</span>
-                    <div>
-                        <div class="sim-route-name">@r.Name</div>
-                        <div class="sim-route-desc">@r.Description</div>
-                    </div>
-                </div>
-                <div class="sim-route-specs">
-                    <span>@r.Distance</span>
-                    <span>@r.Difficulty</span>
-                    <span>@r.TrafficLevel</span>
-                </div>
-            </button>
+            <div class="loading">Memeriksa build WebGL...</div>
         }
-    </div>
-</section>
-
-<!-- Simulation Canvas Area -->
-<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
-    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">3</span>
-        <h2 style="margin:0;font-size:1.15rem;">Simulasi</h2>
-    </div>
-
-    <div class="sim-road-surface" style="min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
-        <div style="text-align:center;color:var(--muted);">
-            <div style="font-size:4rem;margin-bottom:0.75rem;opacity:0.4;">🛣️</div>
-            <div style="font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.25rem;">
-                Simulasi 3D tersedia di website utama
+        else if (_webGlAvailable == true)
+        {
+            <div class="card mt-2">
+                <div class="flex" style="justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+                    <div>
+                        <h3 style="margin:0 0 0.25rem">▶ Mainkan di Browser (WebGL)</h3>
+                        <p class="muted" style="margin:0">
+                            Kendaraan: <strong>@SelectedLabel</strong> ·
+                            Status login: <strong>@(Auth.IsAuthenticated ? "Sudah masuk — hasil akan tersimpan" : "Belum masuk — hasil tidak tersimpan")</strong>
+                        </p>
+                    </div>
+                    <button class="btn btn-primary btn-lg" @onclick="ToggleWebGl" disabled="@(_selectedVehicle is null)">
+                        @(_playingWebGl ? "✕ Tutup Simulasi" : "▶ Mulai Simulasi")
+                    </button>
+                </div>
+                @if (!Auth.IsAuthenticated)
+                {
+                    <p class="muted mt-1">💡 <a href="login" style="color:#2563eb;text-decoration:underline">Masuk dulu</a> agar skor &amp; riwayat tersimpan di dashboard.</p>
+                }
             </div>
-            <div style="font-size:0.9rem;margin-bottom:1.5rem;">
-                Pilih kendaraan dan rute, lalu buka simulasi di aplikasi simulasi terpisah.
+
+            @if (_playingWebGl)
+            {
+                <div class="sim-frame-wrap">
+                    <iframe class="sim-iframe" src="@_webGlUrl" allow="fullscreen; xr-spatial-tracking; gamepad" loading="lazy"></iframe>
+                    <p class="muted" style="text-align:center;margin-top:0.5rem">
+                        Kontrol: <strong>W/S</strong> gas/rem · <strong>A/D</strong> belok · <strong>Space</strong> rem tangan ·
+                        <strong>I</strong> mesin · <strong>C</strong> kamera · <strong>B/H/J/G/F</strong> checklist.
+                        Selesaikan checklist pra-jalan lalu meluncur hingga garis finish.
+                    </p>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="error-box mt-2" style="background:#fffbeb;border-color:#fcd34d;color:#92400e">
+                <strong>Build WebGL belum tersedia.</strong><br />
+                Simulasi browser membutuhkan hasil build WebGL dari proyek Unity
+                (<code>simulation/Kemudi.Simulation</code>) yang disalin ke
+                <code>src/Kemudi.Web/wwwroot/unity/</code> — lihat
+                <a href="https://github.com/Iruzzz67/Kemudi.id/blob/main/simulation/Kemudi.Simulation/README.md" style="color:#92400e;text-decoration:underline">README Unity</a>.
             </div>
-            <a class="btn btn-primary btn-lg"
-               href="@SimulationLink"
-               target="_blank"
-               rel="noopener">
-                ▶ Buka Simulasi 3D
+        }
+    </section>
+
+    <section class="section">
+        <div class="card mt-2" style="text-align:center;padding:1.5rem">
+            <h3 style="margin-top:0">🖥️ Aplikasi Desktop / VR (OpenXR)</h3>
+            <p class="muted">
+                Untuk pengalaman VR penuh (PC VR &amp; Meta Quest), buka proyek
+                <em>Kemudi.Simulation</em> di Unity, build, lalu mainkan. Hasil latihan
+                dikirim otomatis ke server via <code>POST /api/progress</code>.
+            </p>
+            <a class="btn btn-outline" href="https://github.com/Iruzzz67/Kemudi.id/tree/main/simulation/Kemudi.Simulation" target="_blank" rel="noopener">
+                Panduan Build Unity
             </a>
-        </div>
-    </div>
-</section>
-
-<!-- Controls Info -->
-<section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
-    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
-        <span style="width:32px;height:32px;background:var(--black);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">4</span>
-        <h2 style="margin:0;font-size:1.15rem;">Kontrol</h2>
-    </div>
-
-    <div class="sim-road-surface" style="padding:2rem;">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
-            <div>
-                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Kendali</h3>
-                <div class="sim-control-row"><kbd>W</kbd> <span>Maju / Gas</span></div>
-                <div class="sim-control-row"><kbd>S</kbd> <span>Mundur / Rem</span></div>
-                <div class="sim-control-row"><kbd>A</kbd> <span>Belok Kiri</span></div>
-                <div class="sim-control-row"><kbd>D</kbd> <span>Belok Kanan</span></div>
-            </div>
-            <div>
-                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Transmisi</h3>
-                <div class="sim-control-row"><kbd>Q</kbd> <span>Gigi Naik</span></div>
-                <div class="sim-control-row"><kbd>E</kbd> <span>Gigi Turun</span></div>
-                <div class="sim-control-row"><kbd>Space</kbd> <span>Rem Tangan</span></div>
-            </div>
-            <div>
-                <h3 style="margin:0 0 0.75rem;font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);">Lainnya</h3>
-                <div class="sim-control-row"><kbd>R</kbd> <span>Reset Posisi</span></div>
-                <div class="sim-control-row"><kbd>C</kbd> <span>Ganti Kamera</span></div>
-                <div class="sim-control-row"><kbd>Esc</kbd> <span>Pause / Menu</span></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Vehicle Detail Card (if selected) -->
-@if (_selectedVehicle is not null)
-{
-    <section class="sim-section" style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem;">
-        <div class="sim-road-surface" style="padding:1.5rem;">
-            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-                <div class="sim-vehicle-icon" style="width:48px;height:48px;font-size:1.5rem;">
-                    @(_selectedVehicle.Type == "MOTOR" ? "🏍️" : _selectedVehicle.Type == "MOBIL" ? "🚗" : "🚛")
-                </div>
-                <div>
-                    <h3 style="margin:0;font-size:1.15rem;">@_selectedVehicle.Label</h3>
-                    <p style="margin:0.15rem 0 0;color:var(--muted);font-size:0.9rem;">@_selectedVehicle.Description</p>
-                </div>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;">
-                <div class="sim-spec-pill">
-                    <span class="sim-spec-val">@(_selectedVehicle.MaxSpeed)</span>
-                    <span class="sim-spec-lbl">m/s max</span>
-                </div>
-                <div class="sim-spec-pill">
-                    <span class="sim-spec-val">@(_selectedVehicle.MaxSpeed * 3.6).ToString("0")</span>
-                    <span class="sim-spec-lbl">km/j</span>
-                </div>
-                <div class="sim-spec-pill">
-                    <span class="sim-spec-val">@(_selectedVehicle.GearCount)</span>
-                    <span class="sim-spec-lbl">Gigi</span>
-                </div>
-                <div class="sim-spec-pill">
-                    <span class="sim-spec-val">@(_selectedVehicle.Type == "MOTOR" ? "Ringan" : _selectedVehicle.Type == "MOBIL" ? "Sedang" : "Berat")</span>
-                    <span class="sim-spec-lbl">Kelas</span>
-                </div>
-            </div>
         </div>
     </section>
 }
 
 @code {
     private List<VehicleDto>? _vehicles;
-    private VehicleDto? _selectedVehicle;
-    private string? _selectedType;
-    private string? _selectedRoute;
-    private string SimulationLink =>
-        _selectedVehicle is null || _selectedRoute is null
-            ? "http://localhost:3000/simulasi"
-            : $"http://localhost:3000/simulasi?vehicle={Uri.EscapeDataString(_selectedVehicle.Type)}&route={Uri.EscapeDataString(_selectedRoute)}&autoStart=1";
+    private string? _selectedVehicle;
+    private bool? _webGlAvailable;
+    private bool _playingWebGl;
 
-    private record RouteItem(string Id, string Name, string Description, string Distance, string Difficulty, string TrafficLevel);
+    private string SelectedLabel => _vehicles?.FirstOrDefault(v => v.Type == _selectedVehicle)?.Label ?? "—";
 
-    private readonly List<RouteItem> _routes = new()
+    private string? _webGlUrl;
+    private string? WebGlUrl
     {
-        new("city", "Jalan Kota", "Jalanan perkotaan dengan traffic light dan pejalan kaki.", "2.5 km", "Mudah", "Sedang"),
-        new("suburban", "Jalan Perumahan", "Jalanan perumahan dengan tikungan dan parkir paralel.", "3.2 km", "Mudah", "Ringan"),
-        new("highway", "Jalan Tol", "Jalanan lurus dengan kecepatan tinggi dan tanjakan.", "5.0 km", "Sedang", "Sedang"),
-        new("mountain", "Jalanan Gunung", "Tikungan tajam, tanjakan curam, dan turunan berbahaya.", "4.1 km", "Sulit", "Ringan"),
-    };
-
-    protected override async Task OnInitializedAsync()
-    {
-        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+        get
+        {
+            if (_selectedVehicle is null) return null;
+            var token = Auth.IsAuthenticated ? Uri.EscapeDataString(Api.Token ?? "") : "";
+            return Nav.BaseUri + "unity/index.html?token=" + token + "&vehicle=" + _selectedVehicle;
+        }
     }
 
     private void SelectVehicle(string type)
     {
-        _selectedType = type;
-        _selectedVehicle = _vehicles?.FirstOrDefault(v => v.Type == type);
+        _selectedVehicle = type;
+        _webGlUrl = WebGlUrl;
     }
 
+    private void ToggleWebGl()
+    {
+        _webGlUrl = WebGlUrl;
+        _playingWebGl = !_playingWebGl;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+
+        // Cek apakah build WebGL tersedia di /unity/index.html.
+        try
+        {
+            var http = HttpClientFactory.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Head, new Uri(Nav.BaseUri + "unity/index.html"));
+            using var response = await http.SendAsync(request);
+            _webGlAvailable = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            _webGlAvailable = false;
+        }
+    }
 }

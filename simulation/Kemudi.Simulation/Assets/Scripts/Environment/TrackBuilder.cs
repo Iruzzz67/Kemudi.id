@@ -83,7 +83,6 @@ namespace Kemudi.Simulation.Environment
             renderer.sharedMaterial = roadMaterial;
             var collider = roadGo.AddComponent<MeshCollider>();
             collider.sharedMesh = roadMesh; // 1 collider utama (§74)
-            gameObject.AddComponent<StreetscapeBuilder>().Build(_points, roadWidth, renderer);
 
             if (buildOffRoadZone)
                 BuildRoadZone(_points, triggerWidth);

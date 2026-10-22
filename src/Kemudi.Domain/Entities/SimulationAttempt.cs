@@ -16,7 +16,7 @@ public sealed class SimulationAttempt
     public long TimeTakenMs { get; set; }
     public int Violations { get; set; }
     public int OffRoadCount { get; set; }
-    public int CollisionCount { get; set; }
+    public int ObstacleHits { get; set; }          // tabrakan dgn rintangan/kendaraan (§8)
     public TrainingMode? TrainingMode { get; set; }
     public bool Completed { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

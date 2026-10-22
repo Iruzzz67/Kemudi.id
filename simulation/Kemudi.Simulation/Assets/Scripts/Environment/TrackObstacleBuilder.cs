@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Kemudi.Simulation.Vehicles;
 using UnityEngine;
 
 namespace Kemudi.Simulation.Environment
@@ -151,16 +150,6 @@ namespace Kemudi.Simulation.Environment
             root.transform.SetParent(transform, false);
             root.transform.position = center + right * offset;
             root.transform.rotation = rotation;
-
-            if (name == "ParkedCar" || name == "ParkedTruck")
-            {
-                AuthoredVehicleVisual.BuildAsset(root, "KemudiVehicles/" + (name == "ParkedCar" ? "mobil" : "truk"));
-                var authoredCollider = root.AddComponent<BoxCollider>();
-                authoredCollider.center = new Vector3(0, boxSize.y * .5f, 0);
-                authoredCollider.size = boxSize;
-                AddObstacleMarker(root);
-                return;
-            }
 
             var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
             body.name = "Body";

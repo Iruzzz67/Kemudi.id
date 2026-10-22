@@ -39,6 +39,11 @@ namespace Kemudi.Simulation.Transmission
                 return;
             }
 
+            // Pastikan gigi 1 aktif saat mulai bergerak (jangan menampilkan N
+            // terus saat kendaraan sudah jalan).
+            if (CurrentGear <= Neutral && _speed > 0.3f)
+                CurrentGear = 0;
+
             var abs = Mathf.Abs(_speed);
 
             // Upshift
