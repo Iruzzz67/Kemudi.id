@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200">
+<defs><filter id="shadow"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#172631" flood-opacity=".2"/></filter>
+<marker id="arr" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#156a96"/></marker>
+</defs>
+<rect width="1400" height="1200" fill="#e9f0ed"/>
+<text x="65" y="72" font-family="DejaVu Sans,sans-serif" font-size="31" font-weight="bold" fill="#192d35">SKEMA TEKNIS • SIMULASI MENGEMUDI 3D</text>
+<text x="65" y="108" font-family="DejaVu Sans,sans-serif" font-size="19" fill="#385361">Jalan dua arah • satu lajur per arah • Indonesia: berjalan di sisi kiri</text>
+<rect x="580" y="140" width="240" height="990" fill="#36434d"/>
+<rect x="90" y="480" width="1220" height="240" fill="#36434d"/>
+<!-- curb edges -->
+<g stroke="#aab4af" stroke-width="8"><line x1="576" y1="140" x2="576" y2="478"/><line x1="824" y1="140" x2="824" y2="478"/><line x1="576" y1="724" x2="576" y2="1130"/><line x1="824" y1="724" x2="824" y2="1130"/><line x1="90" y1="476" x2="577" y2="476"/><line x1="825" y1="476" x2="1310" y2="476"/><line x1="90" y1="724" x2="577" y2="724"/><line x1="825" y1="724" x2="1310" y2="724"/></g>
+<!-- center lane division dashes -->
+<g stroke="#dce2e2" stroke-width="5" stroke-dasharray="25 22" opacity=".87"><line x1="700" y1="145" x2="700" y2="392"/><line x1="700" y1="810" x2="700" y2="1130"/><line x1="95" y1="600" x2="492" y2="600"/><line x1="908" y1="600" x2="1305" y2="600"/></g>
+<!-- zebra cross stripe groups perpendicular to road -->
+<g fill="#fcfcf6">
+<rect x="588" y="411" width="10" height="55" rx="1"/><rect x="588" y="734" width="10" height="55" rx="1"/>
+<rect x="606" y="411" width="10" height="55" rx="1"/><rect x="606" y="734" width="10" height="55" rx="1"/>
+<rect x="624" y="411" width="10" height="55" rx="1"/><rect x="624" y="734" width="10" height="55" rx="1"/>
+<rect x="642" y="411" width="10" height="55" rx="1"/><rect x="642" y="734" width="10" height="55" rx="1"/>
+<rect x="660" y="411" width="10" height="55" rx="1"/><rect x="660" y="734" width="10" height="55" rx="1"/>
+<rect x="678" y="411" width="10" height="55" rx="1"/><rect x="678" y="734" width="10" height="55" rx="1"/>
+<rect x="696" y="411" width="10" height="55" rx="1"/><rect x="696" y="734" width="10" height="55" rx="1"/>
+<rect x="714" y="411" width="10" height="55" rx="1"/><rect x="714" y="734" width="10" height="55" rx="1"/>
+<rect x="732" y="411" width="10" height="55" rx="1"/><rect x="732" y="734" width="10" height="55" rx="1"/>
+<rect x="750" y="411" width="10" height="55" rx="1"/><rect x="750" y="734" width="10" height="55" rx="1"/>
+<rect x="768" y="411" width="10" height="55" rx="1"/><rect x="768" y="734" width="10" height="55" rx="1"/>
+<rect x="786" y="411" width="10" height="55" rx="1"/><rect x="786" y="734" width="10" height="55" rx="1"/>
+<rect x="804" y="411" width="10" height="55" rx="1"/><rect x="804" y="734" width="10" height="55" rx="1"/>
+<rect x="505" y="489" width="55" height="10" rx="1"/><rect x="840" y="489" width="55" height="10" rx="1"/>
+<rect x="505" y="507" width="55" height="10" rx="1"/><rect x="840" y="507" width="55" height="10" rx="1"/>
+<rect x="505" y="525" width="55" height="10" rx="1"/><rect x="840" y="525" width="55" height="10" rx="1"/>
+<rect x="505" y="543" width="55" height="10" rx="1"/><rect x="840" y="543" width="55" height="10" rx="1"/>
+<rect x="505" y="561" width="55" height="10" rx="1"/><rect x="840" y="561" width="55" height="10" rx="1"/>
+<rect x="505" y="579" width="55" height="10" rx="1"/><rect x="840" y="579" width="55" height="10" rx="1"/>
+<rect x="505" y="597" width="55" height="10" rx="1"/><rect x="840" y="597" width="55" height="10" rx="1"/>
+<rect x="505" y="615" width="55" height="10" rx="1"/><rect x="840" y="615" width="55" height="10" rx="1"/>
+<rect x="505" y="633" width="55" height="10" rx="1"/><rect x="840" y="633" width="55" height="10" rx="1"/>
+<rect x="505" y="651" width="55" height="10" rx="1"/><rect x="840" y="651" width="55" height="10" rx="1"/>
+<rect x="505" y="669" width="55" height="10" rx="1"/><rect x="840" y="669" width="55" height="10" rx="1"/>
+<rect x="505" y="687" width="55" height="10" rx="1"/><rect x="840" y="687" width="55" height="10" rx="1"/>
+<rect x="505" y="705" width="55" height="10" rx="1"/><rect x="840" y="705" width="55" height="10" rx="1"/>
+</g>
+<!-- stop lines: inbound only -->
+<g stroke="#ffffff" stroke-width="10"><line x1="705" y1="384" x2="816" y2="384"/><line x1="584" y1="812" x2="695" y2="812"/><line x1="482" y1="484" x2="482" y2="595"/><line x1="918" y1="605" x2="918" y2="716"/></g>
+<!-- directional vehicle arrows; small arrow heads along proper directions -->
+<g stroke="#f3f7f7" stroke-width="10" fill="none" stroke-linecap="round" marker-end="url(#arr)">
+<line x1="760" y1="225" x2="760" y2="310"/><line x1="640" y1="1060" x2="640" y2="930"/>
+<line x1="225" y1="540" x2="355" y2="540"/><line x1="1165" y1="660" x2="1045" y2="660"/>
+</g>
+<!-- outbound arrows subtler -->
+<g stroke="#9dafb6" stroke-width="5" fill="none" stroke-linecap="round"><path d="M640 320V228m-15 15 15-15 15 15"/><path d="M760 930v92m-15-15 15 15 15-15"/><path d="M1020 540h92m-15-15 15 15-15 15"/><path d="M355 660h-92m15-15-15 15 15 15"/></g>
+<!-- signal heads, one lens ON per head: NS green, EW red; no triple-on -->
+<g filter="url(#shadow)">
+<g transform="translate(837,324)"><rect width="36" height="90" rx="8" fill="#121c24" stroke="#b6c5ca" stroke-width="2"/><circle cx="18" cy="18" r="10" fill="#4c2529"/><circle cx="18" cy="45" r="10" fill="#4e411e"/><circle cx="18" cy="72" r="10" fill="#23df65"/></g>
+<g transform="translate(529,805)"><rect width="36" height="90" rx="8" fill="#121c24" stroke="#b6c5ca" stroke-width="2"/><circle cx="18" cy="18" r="10" fill="#4c2529"/><circle cx="18" cy="45" r="10" fill="#4e411e"/><circle cx="18" cy="72" r="10" fill="#23df65"/></g>
+<g transform="translate(436,428)"><rect width="36" height="90" rx="8" fill="#121c24" stroke="#b6c5ca" stroke-width="2"/><circle cx="18" cy="18" r="10" fill="#ff373d"/><circle cx="18" cy="45" r="10" fill="#4e411e"/><circle cx="18" cy="72" r="10" fill="#205b38"/></g>
+<g transform="translate(930,694)"><rect width="36" height="90" rx="8" fill="#121c24" stroke="#b6c5ca" stroke-width="2"/><circle cx="18" cy="18" r="10" fill="#ff373d"/><circle cx="18" cy="45" r="10" fill="#4e411e"/><circle cx="18" cy="72" r="10" fill="#205b38"/></g>
+</g>
+<!-- corner notes -->
+<g font-family="DejaVu Sans,sans-serif" fill="#193645">
+<text x="75" y="205" font-size="26" font-weight="bold">Contoh fase:</text>
+<text x="75" y="245" font-size="23">Utara–Selatan: HIJAU</text>
+<text x="75" y="281" font-size="23">Timur–Barat: MERAH</text>
+<text x="75" y="328" font-size="17">Lensa gelap = tidak aktif</text>
+<text x="972" y="191" font-size="23" font-weight="bold">Urutan mendekati simpang</text>
+<text x="972" y="233" font-size="20">1. Garis henti</text>
+<text x="972" y="265" font-size="20">2. Zebra cross</text>
+<text x="972" y="297" font-size="20">3. Area persimpangan</text>
+<text x="955" y="895" font-size="22" font-weight="bold">Aturan utama</text>
+<text x="955" y="933" font-size="19">Kendaraan memakai</text>
+<text x="955" y="962" font-size="19">lajur kiri menurut</text>
+<text x="955" y="991" font-size="19">arah perjalanannya.</text>
+<text x="73" y="906" font-size="19">Putih tebal: garis henti</text>
+<text x="73" y="945" font-size="19">Strip putih: zebra cross</text>
+<text x="73" y="984" font-size="19">Putus-putus: marka tengah</text>
+<text x="73" y="1035" font-size="17">Skema ilustratif, bukan skala ukur.</text>
+</g>
+</svg>

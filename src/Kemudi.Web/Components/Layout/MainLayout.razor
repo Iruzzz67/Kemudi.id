@@ -1,0 +1,42 @@
+@inherits LayoutComponentBase
+
+<div class="kemudi-app">
+    <NavMenu />
+
+    <main class="kemudi-main">
+        <div class="container">
+            @Body
+        </div>
+    </main>
+
+    <footer class="kemudi-footer">
+        <div class="container">
+            <div class="footer-inner">
+                <div>
+                    <span class="footer-brand" style="display:flex;align-items:center;gap:0.5rem">
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--gradient-blue);border-radius:8px;font-size:0.85rem;box-shadow:var(--shadow-blue);">🚗</span>
+                        <strong style="background:var(--gradient-blue);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Kemudi.id</strong>
+                    </span>
+                    <p class="footer-text" style="margin-top:0.5rem;max-width:320px">
+                        Belajar mengemudi dengan aman sebelum turun ke jalan. Platform kursus & simulasi 3D interaktif.
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <a href="simulasi">Simulasi</a>
+                    <a href="kursus">Kursus</a>
+                    <a href="materi">Materi</a>
+                    <a href="login">Masuk</a>
+                </div>
+            </div>
+            <div style="margin-top:2rem; padding-top:1.25rem; border-top:1px solid var(--border); text-align:center">
+                <span class="footer-text" style="font-size:0.8rem">© 2026 Kemudi.id — Belajar Mengemudi, Sebelum Turun ke Jalan</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui" class="blazor-error-ui" data-nosnippet>
+    Terjadi kesalahan tak terduga.
+    <a href="" class="reload">Muat ulang</a>
+    <a class="dismiss">🗙</a>
+</div>

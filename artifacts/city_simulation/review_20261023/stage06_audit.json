@@ -1,0 +1,475 @@
+{
+  "duration_seconds": 10.0,
+  "shots": [
+    [
+      1,
+      "01_Overview_0-2s",
+      "Camera_Overview"
+    ],
+    [
+      49,
+      "02_Car_2-5s",
+      "Camera_VehicleFocus"
+    ],
+    [
+      121,
+      "03_Bike_5-7s",
+      "Camera_Street"
+    ],
+    [
+      169,
+      "04_Truck_7-9s",
+      "Camera_Truck"
+    ],
+    [
+      217,
+      "05_Finale_9-10s",
+      "Camera_Finale"
+    ]
+  ],
+  "positions": {
+    "1": {
+      "Car": [
+        -22.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "48": {
+      "Car": [
+        -22.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "49": {
+      "Car": [
+        -22.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "85": {
+      "Car": [
+        -8.725372314453125,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "120": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "121": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -29.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "145": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -16.617080688476562,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "168": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "169": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        24.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "192": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        18.675504684448242,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "216": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        13.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "217": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        13.0,
+        2.0,
+        0.10000000149011612
+      ]
+    },
+    "240": {
+      "Car": [
+        4.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Bike": [
+        -5.0,
+        -1.9500000476837158,
+        0.10000000149011612
+      ],
+      "Truck": [
+        13.0,
+        2.0,
+        0.10000000149011612
+      ]
+    }
+  },
+  "drivers": {
+    "Car_Wheel_FR": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-22))*1/0.37",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Car_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Car_Wheel_RR": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-22))*1/0.37",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Car_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Car_Wheel_FL": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-22))*1/0.37",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Car_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Car_Wheel_RL": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-22))*1/0.37",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Car_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Bike_Wheel_F": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-29))*1/0.33",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Bike_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Bike_Wheel_R": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(-29))*1/0.33",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Bike_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Truck_Wheel_FR": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(24))*-1/0.47",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Truck_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Truck_Wheel_RR": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(24))*-1/0.47",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Truck_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Truck_Wheel_FL": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(24))*-1/0.47",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Truck_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Truck_Wheel_RL": [
+      {
+        "path": "rotation_euler",
+        "axis": 1,
+        "expression": "(travel-(24))*-1/0.47",
+        "valid": true,
+        "variables": [
+          {
+            "name": "travel",
+            "type": "SINGLE_PROP",
+            "targets": [
+              {
+                "id": "Truck_Rig",
+                "path": "location.x",
+                "transform": "LOC_X"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "actions": [
+    "Bike_Rig_Travel_10s",
+    "Camera_FinaleAction",
+    "Camera_OverviewAction",
+    "Camera_StreetAction",
+    "Camera_TruckAction",
+    "Camera_VehicleFocusAction",
+    "Car_Rig_Travel_10s",
+    "Truck_Rig_Travel_10s"
+  ]
+}

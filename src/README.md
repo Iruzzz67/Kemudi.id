@@ -1,0 +1,71 @@
+# Kemudi.id — Aplikasi .NET (src/)
+
+Website & API berbasis **ASP.NET Core + Blazor**, database EF Core, dan autentikasi Identity.
+Simulasi 3D ada di `simulation/Kemudi.Simulation/` (proyek Unity).
+
+## Proyek
+
+| Proyek | Teknologi | Isi |
+| --- | --- | --- |
+| `Kemudi.Domain` | Class Library | Entities, enums, value objects |
+| `Kemudi.Shared` | Class Library | DTO, contracts, constants |
+| `Kemudi.Infrastructure` | Class Library | EF Core DbContext, Identity, JWT service, seed data, migrasi |
+| `Kemudi.Api` | Web API | Controllers (auth, progress, courses, mentors, registration, payment, vehicles) + Swagger |
+| `Kemudi.Web` | Blazor Web App | Landing, kursus, mentor, materi, login/register, dashboard, simulasi launcher |
+
+## Cara menjalankan
+
+```bash
+# 1. Build solusi
+dotnet build Kemudi.slnx
+
+# 2. Terapkan database (SQLite, otomatis ter-seed data awal)
+cd src/Kemudi.Api
+dotnet ef database update --project ../Kemudi.Infrastructure --startup-project .
+
+# 3. Jalankan API (http://localhost:5077, Swagger di /swagger)
+dotnet run --project src/Kemudi.Api
+
+# 4. Jalankan website (http://localhost:5259)
+dotnet run --project src/Kemudi.Web
+```
+
+> Konfigurasi `Api:BaseUrl` di `src/Kemudi.Web/appsettings.json` mengarah ke
+> `http://localhost:5077`. Untuk production, ganti database ke PostgreSQL/SQL
+> Server di `ConnectionStrings:KemudiDb` dan set `Jwt:SecretKey` yang kuat.
+
+## Endpoint API
+
+| Method | Endpoint | Auth |
+| --- | --- | --- |
+| POST | `/api/auth/register` | — |
+| POST | `/api/auth/login` | — |
+| GET | `/api/auth/me` | ✅ JWT |
+| POST | `/api/progress` | ✅ JWT |
+| GET | `/api/progress` | ✅ JWT |
+| GET | `/api/courses`, `/api/courses/{slug}` | — |
+| GET | `/api/mentors`, `/api/mentors/{slug}` | — |
+| GET | `/api/vehicles` | — |
+| POST | `/api/course-registration` | opsional |
+| GET | `/api/course-registration/{id}` | — |
+| POST | `/api/payment` | — |
+
+## Status
+
+| Komponen | Status |
+| --- | --- |
+| Domain + Database | ✅ Entities, enums, migrasi, seed data |
+| ASP.NET Core API | ✅ Controllers + JWT + Swagger + CORS |
+| Blazor Website | ✅ Halaman utama + panel admin |
+| Unity Simulasi | ✅ Scene #1 lengkap (fisika, lintasan, AI, VR) |
+
+## Catatan implementasi
+
+- **Skor tidak dipercaya mentah dari klien**: `POST /api/progress` me-clamp
+  skor ke 0–100 dan memvalidasi semua field.
+- **Data seed** (`Kemudi.Infrastructure/Data/SeedData.cs`) memindahkan data
+  `lib/vehicles.ts` dan `lib/kursus-data.ts` ke database (3 kendaraan,
+  3 kursus, 7 paket, 4 mentor).
+- **Auth cookie di Blazor**: token JWT disimpan di cookie `kemudi_token`
+  (httpOnly) oleh `AuthService`; `ApiClient` menyisipkannya ke header secara
+  otomatis.

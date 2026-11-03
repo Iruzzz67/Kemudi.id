@@ -1,0 +1,58 @@
+{
+  "city_simulation_v01.blend": {
+    "exists": true,
+    "bytes": 478400
+  },
+  "city_simulation_v02.blend": {
+    "exists": true,
+    "bytes": 478400
+  },
+  "city_simulation_v03_vehicles.blend": {
+    "exists": true,
+    "bytes": 478401
+  },
+  "city_simulation_v04_environment.blend": {
+    "exists": true,
+    "bytes": 490136
+  },
+  "city_simulation_v05_lookdev.blend": {
+    "exists": true,
+    "bytes": 498791
+  },
+  "city_simulation_v06_animation.blend": {
+    "exists": true,
+    "bytes": 487105
+  },
+  "city_simulation_final.blend": {
+    "exists": true,
+    "bytes": 487235
+  },
+  "preview_overview.png": {
+    "exists": true,
+    "bytes": 669280
+  },
+  "preview_car.png": {
+    "exists": true,
+    "bytes": 1258358
+  },
+  "preview_bike.png": {
+    "exists": true,
+    "bytes": 681502
+  },
+  "preview_truck.png": {
+    "exists": true,
+    "bytes": 664259
+  },
+  "preview_finale.png": {
+    "exists": true,
+    "bytes": 674331
+  },
+  "qa_report.json": {
+    "exists": true,
+    "bytes": 1445
+  },
+  "README.md": {
+    "exists": true,
+    "bytes": 3452
+  }
+}

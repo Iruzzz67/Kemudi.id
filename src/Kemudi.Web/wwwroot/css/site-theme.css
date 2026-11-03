@@ -1,0 +1,66 @@
+﻿/* Website surfaces follow the simulator palette in every OS color mode. */
+body { background: var(--kemudi-bg); color: var(--kemudi-text); }
+.kemudi-navbar { background: var(--bg); border-color: var(--border); }
+.kemudi-main { min-height: calc(100dvh - 72px); }
+.kemudi-footer { background: var(--bg-muted); border-color: var(--border); }
+.kemudi-footer::before { width: min(400px, 100%); }
+.card, .feature-card, .stat-card, .pricing-card, .detail-hero, .auth-card {
+  background: var(--gradient-card); border-color: var(--border); color: var(--text);
+}
+.hero { background: var(--bg); border-radius: 0; margin-top: 0; overflow: hidden; }
+.hero h1, .hero p { color: var(--text); }
+.hero h1 span { color: var(--kemudi-accent); }
+.btn-primary { background: #326bc4; color: #fff; border-color: #326bc4; }
+.btn-primary:hover { background: #1d4ed8; color: #fff; }
+.btn-outline { background: transparent; color: var(--text); border-color: #555b65; }
+.btn-outline:hover { background: #1c3550; color: #fff; }
+.btn, .pill { min-height: 44px; border-radius: 6px; }
+.nav-link.active, .nav-link:hover { color: var(--text); background: #2b2e34; }
+.navbar-brand, .nav-link { color: var(--text); }
+input, select, textarea, .form-input { background: var(--bg-muted); color: var(--text); border-color: var(--border); }
+th { background: var(--bg-muted); color: var(--text); }
+.alert-danger { background: #351d2a; color: #fecaca; border-color: #7f3544; }
+.alert-success { background: #10362e; color: #a7f3d0; border-color: #216a53; }
+.page-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .12em; color: var(--kemudi-accent); }
+.simulation-page { padding: 0; }
+.kemudi-main:has(.simulation-page) { padding: 0; min-height: 0; }
+.kemudi-main > .container:has(.simulation-page) { max-width: none; padding: 0; }
+.kemudi-app:has(.simulation-page) > .kemudi-footer { display: none; }
+.simulation-accessible-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.simulation-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 20px; }
+.simulation-heading h1 { font-size: clamp(1.5rem, 3vw, 2rem); margin: 4px 0; line-height: 1.2; }
+.simulation-heading p { color: var(--muted); margin: 8px 0 0; }
+.simulation-frame { background: var(--bg); overflow: hidden; }
+.simulation-frame iframe { display: block; width: 100%; height: max(420px, calc(100dvh - var(--navbar-h))); border: 0; }
+.simulation-help { margin: 16px; padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-soft); color: var(--muted); }
+.simulation-help summary { color: var(--text); font-weight: 600; cursor: pointer; min-height: 28px; }
+.simulation-help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+kbd { padding: 2px 6px; border: 1px solid #52647a; border-radius: 4px; color: var(--text); background: var(--bg-muted); }
+@media (max-width: 768px) {
+  .navbar-links.open { background: var(--bg-soft); border-color: var(--border); }
+  .simulation-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .simulation-help-grid { grid-template-columns: 1fr; }
+  .hero { margin-top: 12px; }
+}
+
+.navbar-brand strong, .footer-brand strong, .hero h1 span,
+.section-title, .auth-title, .stat-number {
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+  color: var(--text);
+}
+.navbar-brand .brand-icon, .footer-brand > span { background: var(--bg-soft) !important; }
+.hero::before, .hero::after, .card::before, .feature-card::before,
+.kemudi-footer::before, .btn::before, .hero canvas { display: none; }
+.hero { min-height: 480px !important; padding: 64px 0 !important; }
+.hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 600; letter-spacing: -.025em; }
+.hero p { font-size: 1rem; color: var(--muted); }
+h1, h2, h3, .section-title { font-weight: 600 !important; }
+.card, .feature-card, .pricing-card, .stat-card, .auth-card { border-radius: 6px !important; }
+.card:hover, .feature-card:hover, .btn:hover { transform: none !important; }
+.feature-icon { font-size: 1.75rem; filter: none; }
+.page-eyebrow { display: none; }
+.hero *, .grid > *, .animate-fade, .animate-slide, .animate-scale { animation: none !important; }
+.hero h1[tabindex="-1"]:focus { outline: none; }
+.feature-card { text-align: left; padding: 24px; }
+.feature-card .feature-icon { display: none; }

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "overview",
+    "frame": 1,
+    "path": "C:\\Users\\user\\Kemudi.id\\artifacts\\city_simulation\\review_20261023\\preview_overview.png"
+  },
+  {
+    "name": "bike",
+    "frame": 145,
+    "path": "C:\\Users\\user\\Kemudi.id\\artifacts\\city_simulation\\review_20261023\\preview_bike.png"
+  },
+  {
+    "name": "truck",
+    "frame": 192,
+    "path": "C:\\Users\\user\\Kemudi.id\\artifacts\\city_simulation\\review_20261023\\preview_truck.png"
+  },
+  {
+    "name": "finale",
+    "frame": 240,
+    "path": "C:\\Users\\user\\Kemudi.id\\artifacts\\city_simulation\\review_20261023\\preview_finale.png"
+  }
+]

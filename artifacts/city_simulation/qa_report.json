@@ -1,0 +1,157 @@
+{
+  "required_names_missing": [],
+  "vehicle_overlap_frames": [],
+  "lane_violations": [],
+  "wheel_sync_max_error": 3.711597344135953e-06,
+  "camera_shots": [
+    {
+      "frame": 1,
+      "camera": "Camera_Overview"
+    },
+    {
+      "frame": 49,
+      "camera": "Camera_VehicleFocus"
+    },
+    {
+      "frame": 121,
+      "camera": "Camera_Street"
+    },
+    {
+      "frame": 169,
+      "camera": "Camera_Truck"
+    },
+    {
+      "frame": 217,
+      "camera": "Camera_Finale"
+    }
+  ],
+  "static_overlap_frames": [],
+  "vehicle_dimensions_m": {
+    "Car_Rig": [
+      4.65,
+      2.31,
+      1.516
+    ],
+    "Bike_Rig": [
+      2.26,
+      1.02,
+      1.38
+    ],
+    "Truck_Rig": [
+      6.47,
+      2.88,
+      3.27
+    ]
+  },
+  "wheel_contact_z": {
+    "Car_Wheel_FL": 0.1,
+    "Car_Wheel_FR": 0.1,
+    "Car_Wheel_RL": 0.1,
+    "Car_Wheel_RR": 0.1,
+    "Bike_Wheel_F": 0.1,
+    "Bike_Wheel_R": 0.1,
+    "Truck_Wheel_FL": 0.1,
+    "Truck_Wheel_FR": 0.1,
+    "Truck_Wheel_RL": 0.1,
+    "Truck_Wheel_RR": 0.1
+  },
+  "unparented_vehicle_meshes": [],
+  "unassigned_materials": [],
+  "numeric_suffix_names": [],
+  "mesh_faces": 14273,
+  "objects": 917,
+  "duration_seconds": 10.0,
+  "note": "AABB sweep checks vehicles against one another and static houses/props at all 240 frames. Ground contact is tire radius vs road surface z=0.1. Kinematic presentation, not rigid-body traffic physics.",
+  "camera_framing": [
+    {
+      "frame": 49,
+      "bounds": [
+        0.235,
+        0.804,
+        0.126,
+        0.667
+      ],
+      "inside": true
+    },
+    {
+      "frame": 85,
+      "bounds": [
+        0.215,
+        0.83,
+        0.117,
+        0.675
+      ],
+      "inside": true
+    },
+    {
+      "frame": 120,
+      "bounds": [
+        0.194,
+        0.858,
+        0.077,
+        0.683
+      ],
+      "inside": true
+    },
+    {
+      "frame": 121,
+      "bounds": [
+        0.364,
+        0.66,
+        0.175,
+        0.61
+      ],
+      "inside": true
+    },
+    {
+      "frame": 145,
+      "bounds": [
+        0.345,
+        0.682,
+        0.161,
+        0.621
+      ],
+      "inside": true
+    },
+    {
+      "frame": 168,
+      "bounds": [
+        0.324,
+        0.715,
+        0.088,
+        0.632
+      ],
+      "inside": true
+    },
+    {
+      "frame": 169,
+      "bounds": [
+        0.193,
+        0.768,
+        0.065,
+        0.825
+      ],
+      "inside": true
+    },
+    {
+      "frame": 192,
+      "bounds": [
+        0.172,
+        0.784,
+        0.021,
+        0.84
+      ],
+      "inside": true
+    },
+    {
+      "frame": 216,
+      "bounds": [
+        0.146,
+        0.803,
+        0.008,
+        0.858
+      ],
+      "inside": true
+    }
+  ]
+}

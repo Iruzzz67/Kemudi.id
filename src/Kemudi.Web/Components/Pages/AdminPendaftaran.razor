@@ -1,0 +1,184 @@
+@page "/admin/pendaftaran"
+@layout Kemudi.Web.Components.Layout.AdminLayout
+@using System.Globalization
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Pendaftaran Kursus</h1>
+<p class="page-sub">Verifikasi pendaftaran dan konfirmasi pembayaran pelanggan.</p>
+
+@if (_loading)
+{
+    <div class="loading">Memuat data...</div>
+}
+else if (_error is not null)
+{
+    <div class="error-box">@_error</div>
+}
+else
+{
+    <div class="admin-cards">
+        <div class="admin-card">
+            <div class="ac-label">Total Orang</div>
+            <div class="ac-value">@_totalPeople</div>
+            <div class="ac-sub">@_registrations.Count pendaftaran</div>
+        </div>
+        <div class="admin-card ac-amber">
+            <div class="ac-label">Pending</div>
+            <div class="ac-value">@PeopleByStatus("pending")</div>
+            <div class="ac-sub">orang menunggu verifikasi</div>
+        </div>
+        <div class="admin-card ac-green">
+            <div class="ac-label">Dikonfirmasi</div>
+            <div class="ac-value">@PeopleByStatus("paid")</div>
+            <div class="ac-sub">orang terkonfirmasi</div>
+        </div>
+        <div class="admin-card ac-red">
+            <div class="ac-label">Ditolak</div>
+            <div class="ac-value">@PeopleByStatus("rejected")</div>
+            <div class="ac-sub">orang ditolak</div>
+        </div>
+    </div>
+
+    <div class="admin-panel">
+        <div class="admin-toolbar">
+            <input type="text" placeholder="Cari nama / email..." value="@_q" @oninput="OnSearch" />
+            <select value="@_statusFilter" @onchange="OnFilter">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Dikonfirmasi</option>
+                <option value="rejected">Ditolak</option>
+            </select>
+            <span class="spacer"></span>
+            <span class="admin-count">
+                @_filteredPeople orang unik · @_filtered.Count pendaftaran
+            </span>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th><th>Nama</th><th>Kursus / Mentor</th><th>Metode</th><th>Jumlah</th><th>Status</th><th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in _filtered)
+                    {
+                        <tr>
+                            <td>@r.CreatedAt.ToLocalTime().ToString("dd MMM, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
+                            <td><strong>@r.Name</strong><br /><span class="muted">@r.Email</span></td>
+                            <td>@r.PackageLabel<br /><span class="muted">@r.MentorName · mulai @r.StartDate.ToString("dd MMM yyyy", CultureInfo.GetCultureInfo("id-ID"))</span></td>
+                            <td>@PaymentMethodLabel(r.PaymentMethod)</td>
+                            <td>@FormatRp(r.Amount)</td>
+                            <td><AdminBadge Value="@r.Status" /></td>
+                            <td>
+                                <div class="admin-actions">
+                                    @if (r.Status != "paid")
+                                    {
+                                        <button class="btn btn-success" disabled="@_busy" @onclick="@(() => SetStatus(r, "paid"))">Konfirmasi</button>
+                                    }
+                                    @if (r.Status != "rejected")
+                                    {
+                                        <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" disabled="@_busy" @onclick="@(() => SetStatus(r, "rejected"))">Tolak</button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (_filtered.Count == 0)
+        {
+            <p class="empty">Tidak ada pendaftaran.</p>
+        }
+    </div>
+}
+
+@code {
+    private List<AdminRegistrationDto> _registrations = new();
+    private List<AdminRegistrationDto> _filtered = new();
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+    private string _q = "";
+    private string _statusFilter = "";
+    private int _totalPeople;
+    private int _filteredPeople;
+
+    private int PeopleByStatus(string status) =>
+        _registrations.Where(r => r.Status == status).Select(r => r.Email.ToLowerInvariant()).Distinct().Count();
+
+    private void ApplyFilter()
+    {
+        _filtered = _registrations
+            .Where(r => string.IsNullOrEmpty(_statusFilter) || r.Status == _statusFilter)
+            .Where(r => string.IsNullOrWhiteSpace(_q)
+                || r.Name.Contains(_q, StringComparison.OrdinalIgnoreCase)
+                || r.Email.Contains(_q, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
+        _filteredPeople = _filtered.Select(r => r.Email.ToLowerInvariant()).Distinct().Count();
+    }
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        _q = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private void OnFilter(ChangeEventArgs e)
+    {
+        _statusFilter = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private async Task SetStatus(AdminRegistrationDto reg, string status)
+    {
+        _busy = true;
+        _error = null;
+        var result = await Api.PatchVoidAsync(
+            $"/api/admin/registrations/{reg.Id}", new { status });
+        if (!result.Success)
+        {
+            _error = result.Error;
+        }
+        else
+        {
+            _registrations = _registrations
+                .Select(x => x.Id == reg.Id ? x with { Status = status } : x)
+                .ToList();
+            ApplyFilter();
+        }
+        _busy = false;
+    }
+
+    private static string FormatRp(decimal amount) => $"Rp {amount.ToString("N0", CultureInfo.GetCultureInfo("id-ID"))}";
+
+    private static string PaymentMethodLabel(string method) => method switch
+    {
+        "transfer" => "Transfer Bank",
+        "e-wallet" => "E-Wallet / QRIS",
+        "cash" => "Bayar di Tempat",
+        _ => method
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login", forceLoad: true);
+            return;
+        }
+
+        _registrations = await Api.GetAsync<List<AdminRegistrationDto>>("/api/admin/registrations") ?? new();
+        _totalPeople = _registrations.Select(r => r.Email.ToLowerInvariant()).Distinct().Count();
+        ApplyFilter();
+        _loading = false;
+    }
+}

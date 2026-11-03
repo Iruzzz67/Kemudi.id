@@ -1,0 +1,34 @@
+﻿@page "/simulasi"
+@page "/simulasi/play"
+
+<PageTitle>Simulasi Mengemudi | Kemudi.id</PageTitle>
+<section class="simulation-page" aria-labelledby="simulation-title">
+    <h1 id="simulation-title" class="simulation-accessible-title">Simulasi mengemudi</h1>
+    <div class="simulation-frame">
+        <iframe @key="_iframeSrc" src="@_iframeSrc" title="Simulasi mengemudi Kemudi.id"
+                loading="eager" allow="fullscreen; autoplay" allowfullscreen></iframe>
+    </div>
+    <details class="simulation-help">
+        <summary>Panduan kontrol dan penyimpanan hasil</summary>
+        <div class="simulation-help-grid">
+            <p><kbd>Enter</kbd> masuk kendaraan · <kbd>I</kbd> mesin · <kbd>Space</kbd> rem tangan</p>
+            <p><kbd>W</kbd> gas · <kbd>S</kbd> rem · <kbd>A</kbd> / <kbd>D</kbd> belok</p>
+            <p>Matic: berhenti dengan <kbd>S</kbd>, lalu <kbd>R</kbd> untuk berganti mundur / maju.</p>
+            <p><kbd>C</kbd> kamera · <kbd>P</kbd> jeda · Manual: <kbd>Shift</kbd> kopling, <kbd>Q</kbd> / <kbd>E</kbd> gigi.</p>
+        </div>
+        <p>Masuk ke akun sebelum latihan untuk menyimpan hasil ke dashboard. Simulator paling nyaman digunakan dengan keyboard.</p>
+    </details>
+</section>
+
+@code {
+    [SupplyParameterFromQuery] public string? Vehicle { get; set; }
+    [SupplyParameterFromQuery] public string? Transmission { get; set; }
+    [SupplyParameterFromQuery] public string? Map { get; set; }
+    private string _iframeSrc = "/simulation-3d/index.html";
+    protected override void OnParametersSet()
+    {
+        var vehicle = Vehicle?.ToUpperInvariant() is "MOTOR" or "TRUK" ? Vehicle.ToUpperInvariant() : "MOBIL";
+        var transmission = Transmission == "manual" ? "manual" : "automatic";
+        _iframeSrc = $"/simulation-3d/index.html?vehicle={vehicle}&transmission={transmission}&map=unified&autostart=1";
+    }
+}

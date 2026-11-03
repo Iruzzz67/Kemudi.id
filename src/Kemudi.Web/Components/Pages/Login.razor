@@ -1,0 +1,67 @@
+@page "/login"
+@using Kemudi.Web.Services
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<section class="hero" style="min-height:70vh; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+    <canvas id="three-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+    <div style="max-width:440px; width:100%; position:relative; z-index:1; animation:scaleIn 0.5s var(--ease-out) both;">
+        <div class="text-center mb-4">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:var(--gradient-blue);border-radius:18px;font-size:2rem;box-shadow:var(--shadow-blue);margin-bottom:1rem;">🚗</div>
+            <h1 class="section-title" style="font-size:2rem;">Masuk</h1>
+            <p class="muted" style="margin-top:0.5rem">Lanjutkan latihan dan pantau progresmu di dashboard.</p>
+        </div>
+
+        <div class="form-card">
+            <div class="form" style="max-width:none">
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="error-box">@_error</div>
+                }
+
+                <div class="field">
+                    <label for="login-email">Email</label>
+                    <input id="login-email" type="email" autocomplete="username" @bind="_email" placeholder="nama@email.com" />
+                </div>
+
+                <div class="field">
+                    <label for="login-password">Password</label>
+                    <input id="login-password" type="password" autocomplete="current-password" @bind="_password" placeholder="••••••••" />
+                </div>
+
+                <button class="btn btn-primary btn-lg" style="width:100%" disabled="@_busy" @onclick="LoginAsync">
+                    @(_busy ? "Memproses..." : "Masuk")
+                </button>
+
+                <p class="text-center muted" style="font-size:0.9rem; margin:0">
+                    Belum punya akun? <a href="register" style="font-weight:600">Daftar</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string _email = "";
+    private string _password = "";
+    private string? _error;
+    private bool _busy;
+
+    private async Task LoginAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            await using var session = await JS.InvokeAsync<IJSObjectReference>("import", "/js/session-client.js");
+            _error = await session.InvokeAsync<string?>("submit", "login", new { email = _email, password = _password });
+            if (_error is null)
+                Nav.NavigateTo("/dashboard", forceLoad: true);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

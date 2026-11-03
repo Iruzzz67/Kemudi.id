@@ -1,0 +1,63 @@
+@page "/kursus/mentor/{Slug}"
+@using Kemudi.Shared.DTOs
+@using Kemudi.Web.Services
+@inject ApiClient Api
+
+@if (_mentor is null)
+{
+    <div class="loading">Memuat profil mentor...</div>
+}
+else
+{
+    <div class="detail-hero" style="gap:1.5rem;">
+        <span class="avatar" style="width:72px;height:72px;font-size:1.5rem;background:@_mentor.AvatarColor; border-radius:18px; box-shadow:0 8px 24px @(_mentor.AvatarColor)30;">@_mentor.Initials</span>
+        <div>
+            <h1>@_mentor.Name</h1>
+            <p>@_mentor.Title · ★ @_mentor.Rating.ToString("0.0") · @_mentor.ExperienceYears tahun pengalaman</p>
+        </div>
+    </div>
+
+    <div class="card" style="padding:2rem; line-height:1.8;">
+        <p style="font-size:1.05rem; margin:0;">@_mentor.Bio</p>
+    </div>
+
+    <div class="grid grid-2 mt-3">
+        <div class="card" style="padding:2rem;">
+            <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1rem;">Sertifikasi</h3>
+            @foreach (var c in _mentor.Portfolio.Certifications)
+            {
+                <div class="list-item" style="padding:0.6rem 0;">✓ @c</div>
+            }
+        </div>
+        <div class="card" style="padding:2rem;">
+            <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1rem;">Prestasi</h3>
+            @foreach (var a in _mentor.Portfolio.Achievements)
+            {
+                <div class="list-item" style="padding:0.6rem 0;">🏆 @a</div>
+            }
+        </div>
+    </div>
+
+    <div class="card mt-3" style="padding:2rem;">
+        <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1rem;">Testimoni Murid</h3>
+        @foreach (var t in _mentor.Portfolio.Testimonials)
+        {
+            <blockquote class="quote" style="margin:1.25rem 0;">"@t.Quote" <br /><span class="muted">— @t.Name</span></blockquote>
+        }
+    </div>
+
+    <div class="mt-4" style="display:flex; gap:0.75rem;">
+        <a class="btn btn-primary btn-lg" href="kursus/personal?mentor=@_mentor.Id">Lanjutkan Pendaftaran</a>
+        <a class="btn btn-outline btn-lg" href="kursus">Kembali ke Kursus</a>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+    private MentorDto? _mentor;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _mentor = await Api.GetAsync<MentorDto>($"/api/mentors/{Slug}");
+    }
+}

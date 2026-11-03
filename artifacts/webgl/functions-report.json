@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "Blender source matches exported package provenance",
+    "training map traffic signals: initial state, order and full cycle",
+    "manual requires clutch, shifts, stalls and restarts",
+    "handbrake prevents acceleration, off-road limits speed, steering returns",
+    "motor safety and seat limits",
+    "city colliders, road boundaries and finish direction"
+  ]
+}

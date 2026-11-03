@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kemudi.id — Simulasi 3D</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1220; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 100;
+            background: #0b1220;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+        }
+        #loading-title {
+            color: #e2e8f0; font-size: 1.5rem; font-weight: 700;
+            margin-bottom: 1.5rem; letter-spacing: 0.02em;
+        }
+        #loading-title span { color: #38bdf8; }
+        #loading-bar-outer {
+            width: min(420px, 80vw); height: 10px;
+            border-radius: 999px; background: #1e293b;
+            overflow: hidden; border: 1px solid #334155;
+        }
+        #loading-bar-inner {
+            width: 0%; height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #2563eb, #38bdf8);
+            transition: width 0.2s ease;
+        }
+        #loading-status {
+            color: #94a3b8; font-size: 0.85rem; margin-top: 0.75rem;
+        }
+
+        canvas#sim-canvas {
+            position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+        }
+        button, a { touch-action: manipulation; }
+        button:focus-visible, a:focus-visible { outline: 3px solid #7dd3fc; outline-offset: 4px; }
+        select:focus-visible { outline: 3px solid #7dd3fc; outline-offset: 3px; }
+        #environment-controls { position: fixed; z-index: 55; right: 16px; top: 16px; padding: 12px; border: 1px solid #64748b; border-radius: 10px; background: #142438; color: #f8fafc; display: flex; flex-wrap: wrap; gap: 12px; max-width: calc(100vw - 32px); }
+        #environment-controls[hidden] { display: none; }
+        #environment-controls legend { font-size: 12px; padding: 0 4px; }
+        #environment-controls label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        #environment-controls select { min-height: 44px; padding: 6px; border: 1px solid #64748b; border-radius: 6px; color: #f8fafc; background: #0f172a; font: inherit; }
+        @media (max-width: 640px) { #environment-controls { position: fixed; top: auto; bottom: 8px; right: 8px; padding: 6px; gap: 6px; } }
+        #sim-toolbar { position: fixed; right: 16px; bottom: 68px; z-index: 30; display: flex; align-items: center; gap: 8px; color: white; }
+        #sim-toolbar button, #loading-retry { border: 1px solid #52647a; background: #142438; color: white; padding: 10px 14px; border-radius: 10px; cursor: pointer; min-height: 44px; }
+        #map-label { background: #142438df; padding: 12px; border-radius: 10px; font-size: 12px; }
+        #vehicle-select { overflow: auto; }
+        #finished-screen, #failed-screen { overflow: auto; padding: 24px; }
+        #finished-screen > div, #failed-screen > div { margin: auto; }
+        .vs-card { font: inherit; color: inherit; }
+        @media (max-width: 640px) {
+            #map-label { display: none; }
+            #sim-toolbar { right: 8px; bottom: 68px; }
+            #vehicle-select > div { padding: 20px 12px !important; margin: auto; }
+            .vs-card { padding: 14px 6px !important; min-width: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; }
+        }
+    </style>
+    <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+    <canvas id="sim-canvas" tabindex="0" aria-label="Simulasi mengemudi 3D. WASD untuk bergerak, I menyalakan mesin, Space rem tangan, C kamera, P jeda."></canvas>
+    <div id="sim-toolbar" aria-label="Kontrol simulasi">
+        <span id="map-label">Jalan latihan terpadu</span>
+        <button id="sim-reset" type="button">Ganti kendaraan</button>
+        <button id="sim-fullscreen" type="button">Layar penuh</button>
+    </div>
+
+    <div id="loading-screen">
+        <div id="loading-title">Kemudi<span>.id</span> — Simulasi 3D</div>
+        <div id="loading-bar-outer"><div id="loading-bar-inner"></div></div>
+        <div id="loading-status" role="status" aria-live="polite">Memuat simulasi...</div>
+        <button id="loading-retry" hidden onclick="location.reload()" style="margin-top:20px">Coba lagi</button>
+    </div>
+
+    <!-- Three.js core -->
+    <script src="vendor/three.min.js"></script>
+    <!-- GLTFLoader for loading .glb vehicle models -->
+    <script src="vendor/GLTFLoader.js"></script>
+
+    <!-- Simulation modules (order matters) -->
+    <script src="controls.js"></script>
+    <script src="track.js"></script>
+    <script src="intersection.js"></script>
+    <script src="city-track.js"></script>
+    <script src="long-road.js"></script>
+    <script src="pedestrian.js"></script>
+    <script src="vehicle.js"></script>
+    <script src="audio.js"></script>
+    <script src="hud.js"></script>
+    <script src="screens.js"></script>
+    <script src="results.js"></script>
+    <script src="systems/simulation-state.js"></script>
+    <script src="systems/collision-system.js"></script>
+    <script src="systems/environment-system.js"></script>
+    <script src="systems/instrument-system.js"></script>
+    <script src="systems/character-system.js"></script>
+    <script src="systems/cockpit-system.js"></script>
+    <script src="systems/vehicle-light-system.js"></script>
+    <script src="systems/horn-system.js"></script>
+    <script src="systems/traffic-routes.js"></script>
+    <script src="systems/pedestrian-system.js"></script>
+    <script src="systems/traffic-system.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

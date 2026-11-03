@@ -1,0 +1,39 @@
+@using Microsoft.AspNetCore.Components.Routing
+@inject Kemudi.Web.Services.AuthService Auth
+
+<header class="kemudi-navbar">
+    <div class="container navbar-inner">
+        <NavLink class="navbar-brand" href="" Match="NavLinkMatch.All">
+            <span class="brand-icon">🚗</span>
+            <strong>Kemudi.id</strong>
+        </NavLink>
+
+        <button class="nav-toggle" @onclick="ToggleNav" aria-label="Toggle menu">
+            @(navOpen ? "✕" : "☰")
+        </button>
+
+        <nav class="navbar-links @(navOpen ? "open" : "")">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNav">Beranda</NavLink>
+            <NavLink class="nav-link" href="simulasi" @onclick="CloseNav">Simulasi</NavLink>
+            <NavLink class="nav-link" href="kursus" @onclick="CloseNav">Kursus</NavLink>
+            <NavLink class="nav-link" href="materi" @onclick="CloseNav">Materi</NavLink>
+            @if (Auth.IsAuthenticated)
+            {
+                <NavLink class="nav-link" href="dashboard" @onclick="CloseNav">Dashboard</NavLink>
+                <a class="btn btn-outline btn-sm" href="/logout">Keluar</a>
+            }
+            else
+            {
+                <NavLink class="nav-link" href="login" @onclick="CloseNav">Masuk</NavLink>
+                <NavLink class="btn btn-primary btn-sm" href="register" @onclick="CloseNav">Daftar</NavLink>
+            }
+        </nav>
+    </div>
+</header>
+
+@code {
+    private bool navOpen;
+
+    private void ToggleNav() => navOpen = !navOpen;
+    private void CloseNav() => navOpen = false;
+}

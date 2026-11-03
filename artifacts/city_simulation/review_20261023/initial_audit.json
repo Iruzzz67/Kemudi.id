@@ -1,0 +1,20 @@
+{
+  "source": "C:\\Users\\user\\Kemudi.id\\artifacts\\city_simulation\\city_simulation_final.blend",
+  "version": "5.2.3 LTS",
+  "objects": 917,
+  "collections": {
+    "Animation": 7,
+    "Archive_Original": 3,
+    "Cameras": 5,
+    "Environment": 10,
+    "Houses": 179,
+    "Lights": 3,
+    "Materials": 23,
+    "Props": 326,
+    "Roads": 98,
+    "Vehicles": 263
+  },
+  "scenes": [
+    "Scene"
+  ]
+}

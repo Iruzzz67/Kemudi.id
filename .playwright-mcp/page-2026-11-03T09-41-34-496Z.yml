@@ -1,0 +1,9 @@
+- generic [active] [ref=e1]:
+  - generic "Simulasi mengemudi 3D. WASD untuk bergerak, I menyalakan mesin, Space rem tangan, C kamera, P jeda." [ref=e2]
+  - generic "Kontrol simulasi" [ref=e3]:
+    - generic [ref=e4]: Jalan latihan terpadu
+    - button "Ganti kendaraan" [ref=e5] [cursor=pointer]
+    - button "Layar penuh" [ref=e6] [cursor=pointer]
+  - generic [ref=e7]:
+    - generic [ref=e8]: Kemudi.id — Simulasi 3D
+    - status [ref=e11]: Memuat lingkungan perumahan...

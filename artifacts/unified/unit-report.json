@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "two safe junctions in one world; pedestrian crossings disabled",
+    "continuous aligned seams, left/right lanes and truck clearance across full curved road",
+    "road and pavement face upward",
+    "finish moved beyond second junction",
+    "both controllers update/reset and both junctions report red crossing"
+  ],
+  "lengthMeters": 213.7306401423971
+}

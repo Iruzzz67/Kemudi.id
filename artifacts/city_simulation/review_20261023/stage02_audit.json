@@ -1,0 +1,166 @@
+{
+  "Road_Main": {
+    "location": [
+      0.0,
+      0.0,
+      0.029999999329447746
+    ],
+    "dimensions": [
+      66.0,
+      8.0,
+      0.11999999731779099
+    ]
+  },
+  "Road_Branch": {
+    "location": [
+      15.0,
+      12.0,
+      0.029999999329447746
+    ],
+    "dimensions": [
+      7.0,
+      16.0,
+      0.11999999731779099
+    ]
+  },
+  "Sidewalk_01": {
+    "location": [
+      0.0,
+      -4.949999809265137,
+      0.12999999523162842
+    ],
+    "dimensions": [
+      66.0,
+      1.7999999523162842,
+      0.25999999046325684
+    ]
+  },
+  "Grass_Area_01": {
+    "location": [
+      0.0,
+      4.0,
+      -0.03500000014901161
+    ],
+    "dimensions": [
+      67.5,
+      43.5,
+      0.09000000357627869
+    ]
+  },
+  "units": {
+    "system": "METRIC",
+    "scale": 1.0
+  },
+  "road_objects": [
+    "Road_Main",
+    "Road_Branch",
+    "Sidewalk_01",
+    "Sidewalk_02",
+    "Sidewalk_03",
+    "Sidewalk_Branch_00",
+    "Sidewalk_Branch_01",
+    "Road_Marking_Center_00",
+    "Road_Marking_Center_01",
+    "Road_Marking_Center_02",
+    "Road_Marking_Center_03",
+    "Road_Marking_Center_04",
+    "Road_Marking_Center_05",
+    "Road_Marking_Center_06",
+    "Road_Marking_Center_07",
+    "Road_Marking_Center_08",
+    "Road_Marking_Center_09",
+    "Road_Marking_Center_10",
+    "Road_Marking_Center_13",
+    "Road_Marking_Center_14",
+    "Road_Marking_Center_15",
+    "Road_Edge_South",
+    "Road_Edge_North_00",
+    "Road_Edge_North_01",
+    "Crosswalk_00",
+    "Crosswalk_01",
+    "Crosswalk_02",
+    "Crosswalk_03",
+    "Crosswalk_04",
+    "Crosswalk_05",
+    "Crosswalk_06",
+    "Branch_Stop_Line",
+    "Branch_Center_00",
+    "Branch_Center_01",
+    "Branch_Center_02",
+    "Branch_Center_03",
+    "Branch_Center_04",
+    "Paving_Joint_S_00",
+    "Paving_Joint_N_00",
+    "Paving_Joint_S_01",
+    "Paving_Joint_N_01",
+    "Paving_Joint_S_02",
+    "Paving_Joint_N_02",
+    "Paving_Joint_S_03",
+    "Paving_Joint_N_03",
+    "Paving_Joint_S_04",
+    "Paving_Joint_N_04",
+    "Paving_Joint_S_05",
+    "Paving_Joint_N_05",
+    "Paving_Joint_S_06",
+    "Paving_Joint_N_06",
+    "Paving_Joint_S_07",
+    "Paving_Joint_N_07",
+    "Paving_Joint_S_08",
+    "Paving_Joint_N_08",
+    "Paving_Joint_S_09",
+    "Paving_Joint_N_09",
+    "Paving_Joint_S_10",
+    "Paving_Joint_N_10",
+    "Paving_Joint_S_11",
+    "Paving_Joint_N_11",
+    "Paving_Joint_S_12",
+    "Paving_Joint_N_12",
+    "Paving_Joint_S_13",
+    "Paving_Joint_N_13",
+    "Paving_Joint_S_14",
+    "Paving_Joint_N_14",
+    "Paving_Joint_S_15",
+    "Paving_Joint_N_15",
+    "Paving_Joint_S_16",
+    "Paving_Joint_N_16",
+    "Paving_Joint_S_17",
+    "Paving_Joint_N_17",
+    "Paving_Joint_S_18",
+    "Paving_Joint_N_18",
+    "Paving_Joint_S_19",
+    "Paving_Joint_N_19",
+    "Paving_Joint_S_20",
+    "Paving_Joint_N_20",
+    "Paving_Joint_S_21",
+    "Paving_Joint_N_21",
+    "Paving_Joint_S_22",
+    "Paving_Joint_S_23",
+    "Paving_Joint_S_24",
+    "Paving_Joint_S_25",
+    "Paving_Joint_S_26",
+    "Paving_Joint_S_27",
+    "Paving_Joint_N_27",
+    "Paving_Joint_S_28",
+    "Paving_Joint_N_28",
+    "Paving_Joint_S_29",
+    "Paving_Joint_N_29",
+    "Paving_Joint_S_30",
+    "Paving_Joint_N_30",
+    "Paving_Joint_S_31",
+    "Paving_Joint_N_31",
+    "Paving_Joint_S_32",
+    "Paving_Joint_N_32"
+  ],
+  "environment_objects": [
+    "Ground_Base",
+    "Grass_Area_01",
+    "Garden_Border_00",
+    "Garden_Lawn_00",
+    "Garden_Border_01",
+    "Garden_Lawn_01",
+    "Garden_Border_02",
+    "Garden_Lawn_02",
+    "Park_Plaza",
+    "Presentation_Backdrop"
+  ]
+}

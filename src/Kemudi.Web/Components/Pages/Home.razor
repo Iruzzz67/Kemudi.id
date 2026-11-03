@@ -1,0 +1,127 @@
+@page "/"
+@using Kemudi.Web.Data
+@using Kemudi.Web.Services
+@inject ApiClient Api
+
+@if (_vehicles is null)
+{
+    <div class="loading">Memuat kendaraan...</div>
+}
+else
+{
+    @* ── Hero with 3D Background ── *@
+    <section class="hero" style="position:relative; min-height:85vh; display:flex; align-items:center; justify-content:center; padding:6rem 0 4rem;">
+        <canvas id="three-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+        <div style="position:relative;z-index:1;">
+            <h1 style="animation:slideUp 0.7s var(--ease-out) both;">
+                Belajar Mengemudi,<br /><span>Sebelum Turun ke Jalan</span>
+            </h1>
+            <p style="animation:slideUp 0.7s var(--ease-out) 0.1s both;">
+                Platform kursus mengemudi online dengan simulasi 3D interaktif.
+                Latih refleks dan kontrolmu mengendarai motor, mobil, dan truk langsung dari browser.
+            </p>
+            <div class="hero-actions" style="animation:slideUp 0.7s var(--ease-out) 0.2s both;">
+                <a class="btn btn-primary btn-lg" href="simulasi">🎮 Coba Simulasi</a>
+                <a class="btn btn-outline btn-lg" href="kursus">Lihat Kursus</a>
+                <a class="btn btn-outline btn-lg" href="materi">📖 Lihat Materi</a>
+            </div>
+        </div>
+    </section>
+
+    @* ── Features ── *@
+    <section class="section" style="margin-top:2rem">
+        <div class="grid grid-3">
+            <div class="feature-card">
+                <span class="feature-icon">🏍️</span>
+                <h3>Simulasi Realistis</h3>
+                <p>Fisika kendaraan yang akurat dengan kontrol manual & otomatis, lampu, klakson, dan speedometer.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🛣️</span>
+                <h3>Jalan Beragam</h3>
+                <p>Perkotaan, jalan raya, pedesaan, hingga pegunungan — dengan rambu lalu lintas dan cuaca dinamis.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎓</span>
+                <h3>Kursus Terstruktur</h3>
+                <p>Paket kursus motor, mobil, dan truk dengan mentor berpengalaman dan sertifikat kelulusan.</p>
+            </div>
+        </div>
+    </section>
+
+    @* ── Vehicles ── *@
+    <section class="section">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Tiga Jenis Kendaraan</h2>
+                <p class="section-sub">Setiap kendaraan disimulasikan dengan karakteristik fisika yang berbeda.</p>
+            </div>
+            <a href="simulasi" class="btn btn-outline btn-sm">Coba Sekarang →</a>
+        </div>
+        <div class="grid grid-3 mt-3">
+            @foreach (var v in _vehicles)
+            {
+                <a class="card" href="simulasi" style="border-top: 3px solid @v.Color">
+                    <span class="chip" style="background:@v.Color"></span>
+                    <h3>@v.Label</h3>
+                    <p>@v.Description</p>
+                </a>
+            }
+        </div>
+    </section>
+
+    @* ── Materi ── *@
+    <section class="section">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title">Materi Terbaru</h2>
+                <p class="section-sub">Bekali diri dengan teori sebelum praktik.</p>
+            </div>
+            <a href="materi" class="btn btn-outline btn-sm">Lihat Semua →</a>
+        </div>
+        <div class="grid grid-2 mt-3">
+            @foreach (var m in MateriData.List.Take(4))
+            {
+                <a class="card" href="materi/@m.Slug">
+                    <span class="card-tag">@m.Category</span>
+                    <h3>@m.Title</h3>
+                    <p>@m.Summary</p>
+                </a>
+            }
+        </div>
+    </section>
+
+    @* ── CTA ── *@
+    <section class="section" style="text-align:center; padding:4rem 0; position:relative;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
+        <div style="position:relative;z-index:1;">
+            <h2 style="font-size:2rem; font-weight:900; letter-spacing:-0.03em; margin:0">Siap Belajar Mengemudi?</h2>
+            <p style="color:var(--muted); margin:0.75rem auto 2rem; max-width:480px; font-size:1.05rem;">Mulai dengan simulasi gratis atau daftar kursus untuk bimbingan mentor profesional.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" href="register">Daftar Gratis</a>
+                <a class="btn btn-outline btn-lg" href="simulasi">Mulai Simulasi</a>
+            </div>
+        </div>
+    </section>
+}
+
+<script>
+    // Initialize Three.js background after render
+    window.addEventListener('DOMContentLoaded', function() {
+        // Re-init if canvas exists
+        var canvas = document.getElementById('three-bg');
+        if (canvas && typeof THREE !== 'undefined' && !canvas._threeInit) {
+            canvas._threeInit = true;
+        }
+    });
+</script>
+
+@code {
+    private List<Kemudi.Shared.DTOs.VehicleDto>? _vehicles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<Kemudi.Shared.DTOs.VehicleDto>>("/api/vehicles");
+    }
+}

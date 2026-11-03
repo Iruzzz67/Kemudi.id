@@ -1,0 +1,341 @@
+{
+  "houses": {
+    "House_Main": {
+      "type": "EMPTY",
+      "location": [
+        -6.0,
+        14.0,
+        0.18000000715255737
+      ],
+      "children": 60
+    },
+    "House_01": {
+      "type": "EMPTY",
+      "location": [
+        -23.0,
+        13.0,
+        0.18000000715255737
+      ],
+      "children": 58
+    },
+    "House_02": {
+      "type": "EMPTY",
+      "location": [
+        26.0,
+        13.0,
+        0.18000000715255737
+      ],
+      "children": 58
+    }
+  },
+  "props": [
+    "Fence_Post_0_0",
+    "Fence_Post_0_1",
+    "Fence_Post_0_2",
+    "Fence_Post_0_3",
+    "Fence_Post_0_7",
+    "Fence_Post_0_8",
+    "Fence_Post_0_9",
+    "Fence_Post_0_10",
+    "Fence_Rail_0_-1_0.6",
+    "Fence_Rail_0_-1_0.95",
+    "Fence_Rail_0_1_0.6",
+    "Fence_Rail_0_1_0.95",
+    "Fence_Post_1_0",
+    "Fence_Post_1_1",
+    "Fence_Post_1_2",
+    "Fence_Post_1_3",
+    "Fence_Post_1_4",
+    "Fence_Post_1_7",
+    "Fence_Post_1_8",
+    "Fence_Post_1_9",
+    "Fence_Post_1_10",
+    "Fence_Post_1_11",
+    "Fence_Rail_1_-1_0.6",
+    "Fence_Rail_1_-1_0.95",
+    "Fence_Rail_1_1_0.6",
+    "Fence_Rail_1_1_0.95",
+    "Fence_Post_2_0",
+    "Fence_Post_2_1",
+    "Fence_Post_2_2",
+    "Fence_Post_2_3",
+    "Fence_Post_2_7",
+    "Fence_Post_2_8",
+    "Fence_Post_2_9",
+    "Fence_Post_2_10",
+    "Fence_Rail_2_-1_0.6",
+    "Fence_Rail_2_-1_0.95",
+    "Fence_Rail_2_1_0.6",
+    "Fence_Rail_2_1_0.95",
+    "Carport_Paving",
+    "Carport_Post_00",
+    "Carport_Post_01",
+    "Carport_Post_02",
+    "Carport_Post_03",
+    "Carport_Roof",
+    "Carport_Louver_00",
+    "Carport_Louver_01",
+    "Carport_Louver_02",
+    "Carport_Louver_03",
+    "Carport_Louver_04",
+    "Carport_Louver_05",
+    "Carport_Louver_06",
+    "Carport_Louver_07",
+    "Carport_Louver_08",
+    "Carport_Louver_09",
+    "Carport_Louver_10",
+    "Carport_Louver_11",
+    "StreetLight_01",
+    "StreetLight_Base_00",
+    "StreetLight_Pole_00",
+    "StreetLight_Arm_00",
+    "StreetLight_Housing_00",
+    "StreetLight_Emitter_00",
+    "StreetLight_02",
+    "StreetLight_Base_01",
+    "StreetLight_Pole_01",
+    "StreetLight_Arm_01",
+    "StreetLight_Housing_01",
+    "StreetLight_Emitter_01",
+    "StreetLight_03",
+    "StreetLight_Base_02",
+    "StreetLight_Pole_02",
+    "StreetLight_Arm_02",
+    "StreetLight_Housing_02",
+    "StreetLight_Emitter_02",
+    "StreetLight_04",
+    "StreetLight_Base_03",
+    "StreetLight_Pole_03",
+    "StreetLight_Arm_03",
+    "StreetLight_Housing_03",
+    "StreetLight_Emitter_03",
+    "StreetLight_05",
+    "StreetLight_Base_04",
+    "StreetLight_Pole_04",
+    "StreetLight_Arm_04",
+    "StreetLight_Housing_04",
+    "StreetLight_Emitter_04",
+    "StreetLight_06",
+    "StreetLight_Base_05",
+    "StreetLight_Pole_05",
+    "StreetLight_Arm_05",
+    "StreetLight_Housing_05",
+    "StreetLight_Emitter_05",
+    "Tree_01",
+    "Tree_Trunk_00",
+    "Tree_Branch_0_0",
+    "Tree_Branch_0_1",
+    "Tree_Branch_0_2",
+    "Tree_Crown_00",
+    "Tree_Crown_Side_00",
+    "Tree_Planter_00",
+    "Tree_02",
+    "Tree_Trunk_01",
+    "Tree_Branch_1_0",
+    "Tree_Branch_1_1",
+    "Tree_Branch_1_2",
+    "Tree_Crown_01",
+    "Tree_Crown_Side_01",
+    "Tree_Planter_01",
+    "Tree_03",
+    "Tree_Trunk_02",
+    "Tree_Branch_2_0",
+    "Tree_Branch_2_1",
+    "Tree_Branch_2_2",
+    "Tree_Crown_02",
+    "Tree_Crown_Side_02",
+    "Tree_Planter_02",
+    "Tree_04",
+    "Tree_Trunk_03",
+    "Tree_Branch_3_0",
+    "Tree_Branch_3_1",
+    "Tree_Branch_3_2",
+    "Tree_Crown_03",
+    "Tree_Crown_Side_03",
+    "Tree_Planter_03",
+    "Tree_05",
+    "Tree_Trunk_04",
+    "Tree_Branch_4_0",
+    "Tree_Branch_4_1",
+    "Tree_Branch_4_2",
+    "Tree_Crown_04",
+    "Tree_Crown_Side_04",
+    "Tree_Planter_04",
+    "Tree_06",
+    "Tree_Trunk_05",
+    "Tree_Branch_5_0",
+    "Tree_Branch_5_1",
+    "Tree_Branch_5_2",
+    "Tree_Crown_05",
+    "Tree_Crown_Side_05",
+    "Tree_Planter_05",
+    "Tree_07",
+    "Tree_Trunk_06",
+    "Tree_Branch_6_0",
+    "Tree_Branch_6_1",
+    "Tree_Branch_6_2",
+    "Tree_Crown_06",
+    "Tree_Crown_Side_06",
+    "Tree_Planter_06",
+    "Tree_08",
+    "Tree_Trunk_07",
+    "Tree_Branch_7_0",
+    "Tree_Branch_7_1",
+    "Tree_Branch_7_2",
+    "Tree_Crown_07",
+    "Tree_Crown_Side_07",
+    "Tree_Planter_07",
+    "Tree_09",
+    "Tree_Trunk_08",
+    "Tree_Branch_8_0",
+    "Tree_Branch_8_1",
+    "Tree_Branch_8_2",
+    "Tree_Crown_08",
+    "Tree_Crown_Side_08",
+    "Tree_Planter_08",
+    "Tree_10",
+    "Tree_Trunk_09",
+    "Tree_Branch_9_0",
+    "Tree_Branch_9_1",
+    "Tree_Branch_9_2",
+    "Tree_Crown_09",
+    "Tree_Crown_Side_09",
+    "Tree_Planter_09",
+    "Tree_11",
+    "Tree_Trunk_10",
+    "Tree_Branch_10_0",
+    "Tree_Branch_10_1",
+    "Tree_Branch_10_2",
+    "Tree_Crown_10",
+    "Tree_Crown_Side_10",
+    "Tree_Planter_10",
+    "Tree_12",
+    "Tree_Trunk_11",
+    "Tree_Branch_11_0",
+    "Tree_Branch_11_1",
+    "Tree_Branch_11_2",
+    "Tree_Crown_11",
+    "Tree_Crown_Side_11",
+    "Tree_Planter_11",
+    "Tree_13",
+    "Tree_Trunk_12",
+    "Tree_Branch_12_0",
+    "Tree_Branch_12_1",
+    "Tree_Branch_12_2",
+    "Tree_Crown_12",
+    "Tree_Crown_Side_12",
+    "Tree_Planter_12",
+    "Tree_14",
+    "Tree_Trunk_13",
+    "Tree_Branch_13_0",
+    "Tree_Branch_13_1",
+    "Tree_Branch_13_2",
+    "Tree_Crown_13",
+    "Tree_Crown_Side_13",
+    "Tree_Planter_13",
+    "Tree_15",
+    "Tree_Trunk_14",
+    "Tree_Branch_14_0",
+    "Tree_Branch_14_1",
+    "Tree_Branch_14_2",
+    "Tree_Crown_14",
+    "Tree_Crown_Side_14",
+    "Tree_Planter_14"
+  ],
+  "lights": {
+    "Sun_Late_Afternoon": {
+      "type": "SUN",
+      "energy": 2.4000000953674316,
+      "location": [
+        -30.0,
+        -25.0,
+        45.0
+      ]
+    },
+    "Area_Soft_Sky": {
+      "type": "AREA",
+      "energy": 2300.0,
+      "location": [
+        0.0,
+        -20.0,
+        30.0
+      ]
+    },
+    "Area_Rim": {
+      "type": "AREA",
+      "energy": 3200.0,
+      "location": [
+        10.0,
+        23.0,
+        25.0
+      ]
+    }
+  },
+  "cameras": {
+    "Camera_Overview": {
+      "type": "ORTHO",
+      "lens": 48.0,
+      "location": [
+        45.0,
+        -58.0,
+        45.0
+      ],
+      "constraints": [
+        "TRACK_TO"
+      ]
+    },
+    "Camera_VehicleFocus": {
+      "type": "PERSP",
+      "lens": 48.0,
+      "location": [
+        7.0,
+        -8.0,
+        3.9000000953674316
+      ],
+      "constraints": [
+        "TRACK_TO"
+      ]
+    },
+    "Camera_Street": {
+      "type": "PERSP",
+      "lens": 48.0,
+      "location": [
+        5.0,
+        -7.0,
+        2.9000000953674316
+      ],
+      "constraints": [
+        "TRACK_TO"
+      ]
+    },
+    "Camera_Truck": {
+      "type": "PERSP",
+      "lens": 42.0,
+      "location": [
+        8.0,
+        9.0,
+        4.599999904632568
+      ],
+      "constraints": [
+        "TRACK_TO"
+      ]
+    },
+    "Camera_Finale": {
+      "type": "ORTHO",
+      "lens": 48.0,
+      "location": [
+        39.0,
+        -60.0,
+        41.0
+      ],
+      "constraints": [
+        "TRACK_TO"
+      ]
+    }
+  },
+  "render": {
+    "engine": "BLENDER_EEVEE",
+    "exposure": 0.6000000238418579,
+    "look": "None"
+  }
+}

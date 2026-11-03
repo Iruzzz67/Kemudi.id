@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "four headings, left lanes, graph connections and geometry ordering in metres",
+    "signals face approaching traffic, single lens, stopline and stripe dimensions",
+    "player red-light footprint detection respects inbound lane, heading and optional penalty",
+    "phase sequence and startup all red; invalid phase rejected; negative dt ignored",
+    "AI red bumper stop, queues, no conflicting occupancy, clearing, restart over multiple cycles",
+    "blocked exit holds green traffic and releases queue when exit clears",
+    "yellow decision uses comfortable stopping distance; committed car clears on red",
+    "asymmetric arm lengths bound lane graph and recycled vehicle footprints",
+    "physical exit obstacles block green entry and occupied spawn waits safely",
+    "invalid configuration fails early instead of hanging or generating NaN geometry",
+    "AI brakes comfortably for red and stops with its bumper upstream"
+  ]
+}

@@ -1,0 +1,19 @@
+[    1874ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586
+[    1898ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/favicon.ico:0
+[   11715ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586
+[   13301ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586
+[   14395ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586
+[   16586ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586
+[   29678ms] [ERROR] Error: Static collision box needs finite ordered bounds
+    at CollisionWorld.registerStaticBox (http://127.0.0.1:8080/systems/collision-system.js:92:15)
+    at init (http://127.0.0.1:8080/main.js:147:24) @ http://127.0.0.1:8080/main.js:586

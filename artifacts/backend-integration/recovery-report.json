@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "checks": [
+    "Anonymous result panel requests login",
+    "Invalid session rejected and login recovery offered",
+    "Pending result saved after authentication restored",
+    "Standalone build reports backend unavailable honestly"
+  ]
+}

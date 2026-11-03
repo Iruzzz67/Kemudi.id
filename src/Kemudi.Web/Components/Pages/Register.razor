@@ -1,0 +1,80 @@
+@page "/register"
+@using Kemudi.Web.Services
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<section class="hero" style="min-height:70vh; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+    <canvas id="three-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+    <div style="max-width:440px; width:100%; position:relative; z-index:1; animation:scaleIn 0.5s var(--ease-out) both;">
+        <div class="text-center mb-4">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:linear-gradient(135deg,#8b5cf6,#a78bfa);border-radius:18px;font-size:2rem;box-shadow:0 8px 32px -8px rgba(139,92,246,0.4);margin-bottom:1rem;">✨</div>
+            <h1 class="section-title" style="font-size:2rem;">Daftar Akun</h1>
+            <p class="muted" style="margin-top:0.5rem">Mulai perjalanan belajarmu bersama Kemudi.id.</p>
+        </div>
+
+        <div class="form-card">
+            <div class="form" style="max-width:none">
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="error-box">@_error</div>
+                }
+
+                <div class="field">
+                    <label for="register-name">Nama Lengkap</label>
+                    <input id="register-name" type="text" autocomplete="name" @bind="_name" placeholder="Masukkan nama lengkap" />
+                </div>
+
+                <div class="field">
+                    <label for="register-email">Email</label>
+                    <input id="register-email" type="email" autocomplete="username" @bind="_email" placeholder="nama@email.com" />
+                </div>
+
+                <div class="field">
+                    <label for="register-password">Password</label>
+                    <input id="register-password" type="password" autocomplete="new-password" @bind="_password" placeholder="Minimal 6 karakter" />
+                    <div class="hint">Gunakan kombinasi huruf, angka, dan simbol.</div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" style="width:100%" disabled="@_busy" @onclick="RegisterAsync">
+                    @(_busy ? "Mendaftar..." : "Daftar Sekarang")
+                </button>
+
+                <p class="text-center muted" style="font-size:0.9rem; margin:0">
+                    Sudah punya akun? <a href="login" style="font-weight:600">Masuk</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private string _name = "";
+    private string _email = "";
+    private string _password = "";
+    private string? _error;
+    private bool _busy;
+
+    private async Task RegisterAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_name) || string.IsNullOrWhiteSpace(_email) || _password.Length < 6)
+            {
+                _error = "Nama, email valid, dan password minimal 6 karakter wajib diisi.";
+                return;
+            }
+
+            await using var session = await JS.InvokeAsync<IJSObjectReference>("import", "/js/session-client.js");
+            _error = await session.InvokeAsync<string?>("submit", "register", new { name = _name, email = _email, password = _password });
+            if (_error is null)
+                Nav.NavigateTo("/dashboard", forceLoad: true);
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

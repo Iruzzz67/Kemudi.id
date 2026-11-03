@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Kemudi.Api/Kemudi.Api.csproj" />
+    <Project Path="src/Kemudi.App/Kemudi.App.csproj" />
+    <Project Path="src/Kemudi.Domain/Kemudi.Domain.csproj" />
+    <Project Path="src/Kemudi.Infrastructure/Kemudi.Infrastructure.csproj" />
+    <Project Path="src/Kemudi.Shared/Kemudi.Shared.csproj" />
+    <Project Path="src/Kemudi.Web/Kemudi.Web.csproj" />
+  </Folder>
+</Solution>
