@@ -1,42 +1,52 @@
 @page "/register"
 @using Kemudi.Web.Services
-@inject AuthService Auth
+@inject IJSRuntime JS
 @inject NavigationManager Nav
 
-<div class="text-center" style="margin-bottom:1.5rem">
-    <h1 class="section-title">Daftar Akun</h1>
-    <p class="muted">Mulai perjalanan belajarmu bersama Kemudi.id.</p>
-</div>
+<section class="hero" style="min-height:70vh; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+    <canvas id="three-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
 
-<div style="display:flex;justify-content:center">
-    <div class="form card" style="width:100%">
-        @if (!string.IsNullOrEmpty(_error))
-        {
-            <div class="error-box">@_error</div>
-        }
-
-        <div class="field">
-            <label>Nama Lengkap</label>
-            <input type="text" @bind="_name" />
+    <div style="max-width:440px; width:100%; position:relative; z-index:1; animation:scaleIn 0.5s var(--ease-out) both;">
+        <div class="text-center mb-4">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:linear-gradient(135deg,#8b5cf6,#a78bfa);border-radius:18px;font-size:2rem;box-shadow:0 8px 32px -8px rgba(139,92,246,0.4);margin-bottom:1rem;">✨</div>
+            <h1 class="section-title" style="font-size:2rem;">Daftar Akun</h1>
+            <p class="muted" style="margin-top:0.5rem">Mulai perjalanan belajarmu bersama Kemudi.id.</p>
         </div>
 
-        <div class="field">
-            <label>Email</label>
-            <input type="email" @bind="_email" />
-        </div>
+        <div class="form-card">
+            <div class="form" style="max-width:none">
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="error-box">@_error</div>
+                }
 
-        <div class="field">
-            <label>Password</label>
-            <input type="password" @bind="_password" />
-            <div class="hint">Minimal 6 karakter.</div>
-        </div>
+                <div class="field">
+                    <label for="register-name">Nama Lengkap</label>
+                    <input id="register-name" type="text" autocomplete="name" @bind="_name" placeholder="Masukkan nama lengkap" />
+                </div>
 
-        <div class="flex-between">
-            <button class="btn btn-primary" disabled="@_busy" @onclick="RegisterAsync">@(_busy ? "Mendaftar..." : "Daftar")</button>
-            <span class="muted">Sudah punya akun? <a href="login">Masuk</a></span>
+                <div class="field">
+                    <label for="register-email">Email</label>
+                    <input id="register-email" type="email" autocomplete="username" @bind="_email" placeholder="nama@email.com" />
+                </div>
+
+                <div class="field">
+                    <label for="register-password">Password</label>
+                    <input id="register-password" type="password" autocomplete="new-password" @bind="_password" placeholder="Minimal 6 karakter" />
+                    <div class="hint">Gunakan kombinasi huruf, angka, dan simbol.</div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" style="width:100%" disabled="@_busy" @onclick="RegisterAsync">
+                    @(_busy ? "Mendaftar..." : "Daftar Sekarang")
+                </button>
+
+                <p class="text-center muted" style="font-size:0.9rem; margin:0">
+                    Sudah punya akun? <a href="login" style="font-weight:600">Masuk</a>
+                </p>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
 @code {
     private string _name = "";
@@ -57,11 +67,10 @@
                 return;
             }
 
-            var result = await Auth.RegisterAsync(_name, _email, _password);
-            if (result.Success)
+            await using var session = await JS.InvokeAsync<IJSObjectReference>("import", "/js/session-client.js");
+            _error = await session.InvokeAsync<string?>("submit", "register", new { name = _name, email = _email, password = _password });
+            if (_error is null)
                 Nav.NavigateTo("/dashboard", forceLoad: true);
-            else
-                _error = result.Error;
         }
         finally
         {

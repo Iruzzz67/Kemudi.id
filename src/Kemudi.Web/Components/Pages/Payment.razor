@@ -14,62 +14,64 @@ else if (_registration is null)
 }
 else
 {
-    <div class="section-head">
-        <div>
-            <h1 class="section-title">Instruksi Pembayaran</h1>
-            <p class="section-sub">Selesaikan pembayaran untuk mengaktifkan kursusmu.</p>
-        </div>
-    </div>
-
-    <div class="two-col mt-2">
-        <div class="card">
-            <h3>Detail Pendaftaran</h3>
-            <div class="list-item"><span class="muted">Nama</span><br /><strong>@_registration.Name</strong></div>
-            <div class="list-item"><span class="muted">Metode</span><br /><strong>@MethodLabel(_registration.PaymentMethod)</strong></div>
-            <div class="list-item"><span class="muted">Mulai Kursus</span><br /><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></div>
-            <div class="list-item"><span class="muted">Jumlah</span><br /><span class="price">Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span></div>
+    <div style="padding-top:1rem;">
+        <div class="section-head">
+            <div>
+                <h1 class="section-title" style="font-size:2rem;">Instruksi Pembayaran</h1>
+                <p class="section-sub" style="font-size:1.05rem;">Selesaikan pembayaran untuk mengaktifkan kursusmu.</p>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>@MethodLabel(_registration.PaymentMethod)</h3>
+        <div class="two-col mt-3">
+            <div class="card" style="padding:2rem;">
+                <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1.25rem;">Detail Pendaftaran</h3>
+                <div class="list-item"><span class="muted">Nama</span><br /><strong style="font-size:1.05rem;">@_registration.Name</strong></div>
+                <div class="list-item"><span class="muted">Metode</span><br /><strong>@MethodLabel(_registration.PaymentMethod)</strong></div>
+                <div class="list-item"><span class="muted">Mulai Kursus</span><br /><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></div>
+                <div class="list-item"><span class="muted">Jumlah</span><br /><span class="price" style="font-size:1.5rem;">Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span></div>
+            </div>
 
-            @if (_registration.PaymentMethod == "transfer")
-            {
-                <div class="payment-box">
-                    <div class="list-item"><strong>BCA</strong><br /><span class="muted">1234-5678-901</span></div>
-                    <div class="list-item"><strong>BNI</strong><br /><span class="muted">9876-5432-100</span></div>
-                    <div class="list-item"><strong>a.n. Kemudi.id</strong></div>
-                    <p class="muted mt-1">Transfer sesuai jumlah di atas, lalu konfirmasi di bawah.</p>
-                </div>
-            }
-            else if (_registration.PaymentMethod == "e-wallet")
-            {
-                <div class="payment-box flex">
-                    <div class="qris">QRIS<br />Kemudi.id</div>
-                    <div>
-                        <strong>QRIS / E-Wallet</strong>
-                        <div class="muted">Scan QR pada aplikasi dompet digital Anda.</div>
-                        <div class="mt-1 muted">OVO / GoPay / Dana: <strong>0812-3456-7890</strong></div>
+            <div class="card" style="padding:2rem;">
+                <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1.25rem;">@MethodLabel(_registration.PaymentMethod)</h3>
+
+                @if (_registration.PaymentMethod == "transfer")
+                {
+                    <div class="payment-box">
+                        <div class="list-item"><strong>BCA</strong><br /><span class="muted" style="font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">1234-5678-901</span></div>
+                        <div class="list-item"><strong>BNI</strong><br /><span class="muted" style="font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">9876-5432-100</span></div>
+                        <div class="list-item"><strong>a.n. Kemudi.id</strong></div>
+                        <p class="muted mt-1" style="font-size:0.9rem;">Transfer sesuai jumlah di atas, lalu konfirmasi di bawah.</p>
                     </div>
-                </div>
-            }
-            else
-            {
-                <div class="payment-box">
-                    <p>Bayar di tempat saat verifikasi pada tanggal:</p>
-                    <p><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></p>
-                    <p class="muted">Jumlah: <strong>Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</strong></p>
-                </div>
-            }
+                }
+                else if (_registration.PaymentMethod == "e-wallet")
+                {
+                    <div class="payment-box flex">
+                        <div class="qris">QRIS<br />Kemudi.id</div>
+                        <div>
+                            <strong>QRIS / E-Wallet</strong>
+                            <div class="muted">Scan QR pada aplikasi dompet digital Anda.</div>
+                            <div class="mt-1 muted">OVO / GoPay / Dana: <strong style="font-family:'JetBrains Mono',monospace;">0812-3456-7890</strong></div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="payment-box">
+                        <p>Bayar di tempat saat verifikasi pada tanggal:</p>
+                        <p style="font-weight:700;">@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</p>
+                        <p class="muted">Jumlah: <strong style="color:var(--blue);">Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</strong></p>
+                    </div>
+                }
 
-            @if (!string.IsNullOrEmpty(_error))
-            {
-                <div class="error-box mt-2">@_error</div>
-            }
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="error-box mt-2">@_error</div>
+                }
 
-            <div class="flex mt-2">
-                <button class="btn btn-success" disabled="@_busy" @onclick="ConfirmAsync">@(_busy ? "Memproses..." : "Saya sudah bayar")</button>
-                <a class="btn btn-outline" href="kursus">Batalkan</a>
+                <div class="flex mt-3">
+                    <button class="btn btn-success btn-lg" disabled="@_busy" @onclick="ConfirmAsync">@(_busy ? "Memproses..." : "✓ Saya sudah bayar")</button>
+                    <a class="btn btn-outline" href="kursus">Batalkan</a>
+                </div>
             </div>
         </div>
     </div>

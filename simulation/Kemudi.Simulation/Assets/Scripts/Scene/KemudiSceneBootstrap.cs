@@ -6,12 +6,13 @@ using Kemudi.Simulation.Rules;
 using Kemudi.Simulation.Traffic;
 using Kemudi.Simulation.Transmission;
 using Kemudi.Simulation.Vehicles;
+using Kemudi.Simulation.XR;
 using UnityEngine;
 
 namespace Kemudi.Simulation.Scene
 {
     /// <summary>
-    /// Bootstrap scene #1 — PHASE 4-5.
+    /// Bootstrap scene #1 — PHASE 4-5 (termasuk VR).
     ///
     /// Membangun seluruh hierarki simulasi SAAT RUNTIME dari kode, sehingga
     /// scene pertama cukup berisi 1 GameObject dengan komponen ini (atau
@@ -20,9 +21,10 @@ namespace Kemudi.Simulation.Scene
     /// Yang dibangun:
     ///   - Kamera utama + directional light + ground sederhana
     ///   - SimulationManager + ViolationSystem + ScoringSystem + ChecklistManager
-    ///   - UniversalInputSystem + KeyboardInputProvider
+    ///   - UniversalInputSystem + KeyboardInputProvider (+ XRInputProvider bila VR)
     ///   - TrackBuilder (1 mesh jalan + collider + zona off-road & finish)
     ///   - Kendaraan (VehicleController + VehiclePhysics + Engine + Transmisi)
+    ///   - XR systems (XRManager, XRComfortSystem, XRDashboard) bila VR aktif
     ///
     /// Alur: Selecting → PreDrive → Driving → Finished/Failed (§10, §35).
     /// Gunakan Editor/KemudiSceneGenerator untuk membuat Assets/Scenes/Main.unity.
@@ -44,6 +46,11 @@ namespace Kemudi.Simulation.Scene
         public VehicleController Vehicle { get; private set; } = null!;
         public VehicleConfig SelectedConfig { get; private set; } = null!;
 
+        // ── XR/VR Systems ─────────────────────────────────────────────────
+        public XRManager XrManager { get; private set; } = null!;
+        public XRComfortSystem? XrComfort { get; private set; }
+        public XRDashboard? XrDashboard { get; private set; }
+
         private Transform[] _waypoints = System.Array.Empty<Transform>();
 
         /// <summary>Percobaan sedang berjalan (menu pilih kendaraan disembunyikan).</summary>
@@ -60,8 +67,10 @@ namespace Kemudi.Simulation.Scene
             BuildScenery();
             BuildTrafficSystem();
             BuildCameraRig();
+            BuildXrSystem();
 
             // UI sederhana (IMGUI, tanpa aset Canvas).
+            // Di VR, MainMenuUI menggunakan world-space canvas.
             var menu = gameObject.AddComponent<MainMenuUI>();
             menu.Bind(this);
             var hud = gameObject.AddComponent<SceneHud>();
@@ -78,6 +87,14 @@ namespace Kemudi.Simulation.Scene
 
             Vehicle = BuildVehicle(type, manualTransmission);
             CameraRig.Configure(UnityEngine.Camera.main, Vehicle.transform);
+
+            // VR: set vehicle target untuk head tracking follow.
+            if (XrManager != null && XrManager.IsVrActive)
+            {
+                XrManager.SetVehicleTarget(Vehicle.transform);
+                CameraRig.EnableVrMode();
+            }
+
             Simulation.StartSimulation();
             RunStarted = true;
         }
@@ -147,7 +164,8 @@ namespace Kemudi.Simulation.Scene
             var inputGo = new GameObject("Input");
             Input = inputGo.AddComponent<UniversalInputSystem>();
             Input.Register(inputGo.AddComponent<KeyboardInputProvider>());
-            // Gamepad & XR bisa didaftarkan di sini — lihat docs/VR_INPUT_MAP.md.
+            // XRInputProvider didaftarkan oleh XRManager di BuildXrSystem().
+            // Lihat XRInputProvider.cs untuk mapping lengkap VR controller.
         }
 
         private void BuildTrack()
@@ -430,6 +448,42 @@ namespace Kemudi.Simulation.Scene
             CameraRig.Configure(UnityEngine.Camera.main, null); // target di-set saat kendaraan dibuat
         }
 
+        // ── XR/VR System ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// Bangun XR system: XRManager, comfort, dashboard.
+        /// XRInputProvider didaftarkan ke UniversalInputSystem bila VR aktif.
+        /// Semua berjalan otomatis — desktop mode sebagai fallback.
+        /// </summary>
+        private void BuildXrSystem()
+        {
+            // 1) XR Manager — deteksi VR, setup rig, register input.
+            var xrGo = new GameObject("XR Manager");
+            XrManager = xrGo.AddComponent<XRManager>();
+            XrManager.Initialize(Input, CameraRig.gameObject);
+
+            // 2) Comfort system — anti motion sickness.
+            XrComfort = xrGo.AddComponent<XRComfortSystem>();
+            XrComfort.SystemActive = XrManager.IsVrActive;
+
+            // 3) Dashboard world-space — VR cockpit display.
+            XrDashboard = xrGo.AddComponent<XRDashboard>();
+            XrDashboard.gameObject.SetActive(XrManager.IsVrActive);
+
+            // 4) Hand tracking manager (default OFF per §32).
+            var handTracking = xrGo.AddComponent<HandTrackingManager>();
+            handTracking.SetEnabledByUser(false);
+
+            if (XrManager.IsVrActive)
+            {
+                Debug.Log("[Kemudi.XR] VR systems siap: XRManager + Comfort + Dashboard + HandTracking.");
+            }
+            else
+            {
+                Debug.Log("[Kemudi.XR] Desktop mode — VR systems dormant.");
+            }
+        }
+
         // ── Kendaraan ───────────────────────────────────────────────────────
 
         private VehicleController BuildVehicle(VehicleConfig.VehicleType type, bool manual)
@@ -444,7 +498,7 @@ namespace Kemudi.Simulation.Scene
             var rb = go.AddComponent<Rigidbody>();
             rb.mass = SelectedConfig.Mass;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.linearDamping = 0f;
+            rb.drag = 0f;
 
             var box = go.AddComponent<BoxCollider>();
             box.center = new Vector3(0f, SelectedConfig.Height * 0.5f, 0f);

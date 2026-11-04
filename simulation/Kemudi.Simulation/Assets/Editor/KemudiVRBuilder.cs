@@ -2,7 +2,6 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using UnityEngine.Rendering; // GraphicsDeviceType (Vulkan)
 
 namespace Kemudi.Simulation.EditorTools
 {
@@ -94,11 +93,11 @@ namespace Kemudi.Simulation.EditorTools
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29; // Quest 2+
 
             // Set scriptbing target ke IL2CPP untuk performa.
-            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, UnityEditor.ScriptingImplementation.IL2CPP);
             PlayerSettings.SetArchitecture(BuildTargetGroup.Android, 1); // ARM64
 
             // Vulkan graphics API (recommended untuk Quest).
-            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.Vulkan });
 
             // 5. Folder tujuan.
             var output = Path.Combine(outputDir, ApkName);

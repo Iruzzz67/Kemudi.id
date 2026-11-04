@@ -1,0 +1,810 @@
+{
+  "started": "2026-11-03T09:43:28.691Z",
+  "passed": true,
+  "cases": [
+    {
+      "type": "MOBIL",
+      "transmission": "automatic",
+      "checks": [
+        "actual three-type AI models, safe spawn and unified crossings",
+        "legacy lights/signals/hazard/horn keys remain operable",
+        "vehicle-specific procedural cockpit shares committed HUD snapshot",
+        "pause freezes tick, vehicle, indicators, traffic and pedestrians",
+        "forward movement, wheels and one actual speed reading",
+        "reverse retains positive HUD magnitude and R indicator",
+        "stopped speed and camera cycling stay synchronized",
+        "real crossing pedestrian moves from its initial sidewalk position",
+        "no runtime errors, failed requests or missing assets"
+      ],
+      "passed": true,
+      "final": {
+        "ready": true,
+        "phase": "driving",
+        "map": "unified",
+        "vehicle": "MOBIL",
+        "loaded": true,
+        "intersection": {
+          "id": "cedar-junction",
+          "phase": "NS_GREEN",
+          "elapsed": 15.25000000000034,
+          "geometry": {
+            "center": [
+              0,
+              0.09,
+              -80
+            ],
+            "laneWidth": 3.5,
+            "stopDistance": 8.625,
+            "crosswalkDistance": 6
+          },
+          "colors": {
+            "N": "GREEN",
+            "S": "GREEN",
+            "E": "RED",
+            "W": "RED"
+          },
+          "approaches": [
+            {
+              "id": "N",
+              "lane": "cedar-junction:N:in",
+              "stopLine": "cedar-junction:N:stop",
+              "signal": "cedar-junction:N:signal"
+            },
+            {
+              "id": "S",
+              "lane": "cedar-junction:S:in",
+              "stopLine": "cedar-junction:S:stop",
+              "signal": "cedar-junction:S:signal"
+            },
+            {
+              "id": "E",
+              "lane": "cedar-junction:E:in",
+              "stopLine": "cedar-junction:E:stop",
+              "signal": "cedar-junction:E:signal"
+            },
+            {
+              "id": "W",
+              "lane": "cedar-junction:W:in",
+              "stopLine": "cedar-junction:W:stop",
+              "signal": "cedar-junction:W:signal"
+            }
+          ],
+          "agents": []
+        },
+        "intersections": [
+          {
+            "id": "cedar-junction",
+            "phase": "NS_GREEN",
+            "elapsed": 15.25000000000034,
+            "geometry": {
+              "center": [
+                0,
+                0.09,
+                -80
+              ],
+              "laneWidth": 3.5,
+              "stopDistance": 8.625,
+              "crosswalkDistance": 6
+            },
+            "colors": {
+              "N": "GREEN",
+              "S": "GREEN",
+              "E": "RED",
+              "W": "RED"
+            },
+            "approaches": [
+              {
+                "id": "N",
+                "lane": "cedar-junction:N:in",
+                "stopLine": "cedar-junction:N:stop",
+                "signal": "cedar-junction:N:signal"
+              },
+              {
+                "id": "S",
+                "lane": "cedar-junction:S:in",
+                "stopLine": "cedar-junction:S:stop",
+                "signal": "cedar-junction:S:signal"
+              },
+              {
+                "id": "E",
+                "lane": "cedar-junction:E:in",
+                "stopLine": "cedar-junction:E:stop",
+                "signal": "cedar-junction:E:signal"
+              },
+              {
+                "id": "W",
+                "lane": "cedar-junction:W:in",
+                "stopLine": "cedar-junction:W:stop",
+                "signal": "cedar-junction:W:signal"
+              }
+            ],
+            "agents": []
+          },
+          {
+            "id": "training-junction",
+            "phase": "NS_GREEN",
+            "elapsed": 15.25000000000034,
+            "geometry": {
+              "center": [
+                0,
+                0.09,
+                -400
+              ],
+              "laneWidth": 3.5,
+              "stopDistance": 8.625,
+              "crosswalkDistance": 6
+            },
+            "colors": {
+              "N": "GREEN",
+              "S": "GREEN",
+              "E": "RED",
+              "W": "RED"
+            },
+            "approaches": [
+              {
+                "id": "N",
+                "lane": "training-junction:N:in",
+                "stopLine": "training-junction:N:stop",
+                "signal": "training-junction:N:signal"
+              },
+              {
+                "id": "S",
+                "lane": "training-junction:S:in",
+                "stopLine": "training-junction:S:stop",
+                "signal": "training-junction:S:signal"
+              },
+              {
+                "id": "E",
+                "lane": "training-junction:E:in",
+                "stopLine": "training-junction:E:stop",
+                "signal": "training-junction:E:signal"
+              },
+              {
+                "id": "W",
+                "lane": "training-junction:W:in",
+                "stopLine": "training-junction:W:stop",
+                "signal": "training-junction:W:signal"
+              }
+            ],
+            "agents": []
+          }
+        ],
+        "position": [
+          -1.75,
+          0.09,
+          22.013869766242205
+        ],
+        "speed": 0,
+        "gear": -1,
+        "engine": true,
+        "handbrake": false,
+        "seatAdjusted": true,
+        "mirrorChecked": true,
+        "lights": {
+          "headlights": [
+            3,
+            3
+          ],
+          "brakes": [
+            0.1,
+            0.1
+          ],
+          "indicators": [
+            {
+              "name": "Car_Indicator_FL",
+              "intensity": 2
+            },
+            {
+              "name": "Car_Indicator_FR",
+              "intensity": 2
+            },
+            {
+              "name": "Car_Indicator_RL",
+              "intensity": 2
+            },
+            {
+              "name": "Car_Indicator_RR",
+              "intensity": 2
+            }
+          ],
+          "hazard": true,
+          "left": true,
+          "right": false
+        },
+        "camera": "FPV",
+        "wheels": [
+          {
+            "name": "Car_Wheel_FL",
+            "spin": -5.367919550696742,
+            "steer": 0
+          },
+          {
+            "name": "Car_Wheel_FR",
+            "spin": -5.367919550696742,
+            "steer": 0
+          },
+          {
+            "name": "Car_Wheel_RL",
+            "spin": -5.367919550696742,
+            "steer": 0
+          },
+          {
+            "name": "Car_Wheel_RR",
+            "spin": -5.367919550696742,
+            "steer": 0
+          }
+        ],
+        "clock": {
+          "elapsed": 16.25,
+          "tick": 975,
+          "fixedDt": 0.016666666666666666
+        },
+        "environment": {
+          "timeOfDay": "malam",
+          "weather": "heavy",
+          "hour": "21:00",
+          "night": true,
+          "visibilityFactor": 0.3906,
+          "roadGripFactor": 0.84,
+          "recommendedAIMaxSpeedFactor": 0.65,
+          "precipitationCount": 1600
+        },
+        "instruments": {
+          "speedKmh": 0,
+          "speedText": "0",
+          "gear": "R",
+          "engineOn": true,
+          "handbrakeOn": false,
+          "braking": false,
+          "lights": {
+            "lowBeam": true,
+            "highBeam": true,
+            "left": true,
+            "right": false,
+            "hazard": true,
+            "blink": true,
+            "brake": false,
+            "reverse": true
+          },
+          "timeOfDay": "malam",
+          "weather": "heavy"
+        },
+        "cockpit": {
+          "type": "MOBIL",
+          "mode": "FPV",
+          "speedText": "0",
+          "gear": "R",
+          "visible": true,
+          "procedural": true
+        },
+        "traffic": [
+          {
+            "id": "traffic:0",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              1.75,
+              0.09,
+              -86.95000000031558
+            ],
+            "rotation": -3.141592653589793,
+            "speed": 0,
+            "braking": true,
+            "reason": "YIELD_PEDESTRIAN",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:1",
+            "type": "MOBIL",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              1.75,
+              0.09,
+              -93.7254919647652
+            ],
+            "rotation": -3.141592653589793,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:2",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -1.75,
+              0.09,
+              -75.30947011281152
+            ],
+            "rotation": 0,
+            "speed": 0,
+            "braking": true,
+            "reason": "YIELD_PEDESTRIAN",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:3",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -1.75,
+              0.09,
+              -69.64500000000001
+            ],
+            "rotation": 0,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:4",
+            "type": "MOBIL",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              11.583508907068321,
+              0.09,
+              -78.25
+            ],
+            "rotation": 1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "RED_LIGHT",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:5",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              22.08991598121998,
+              0.09,
+              -78.25
+            ],
+            "rotation": 1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:6",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -10.388246888412965,
+              0.09,
+              -81.75
+            ],
+            "rotation": -1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "RED_LIGHT",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:7",
+            "type": "MOBIL",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -16.954867768517353,
+              0.09,
+              -81.75
+            ],
+            "rotation": -1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:8",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              1.75,
+              0.09,
+              -367.580025000535
+            ],
+            "rotation": -3.141592653589793,
+            "speed": 3.1199999999978445,
+            "braking": false,
+            "reason": "CRUISE",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": false,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:9",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              1.75,
+              0.09,
+              -373.87703202184537
+            ],
+            "rotation": -3.141592653589793,
+            "speed": 3.119999999994434,
+            "braking": false,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": false,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:10",
+            "type": "MOBIL",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -1.75,
+              0.09,
+              -448.17767222267344
+            ],
+            "rotation": 0,
+            "speed": 3.8999999999998636,
+            "braking": false,
+            "reason": "CRUISE",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": false,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:11",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -1.75,
+              0.09,
+              -400.2345281765401
+            ],
+            "rotation": 0,
+            "speed": 0,
+            "braking": true,
+            "reason": "YIELD_PEDESTRIAN",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:12",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              10.388246888412965,
+              0.09,
+              -398.25
+            ],
+            "rotation": 1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "RED_LIGHT",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:13",
+            "type": "MOBIL",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              16.954867768517353,
+              0.09,
+              -398.25
+            ],
+            "rotation": 1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:14",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -12.491252750065499,
+              0.09,
+              -401.75
+            ],
+            "rotation": -1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "RED_LIGHT",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:15",
+            "type": "MOTOR",
+            "active": true,
+            "loaded": true,
+            "groupVisible": true,
+            "position": [
+              -18.755033550666212,
+              0.09,
+              -401.75
+            ],
+            "rotation": -1.5707963267948966,
+            "speed": 0,
+            "braking": true,
+            "reason": "FOLLOW",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          }
+        ],
+        "pedestrians": [
+          {
+            "id": "pedestrian:0",
+            "position": [
+              4.3,
+              0.09,
+              -86
+            ],
+            "crossing": false
+          },
+          {
+            "id": "pedestrian:1",
+            "position": [
+              -4.3,
+              0.09,
+              -74
+            ],
+            "crossing": false
+          },
+          {
+            "id": "pedestrian:2",
+            "position": [
+              6,
+              0.09,
+              -84.3
+            ],
+            "crossing": false
+          },
+          {
+            "id": "pedestrian:3",
+            "position": [
+              -1.3541666666666519,
+              0.09,
+              -406
+            ],
+            "crossing": true
+          },
+          {
+            "id": "pedestrian:4",
+            "position": [
+              1.7475000000000163,
+              0.09,
+              -394
+            ],
+            "crossing": true
+          },
+          {
+            "id": "pedestrian:5",
+            "position": [
+              6,
+              0.09,
+              -399.782833333336
+            ],
+            "crossing": true
+          }
+        ],
+        "resources": {
+          "geometries": 2269,
+          "textures": 3
+        },
+        "characters": {
+          "count": 17,
+          "mountedIds": [
+            "traffic:0",
+            "traffic:1",
+            "traffic:2",
+            "traffic:3",
+            "traffic:4",
+            "traffic:5",
+            "traffic:6",
+            "traffic:7",
+            "traffic:8",
+            "traffic:9",
+            "traffic:10",
+            "traffic:11",
+            "traffic:12",
+            "traffic:13",
+            "traffic:14",
+            "traffic:15",
+            "player"
+          ],
+          "playerRole": "Character_driver",
+          "headVisible": false
+        },
+        "exteriorVisible": false,
+        "audio": {
+          "state": "running",
+          "activeHornVoices": 0
+        },
+        "drawCalls": 2134,
+        "triangles": 322498,
+        "elapsed": 15.333333333333675
+      }
+    }
+  ],
+  "checks": [
+    "all 12 independent time/weather combinations switch through labelled selects",
+    "MOBIL/automatic: actual three-type AI models, safe spawn and unified crossings",
+    "MOBIL/automatic: legacy lights/signals/hazard/horn keys remain operable",
+    "MOBIL/automatic: vehicle-specific procedural cockpit shares committed HUD snapshot",
+    "MOBIL/automatic: pause freezes tick, vehicle, indicators, traffic and pedestrians",
+    "all 12 independent time/weather combinations switch through labelled selects",
+    "MOBIL/automatic: forward movement, wheels and one actual speed reading",
+    "MOBIL/automatic: reverse retains positive HUD magnitude and R indicator",
+    "MOBIL/automatic: stopped speed and camera cycling stay synchronized",
+    "MOBIL/automatic: real crossing pedestrian moves from its initial sidewalk position",
+    "MOBIL/automatic: no runtime errors, failed requests or missing assets"
+  ],
+  "gaps": [
+    "Website iframe smoke not requested: set WEB_URL to a local website"
+  ],
+  "finished": "2026-11-03T09:51:54.470Z"
+}

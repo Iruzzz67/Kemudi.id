@@ -1,0 +1,7 @@
+{
+  "status": "success",
+  "result": {
+    "executed": true,
+    "result": "{\"frames_checked\": 240, \"required_names_missing\": [], \"vehicle_overlaps\": [], \"static_overlaps\": [], \"lane_violations\": [], \"framing_violations\": [], \"invalid_drivers\": [], \"wheel_sync_max_error_rad\": 3.711597344135953e-06, \"wheel_contact_gap_m\": {\"Car_Wheel_FL\": 0.01, \"Car_Wheel_FR\": 0.01, \"Car_Wheel_RL\": 0.01, \"Car_Wheel_RR\": 0.01, \"Bike_Wheel_F\": 0.01, \"Bike_Wheel_R\": 0.01, \"Truck_Wheel_FL\": 0.01, \"Truck_Wheel_FR\": 0.01, \"Truck_Wheel_RL\": 0.01, \"Truck_Wheel_RR\": 0.01}, \"vehicle_dimensions_m\": {\"Car_Rig\": [4.65, 2.31, 1.516], \"Bike_Rig\": [2.26, 1.02, 1.38], \"Truck_Rig\": [6.47, 2.88, 3.27]}, \"camera_min_margin\": {\"Camera_Overview\": 0.12914037704467773, \"Camera_VehicleFocus\": 0.046762626618146896, \"Camera_Street\": 0.08823888748884201, \"Camera_Truck\": 0.033760860562324524, \"Camera_Finale\": 0.11635929346084595}, \"unparented_vehicle_meshes\": [], \"missing_materials\": [], \"automatic_suffix_names\": [], \"mesh_faces\": 14273, \"objects\": 917, \"duration_seconds\": 10.0, \"method\": \"Evaluated mesh AABB checks at every frame. Camera bounds checked for every vehicle-shot frame and both endpoints of wide shots. Wheel rotation compared to signed travel/radius. Does not perform rigid-body physics.\"}\nInfo: Saved as \"city_simulation_final.blend\"\n"
+  }
+}

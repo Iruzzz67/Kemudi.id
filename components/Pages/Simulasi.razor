@@ -1,0 +1,97 @@
+@page "/simulasi"
+@inject ApiClient Api
+@inject NavigationManager Nav
+@inject AuthService Auth
+
+<section class="hero" style="padding-bottom:2rem">
+    <h1>Simulasi <span>3D Mengemudi</span></h1>
+    <p>
+        Pilih kendaraan dan transmisi, lalu mulai simulasi mengemudi interaktif langsung di browser.
+    </p>
+</section>
+
+@if (_loading)
+{
+    <div class="loading">Memuat kendaraan...</div>
+}
+else
+{
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Pilih Kendaraan</h2>
+        <p class="section-sub">Setiap kendaraan punya karakteristik berbeda.</p>
+
+        <div class="grid grid-3 mt-2">
+            @foreach (var v in _vehicles)
+            {
+                <div class="card @(_selectedVehicle == v.Type ? "card-selected" : "")"
+                     style="cursor:pointer; border-width:2px; text-align:center; padding:2rem 1.5rem;"
+                     @onclick="() => _selectedVehicle = v.Type">
+                    <div style="width:16px;height:16px;border-radius:50%;background:@(v.Color);margin:0 auto 12px;"></div>
+                    <h3>@v.Label</h3>
+                    <p style="margin-top:4px;">@v.Description</p>
+                    <div style="margin-top:12px;color:var(--blue);font-weight:600;font-size:0.9rem;">
+                        Top speed: @Math.Round(v.MaxSpeed * 3.6) km/j
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Jenis Transmisi</h2>
+        <div class="flex mt-1" style="justify-content:center">
+            <button class="pill @(_transmission == "automatic" ? "active" : "")"
+                    @onclick='() => _transmission = "automatic"'>
+                Automatic
+            </button>
+            <button class="pill @(_transmission == "manual" ? "active" : "")"
+                    @onclick='() => _transmission = "manual"'>
+                Manual
+            </button>
+        </div>
+        @if (_transmission == "manual")
+        {
+            <div class="text-center mt-1" style="font-size:0.85rem;color:var(--muted);">
+                Gunakan <kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">Shift</kbd> kopling ·
+                <kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">Q</kbd>/<kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">E</kbd> oper gigi
+            </div>
+        }
+    </section>
+
+    <section class="section">
+        <h2 class="section-title" style="font-size:1.25rem">Kontrol Keyboard</h2>
+        <div class="card mt-1" style="max-width:600px;margin-left:auto;margin-right:auto;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.85rem;">
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">W</kbd> Gas / Maju</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">S</kbd> Rem / Mundur</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">A</kbd>/<kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">D</kbd> Belok</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">Space</kbd> Rem Tangan</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">I</kbd> Kontak / Starter</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">B</kbd> Sabuk Pengaman</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">Z</kbd>/<kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">X</kbd> Sein Kiri/Kanan</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">L</kbd> Lampu Utama</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">V</kbd> Hazard</div>
+                <div><kbd style="background:var(--bg-muted);padding:2px 6px;border-radius:4px;">P</kbd> Pause</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="mt-4 text-center">
+        <a class="btn btn-primary btn-lg" href="@($"/simulasi/play?vehicle={_selectedVehicle}&transmission={_transmission}")">
+            ▶ Mulai Simulasi
+        </a>
+    </div>
+}
+
+@code {
+    private List<VehicleDto>? _vehicles;
+    private string _selectedVehicle = "MOBIL";
+    private string _transmission = "automatic";
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
+        _loading = false;
+    }
+}

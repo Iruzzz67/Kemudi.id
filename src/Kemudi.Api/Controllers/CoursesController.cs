@@ -29,9 +29,8 @@ public sealed class CoursesController : ControllerBase
             query = query.Where(p => p.Course!.VehicleType == vt);
         }
 
-        // SQLite tidak mendukung ORDER BY decimal — urutkan di memori setelah
-        // materialisasi (urutkan berdasarkan harga per kendaraan).
-        var packages = (await query
+        // Load data first, then sort client-side to avoid SQLite decimal ORDER BY limitation.
+        var raw = await query
             .Select(p => new
             {
                 p.Slug,
@@ -44,9 +43,9 @@ public sealed class CoursesController : ControllerBase
                 p.Description,
                 p.Includes
             })
-            .ToListAsync())
-            .OrderBy(p => p.Price)
-            .ToList();
+            .ToListAsync();
+
+        var packages = raw.OrderBy(p => p.Price).ToList();
 
         var result = packages.Select(p => new CoursePackageDto(
             Id: p.Slug,

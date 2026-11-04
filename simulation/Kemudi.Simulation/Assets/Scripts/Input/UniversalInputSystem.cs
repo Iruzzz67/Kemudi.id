@@ -68,14 +68,6 @@ namespace Kemudi.Simulation.Input
             merged.TurnSignalLeft |= b.TurnSignalLeft;
             merged.TurnSignalRight |= b.TurnSignalRight;
             merged.HornHeld |= b.HornHeld;
-
-            merged.ToggleSeatbelt |= b.ToggleSeatbelt;
-            merged.ToggleHelmet |= b.ToggleHelmet;
-            merged.ToggleJacket |= b.ToggleJacket;
-            merged.ToggleGloves |= b.ToggleGloves;
-            merged.ToggleBoots |= b.ToggleBoots;
-            merged.AdjustSeat |= b.AdjustSeat;
-            merged.AdjustMirrors |= b.AdjustMirrors;
             return merged;
         }
     }

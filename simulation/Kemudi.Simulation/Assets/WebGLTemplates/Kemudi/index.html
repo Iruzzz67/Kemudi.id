@@ -34,6 +34,10 @@
         window.kemudiAuthToken = _params.get('token') || '';
         window.kemudiVehicleType = _params.get('vehicle') || '';
 
+        // WebGL plugin functions — called by WebGlBridge.cs via [DllImport("__Internal")].
+        function GetAuthToken() { return window.kemudiAuthToken || ''; }
+        function GetVehicleType() { return window.kemudiVehicleType || ''; }
+
         var buildUrl = "Build";
         var loaderUrl = buildUrl + "/{{ LOADER_FILENAME }}";
         var config = {

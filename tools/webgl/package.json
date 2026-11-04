@@ -1,0 +1,17 @@
+{
+  "name": "kemudi-webgl-tools",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs",
+    "start": "node build.cjs && node serve.cjs",
+    "test": "node smoke.cjs",
+    "test:functions": "node functions.cjs",
+    "test:intersection": "node intersection-tests.cjs && node intersection-browser.cjs",
+    "test:unified": "node unified-tests.cjs && node unified-browser.cjs",
+    "test:backend": "node backend-smoke.cjs && node result-errors.cjs",
+    "test:syntax": "node syntax.cjs",
+    "test:realism": "node realism-state.cjs && node realism-collision.cjs && node realism-environment.cjs && node realism-lights.cjs && node realism-visual.cjs && node realism-traffic.cjs",
+    "test:realism:browser": "node realism-browser.cjs"
+  },
+  "devDependencies": { "playwright": "1.61.1" }
+}

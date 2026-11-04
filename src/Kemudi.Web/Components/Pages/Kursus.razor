@@ -4,12 +4,13 @@
 @inject ApiClient Api
 @inject NavigationManager Nav
 
-<div class="section-head">
-    <div>
-        <h1 class="section-title">Kursus Mengemudi</h1>
-        <p class="section-sub">Pilih paket, kendaraan, dan mentor yang sesuai kebutuhanmu.</p>
-    </div>
-</div>
+<section class="hero" style="padding-bottom:1rem;">
+    <h1>Kursus <span>Mengemudi</span></h1>
+    <p>
+        Pilih paket, kendaraan, dan mentor yang sesuai kebutuhanmu.
+        Belajar dari instruktur berpengalaman dengan metode yang terstruktur.
+    </p>
+</section>
 
 @if (_loading)
 {
@@ -17,9 +18,19 @@
 }
 else
 {
-    <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">Pilih Kendaraan yang Ingin Dikursuskan</h2>
-        <div class="flex mt-1">
+    @* Vehicle Filter *@
+    <section class="section" style="margin-top:1.5rem;">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title" style="font-size:1.35rem;">Pilih Kendaraan</h2>
+                <p class="section-sub">Filter paket kursus berdasarkan jenis kendaraan.</p>
+            </div>
+        </div>
+        <div class="flex mt-2" style="padding:0 1.5rem;">
+            <button class="pill @(_selectedVehicle is null ? "active" : "")"
+                    @onclick="() => _selectedVehicle = null">
+                Semua
+            </button>
             @foreach (var v in _vehicles)
             {
                 <button class="pill @(v.Type == _selectedVehicle ? "active" : "")"
@@ -30,47 +41,57 @@ else
         </div>
     </section>
 
+    @* Packages *@
     <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">Paket Kursus</h2>
-        <div class="grid grid-3 mt-2">
+        <h2 class="section-title" style="font-size:1.35rem;">Paket Kursus</h2>
+        <div class="grid grid-3 mt-3">
             @foreach (var p in FilteredPackages)
             {
-                <div class="card">
+                <div class="pricing-card">
                     <span class="card-tag">@p.Level</span>
-                    <h3>@p.Label</h3>
-                    <p>@p.Description</p>
-                    <div class="mt-2 flex-between">
+                    <h3 style="margin:0.5rem 0 0.25rem; font-size:1.15rem; font-weight:700;">@p.Label</h3>
+                    <p style="color:var(--muted); font-size:0.9rem; margin:0;">@p.Description</p>
+                    <div style="margin-top:1.5rem; padding-top:1rem; border-top:1px solid var(--border);">
                         <span class="price">Rp @p.Price.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span>
-                        <span class="muted">@p.Sessions× @p.SessionDurationMin mnt</span>
+                        <span class="muted" style="font-size:0.85rem; margin-left:0.5rem;">@p.Sessions× @p.SessionDurationMin mnt</span>
                     </div>
                 </div>
             }
         </div>
+        @if (!FilteredPackages.Any())
+        {
+            <p class="empty">Tidak ada paket untuk kendaraan ini.</p>
+        }
     </section>
 
+    @* Mentors *@
     <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">Pilih Mentor</h2>
-        <p class="section-sub">Klik mentor untuk melihat portofolio lengkap, lalu lanjutkan pendaftaran.</p>
-        <div class="grid grid-4 mt-2">
+        <div class="section-head">
+            <div>
+                <h2 class="section-title" style="font-size:1.35rem;">Pilih Mentor</h2>
+                <p class="section-sub">Klik mentor untuk melihat portofolio lengkap.</p>
+            </div>
+        </div>
+        <div class="grid grid-4 mt-3">
             @foreach (var m in FilteredMentors)
             {
                 <a class="card mentor-card" href="kursus/mentor/@m.Id">
                     <div class="mentor-top">
-                        <span class="avatar" style="background:@m.AvatarColor">@m.Initials</span>
+                        <span class="avatar" style="background:@m.AvatarColor; border-radius:14px; box-shadow:0 4px 12px @(m.AvatarColor)30;">@m.Initials</span>
                         <div>
-                            <div><strong>@m.Name</strong></div>
+                            <div style="font-weight:700; font-size:0.95rem;">@m.Name</div>
                             <div class="title">@m.Title</div>
                         </div>
                     </div>
                     <div class="rating">★ @m.Rating.ToString("0.0")</div>
                     <div class="meta">
-                        <span>@m.ExperienceYears thn</span>
-                        <span>@m.StudentsTrained murid</span>
+                        <span>📅 @m.ExperienceYears thn</span>
+                        <span>👨‍🎓 @m.StudentsTrained murid</span>
                     </div>
-                    <div class="flex">
+                    <div class="flex" style="margin-top:0.25rem;">
                         @foreach (var t in m.VehicleTypes)
                         {
-                            <span class="pill" style="cursor:default">@t</span>
+                            <span class="pill" style="cursor:default; font-size:0.8rem; padding:0.2rem 0.7rem;">@t</span>
                         }
                     </div>
                 </a>

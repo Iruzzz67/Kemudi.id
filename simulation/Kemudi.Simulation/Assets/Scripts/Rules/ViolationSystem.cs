@@ -19,7 +19,7 @@ namespace Kemudi.Simulation.Rules
             WrongWay,           // melawan arus
             Collision,          // menabrak
             NoSignal,           // tidak memakai sein saat berbelok
-            ObstacleHit         // menabrak rintangan lintasan (cone/barrier/kendaraan parkir)
+            ObstacleHit         // menabrak rintangan lintasan (cone/barrier/parkir)
         }
 
         public readonly struct Violation
@@ -40,43 +40,43 @@ namespace Kemudi.Simulation.Rules
         public event Action<Violation>? ViolationOccurred;
         public int Count { get; private set; }
 
-        private readonly Dictionary<ViolationType, int> _byType = new();
+        private readonly List<Violation> _log = new();
 
-        /// <summary>Jumlah pelanggaran per tipe — dipakai laporan hasil (§62).</summary>
-        public int CountOf(ViolationType type) =>
-            _byType.TryGetValue(type, out var count) ? count : 0;
-
-        /// <summary>
-        /// Reset sebelum percobaan baru — dipanggil SimulationManager.BeginPreDrive
-        /// agar laporan hasil (§62) tidak terakumulasi antar percobaan.
-        /// </summary>
-        public void Reset()
+        /// <summary>Reset count & log antar percobaan (§48).</summary>
+        public void ResetCount()
         {
             Count = 0;
-            _byType.Clear();
+            _log.Clear();
+        }
+
+        /// <summary>Jumlah pelanggaran bertipe tertentu (dipakai laporan §62).</summary>
+        public int CountOf(ViolationType type)
+        {
+            var n = 0;
+            foreach (var v in _log)
+                if (v.Type == type) n++;
+            return n;
         }
 
         /// <summary>Daftarkan satu pelanggaran; severity default per tipe.</summary>
-        /// <remarks>
-        /// ObstacleHit sengaja severity 1 (bobot ringan): penalti skornya dipotong
-        /// lewat ScoringSystem.AddObstacleHit (-3 poin, konsisten dengan web),
-        /// bukan lewat AddViolation(severity).
-        /// </remarks>
         public void Register(ViolationType type, Vector3 position, string? description = null)
         {
             var severity = type switch
             {
                 ViolationType.PedestrianPriority or ViolationType.RedLight => 3,
                 ViolationType.Collision => 3,
+                ViolationType.ObstacleHit => 1,
                 ViolationType.WrongWay => 2,
                 _ => 1
             };
 
-            Count++;
-            _byType[type] = (_byType.TryGetValue(type, out var existing) ? existing : 0) + 1;
-            ViolationOccurred?.Invoke(new Violation(
+            var violation = new Violation(
                 type, severity, Time.time, position,
-                description ?? DefaultDescription(type)));
+                description ?? DefaultDescription(type));
+
+            Count++;
+            _log.Add(violation);
+            ViolationOccurred?.Invoke(violation);
         }
 
         private static string DefaultDescription(ViolationType type) => type switch

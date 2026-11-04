@@ -1,0 +1,7 @@
+{
+  "status": "success",
+  "result": {
+    "executed": true,
+    "result": "Info: Saved as \"city_simulation_v03_vehicles.blend\"\n{\"Car\": {\"children\": 102, \"rig_location\": [-22.0, -1.9500000476837158, 0.10000000149011612]}, \"Bike\": {\"children\": 54, \"rig_location\": [-29.0, -1.9500000476837158, 0.10000000149011612]}, \"Truck\": {\"children\": 113, \"rig_location\": [24.0, 2.0, 0.10000000149011612]}}\n"
+  }
+}

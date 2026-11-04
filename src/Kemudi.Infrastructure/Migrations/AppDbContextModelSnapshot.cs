@@ -17,45 +17,6 @@ namespace Kemudi.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.29");
 
-            modelBuilder.Entity("Kemudi.Domain.Entities.AuditLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AdminEmail")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AdminId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Metadata")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Target")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TargetId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdminEmail");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.ToTable("AuditLogs");
-                });
-
             modelBuilder.Entity("Kemudi.Domain.Entities.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -150,10 +111,6 @@ namespace Kemudi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
@@ -175,8 +132,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 350000m,
                             SessionDurationMin = 60,
                             Sessions = 4,
-                            Slug = "motor-reguler",
-                            Status = "ACTIVE"
+                            Slug = "motor-reguler"
                         },
                         new
                         {
@@ -189,8 +145,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 550000m,
                             SessionDurationMin = 60,
                             Sessions = 6,
-                            Slug = "motor-intensif",
-                            Status = "ACTIVE"
+                            Slug = "motor-intensif"
                         },
                         new
                         {
@@ -203,8 +158,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 1200000m,
                             SessionDurationMin = 60,
                             Sessions = 8,
-                            Slug = "mobil-reguler",
-                            Status = "ACTIVE"
+                            Slug = "mobil-reguler"
                         },
                         new
                         {
@@ -217,8 +171,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 1950000m,
                             SessionDurationMin = 60,
                             Sessions = 12,
-                            Slug = "mobil-intensif",
-                            Status = "ACTIVE"
+                            Slug = "mobil-intensif"
                         },
                         new
                         {
@@ -231,8 +184,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 2600000m,
                             SessionDurationMin = 75,
                             Sessions = 10,
-                            Slug = "mobil-mahir",
-                            Status = "ACTIVE"
+                            Slug = "mobil-mahir"
                         },
                         new
                         {
@@ -245,8 +197,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 3200000m,
                             SessionDurationMin = 90,
                             Sessions = 10,
-                            Slug = "truk-reguler",
-                            Status = "ACTIVE"
+                            Slug = "truk-reguler"
                         },
                         new
                         {
@@ -259,8 +210,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Price = 4500000m,
                             SessionDurationMin = 90,
                             Sessions = 14,
-                            Slug = "truk-profesional",
-                            Status = "ACTIVE"
+                            Slug = "truk-profesional"
                         });
                 });
 
@@ -370,10 +320,6 @@ namespace Kemudi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("StudentsTrained")
                         .HasColumnType("INTEGER");
 
@@ -410,7 +356,6 @@ namespace Kemudi.Infrastructure.Migrations
                             Phone = "+62 812-3456-7890",
                             Rating = 4.9000000000000004,
                             Slug = "budi-santoso",
-                            Status = "ACTIVE",
                             StudentsTrained = 480,
                             TestimonialsJson = "[{\"name\":\"Sarah A.\",\"quote\":\"Sabar banget jelasinnya, dari yang takut nyetir jadi PD di tol.\"},{\"name\":\"Doni P.\",\"quote\":\"Cara ngajar parkir paralelnya gampang diikuti, langsung bisa!\"}]",
                             Title = "Instruktur Senior Mobil & Motor",
@@ -429,7 +374,6 @@ namespace Kemudi.Infrastructure.Migrations
                             Phone = "+62 811-2345-678",
                             Rating = 4.7999999999999998,
                             Slug = "siti-rahma",
-                            Status = "ACTIVE",
                             StudentsTrained = 310,
                             TestimonialsJson = "[{\"name\":\"Rina K.\",\"quote\":\"Diajarin cara reaksi kalau tiba-tiba ada motor nyelip, berasa banget manfaatnya.\"}]",
                             Title = "Instruktur Mobil & Defensive Driving",
@@ -448,7 +392,6 @@ namespace Kemudi.Infrastructure.Migrations
                             Phone = "+62 813-9876-5432",
                             Rating = 4.9000000000000004,
                             Slug = "agus-wirawan",
-                            Status = "ACTIVE",
                             StudentsTrained = 210,
                             TestimonialsJson = "[{\"name\":\"Hendra S.\",\"quote\":\"Diajarin trik mundur ke gang sempit, sekarang kerja jadi sopir truk perusahaan.\"}]",
                             Title = "Instruktur Truk & Kendaraan Besar",
@@ -466,7 +409,6 @@ namespace Kemudi.Infrastructure.Migrations
                             Name = "Dewi Lestari",
                             Rating = 4.7000000000000002,
                             Slug = "dewi-lestari",
-                            Status = "ACTIVE",
                             StudentsTrained = 260,
                             TestimonialsJson = "[{\"name\":\"Putri N.\",\"quote\":\"Awalnya takut banget sama motor, sekarang udah berani ke kampus naik motor sendiri.\"}]",
                             Title = "Instruktur Motor",
@@ -511,64 +453,17 @@ namespace Kemudi.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Kemudi.Domain.Entities.Schedule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EndTime")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("FilledSlots")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("MentorId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StartTime")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TotalSlots")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("VehicleType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Date");
-
-                    b.HasIndex("MentorId");
-
-                    b.ToTable("Schedules");
-                });
-
             modelBuilder.Entity("Kemudi.Domain.Entities.SimulationAttempt", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("CollisionCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ObstacleHits")
+                        .HasDefaultValue(0);
 
                     b.Property<bool>("Completed")
                         .ValueGeneratedOnAdd()
@@ -577,11 +472,6 @@ namespace Kemudi.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("ObstacleHits")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
 
                     b.Property<int>("OffRoadCount")
                         .ValueGeneratedOnAdd()
@@ -755,7 +645,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Label = "Motor",
                             LeanAmount = 0.34999999999999998,
                             Length = 1.8,
-                            MaxSpeed = 19.440000000000001,
+                            MaxSpeed = 26.0,
                             MaxSteerAngle = 0.59999999999999998,
                             ReverseMaxSpeed = 4.0,
                             SteerRate = 6.0,
@@ -780,7 +670,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Label = "Mobil",
                             LeanAmount = 0.080000000000000002,
                             Length = 4.2000000000000002,
-                            MaxSpeed = 19.440000000000001,
+                            MaxSpeed = 22.0,
                             MaxSteerAngle = 0.55000000000000004,
                             ReverseMaxSpeed = 6.0,
                             SteerRate = 4.5,
@@ -805,7 +695,7 @@ namespace Kemudi.Infrastructure.Migrations
                             Label = "Truk",
                             LeanAmount = 0.040000000000000001,
                             Length = 7.5,
-                            MaxSpeed = 19.440000000000001,
+                            MaxSpeed = 16.0,
                             MaxSteerAngle = 0.40000000000000002,
                             ReverseMaxSpeed = 4.0,
                             SteerRate = 2.0,
@@ -843,9 +733,6 @@ namespace Kemudi.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
@@ -1062,17 +949,6 @@ namespace Kemudi.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Registration");
-                });
-
-            modelBuilder.Entity("Kemudi.Domain.Entities.Schedule", b =>
-                {
-                    b.HasOne("Kemudi.Domain.Entities.Mentor", "Mentor")
-                        .WithMany()
-                        .HasForeignKey("MentorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Mentor");
                 });
 
             modelBuilder.Entity("Kemudi.Domain.Entities.TrainingSession", b =>

@@ -8,10 +8,15 @@
 
 @if (!Auth.IsAuthenticated)
 {
-    <div class="text-center" style="padding:3rem 0">
-        <h1 class="section-title">Dashboard</h1>
-        <p class="muted mt-1">Silakan <a href="login">masuk</a> untuk melihat progres latihanmu.</p>
-    </div>
+    <section class="hero" style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:4rem 0;">
+        <canvas id="three-bg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+        <div style="position:relative;z-index:1;text-align:center;">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;background:var(--gradient-blue);border-radius:18px;font-size:2rem;box-shadow:var(--shadow-blue);margin-bottom:1.25rem;">🔐</div>
+            <h1 class="section-title" style="font-size:2rem;">Dashboard</h1>
+            <p class="muted mt-1">Silakan <a href="login" style="font-weight:600;">masuk</a> untuk melihat progres latihanmu.</p>
+            <a class="btn btn-primary btn-lg mt-3" href="login">Masuk</a>
+        </div>
+    </section>
 }
 else if (_loading)
 {
@@ -19,36 +24,44 @@ else if (_loading)
 }
 else
 {
-    <h1 class="section-title">Dashboard</h1>
-    <p class="section-sub">Halo, @_email. Ini progres latihanmu.</p>
+    <div class="mb-4" style="padding-top:1rem;">
+        <h1 class="section-title" style="font-size:2rem;">Dashboard</h1>
+        <p class="section-sub" style="font-size:1.05rem;">Halo, @_email 👋 Ini progres latihanmu.</p>
+    </div>
 
-    <div class="stats-grid mt-3">
+    <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">Total Percobaan</div>
             <div class="stat-value">@_attempts.Count</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Skor Terbaik</div>
-            <div class="stat-value">@(_attempts.Count == 0 ? "-" : _attempts.Max(a => a.Score).ToString())</div>
+            <div class="stat-value">@(_attempts.Count == 0 ? "—" : _attempts.Max(a => a.Score).ToString())</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Rata-rata Skor</div>
-            <div class="stat-value">@(_attempts.Count == 0 ? "-" : Math.Round(_attempts.Average(a => a.Score)).ToString())</div>
+            <div class="stat-value">@(_attempts.Count == 0 ? "—" : Math.Round(_attempts.Average(a => a.Score)).ToString())</div>
         </div>
     </div>
 
     <div class="mt-4 flex-between">
-        <h2 class="section-title" style="font-size:1.25rem">Riwayat Latihan</h2>
-        <a class="btn btn-primary" href="simulasi">Latihan lagi</a>
+        <h2 class="section-title" style="font-size:1.35rem;">Riwayat Latihan</h2>
+        <a class="btn btn-primary btn-sm" href="simulasi">🎮 Latihan lagi</a>
     </div>
 
     @if (_attempts.Count == 0)
     {
-        <p class="empty">Belum ada percobaan. Yuk mulai simulasi pertamamu!</p>
+        <div class="card mt-3" style="text-align:center; padding:4rem 2rem;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🏁</div>
+            <p class="muted" style="font-size:1.05rem; margin:0; max-width:380px; margin-left:auto; margin-right:auto;">
+                Belum ada percobaan. Yuk mulai simulasi pertamamu!
+            </p>
+            <a class="btn btn-primary btn-lg mt-3" href="simulasi">Mulai Simulasi</a>
+        </div>
     }
     else
     {
-        <div class="table-wrap card mt-2">
+        <div class="table-wrap card mt-3">
             <table>
                 <thead>
                     <tr>
@@ -58,6 +71,8 @@ else
                         <th>Waktu</th>
                         <th>Pelanggaran</th>
                         <th>Keluar Jalur</th>
+                        <th>Benturan</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,11 +80,13 @@ else
                     {
                         <tr>
                             <td>@a.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
-                            <td>@VehicleLabel(a.VehicleType)</td>
-                            <td><strong>@a.Score</strong></td>
+                            <td><span class="pill" style="cursor:default; font-size:0.8rem; padding:0.25rem 0.7rem;">@VehicleLabel(a.VehicleType)</span></td>
+                            <td><strong style="color:var(--blue);font-size:1.05rem;">@a.Score</strong></td>
                             <td>@((a.TimeTakenMs / 1000.0).ToString("0.0"))s</td>
                             <td>@a.Violations</td>
                             <td>@a.OffRoadCount</td>
+                            <td>@a.CollisionCount</td>
+                            <td>@(a.Completed ? "Selesai" : "Gagal")</td>
                         </tr>
                     }
                 </tbody>
@@ -85,9 +102,9 @@ else
 
     private static string VehicleLabel(string type) => type switch
     {
-        "MOTOR" => "Motor",
-        "MOBIL" => "Mobil",
-        "TRUK" => "Truk",
+        "MOTOR" => "🏍️ Motor",
+        "MOBIL" => "🚗 Mobil",
+        "TRUK" => "🚛 Truk",
         _ => type
     };
 
@@ -97,7 +114,6 @@ else
 
         _attempts = await Api.GetAsync<List<SimulationAttemptDto>>("/api/progress") ?? new();
 
-        // Ambil profil user untuk sapaan di header dashboard.
         var me = await Api.GetAsync<UserProfileDto>("/api/auth/me");
         _email = me?.Email ?? "";
         _loading = false;

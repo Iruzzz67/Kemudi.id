@@ -1,0 +1,45 @@
+﻿/* Shared visual tokens for the website and embedded simulator. */
+:root {
+  color-scheme: dark;
+  --kemudi-bg: #17191c;
+  --kemudi-panel: #22252a;
+  --kemudi-panel-soft: #1c1f23;
+  --kemudi-text: #e2e8f0;
+  --kemudi-muted: #a8b8cc;
+  --kemudi-border: #393d44;
+  --kemudi-accent: #93b7ee;
+  --kemudi-primary: #2563eb;
+  --kemudi-radius: 16px;
+  --blue: #38bdf8; --blue-dark: #7dd3fc; --blue-light: #60a5fa;
+  --blue-50: #142c46; --blue-100: #193959; --blue-200: #334d6c;
+  --bg: var(--kemudi-bg); --bg-soft: var(--kemudi-panel);
+  --bg-muted: var(--kemudi-panel-soft); --text: var(--kemudi-text);
+  --text-secondary: #cbd5e1; --muted: var(--kemudi-muted);
+  --border: var(--kemudi-border); --border-light: #24354b;
+  --gradient-card: #22252a;
+  --gradient-hero: #17191c;
+  --gradient-blue: #326bc4;
+  --gradient-glass: #22252a;
+  --gradient-dark: #1c1f23;
+  --gradient-glow: transparent;
+  --shadow-xs: none; --shadow-sm: none; --shadow: none;
+  --shadow-md: none; --shadow-lg: none; --shadow-xl: none;
+  --shadow-blue: none; --shadow-glow: none;
+  --radius: 6px; --radius-sm: 4px; --radius-lg: 8px; --radius-xl: 8px;
+}
+*, *::before, *::after {
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#vs-start, #pause-resume, #wh-enter { background: #326bc4 !important; border-radius: 6px !important; }
+#vehicle-select button { border-radius: 6px !important; }
+#loading-bar-inner { background: #326bc4; }
+body { font-family: Inter, system-ui, -apple-system, sans-serif; }
+button:focus-visible, a:focus-visible, select:focus-visible, summary:focus-visible,
+input:focus-visible { outline: 3px solid #7dd3fc; outline-offset: 4px; }
+#vehicle-select, #pause-screen, #finished-screen, #failed-screen {
+  background: var(--kemudi-bg) !important; color: var(--kemudi-text);
+}
+#vehicle-select select { color: var(--kemudi-text); background: var(--kemudi-panel); }

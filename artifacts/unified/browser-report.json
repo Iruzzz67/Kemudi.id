@@ -1,0 +1,846 @@
+[
+  {
+    "map": "training",
+    "demo": "long-road",
+    "passed": true,
+    "errors": [],
+    "state": {
+      "ready": true,
+      "phase": "driving",
+      "map": "unified",
+      "vehicle": "MOBIL",
+      "loaded": true,
+      "intersection": {
+        "id": "cedar-junction",
+        "phase": "NS_GREEN",
+        "elapsed": 1.4000000000000015,
+        "geometry": {
+          "center": [
+            0,
+            0.09,
+            -80
+          ],
+          "laneWidth": 3.5,
+          "stopDistance": 8.625,
+          "crosswalkDistance": 6
+        },
+        "colors": {
+          "N": "GREEN",
+          "S": "GREEN",
+          "E": "RED",
+          "W": "RED"
+        },
+        "approaches": [
+          {
+            "id": "N",
+            "lane": "cedar-junction:N:in",
+            "stopLine": "cedar-junction:N:stop",
+            "signal": "cedar-junction:N:signal"
+          },
+          {
+            "id": "S",
+            "lane": "cedar-junction:S:in",
+            "stopLine": "cedar-junction:S:stop",
+            "signal": "cedar-junction:S:signal"
+          },
+          {
+            "id": "E",
+            "lane": "cedar-junction:E:in",
+            "stopLine": "cedar-junction:E:stop",
+            "signal": "cedar-junction:E:signal"
+          },
+          {
+            "id": "W",
+            "lane": "cedar-junction:W:in",
+            "stopLine": "cedar-junction:W:stop",
+            "signal": "cedar-junction:W:signal"
+          }
+        ],
+        "agents": [
+          {
+            "id": "cedar-junction:N:in:agent:0",
+            "approach": "N",
+            "s": -16.200000000000006,
+            "front": -14.100000000000007,
+            "speed": 4.799999999999993,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:N:in:agent:1",
+            "approach": "N",
+            "s": -28.263716774142086,
+            "front": -26.163716774142085,
+            "speed": 4.327726261141462,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:S:in:agent:0",
+            "approach": "S",
+            "s": -16.200000000000006,
+            "front": -14.100000000000007,
+            "speed": 4.799999999999993,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:S:in:agent:1",
+            "approach": "S",
+            "s": -28.263716774142086,
+            "front": -26.163716774142085,
+            "speed": 4.327726261141462,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:E:in:agent:0",
+            "approach": "E",
+            "s": -16.41139539113695,
+            "front": -14.31139539113695,
+            "speed": 3.560568122823672,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:E:in:agent:1",
+            "approach": "E",
+            "s": -28.272959982837467,
+            "front": -26.172959982837465,
+            "speed": 4.246302034810087,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:W:in:agent:0",
+            "approach": "W",
+            "s": -16.41139539113695,
+            "front": -14.31139539113695,
+            "speed": 3.560568122823672,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:W:in:agent:1",
+            "approach": "W",
+            "s": -28.272959982837467,
+            "front": -26.172959982837465,
+            "speed": 4.246302034810087,
+            "committed": false
+          }
+        ]
+      },
+      "intersections": [
+        {
+          "id": "cedar-junction",
+          "phase": "NS_GREEN",
+          "elapsed": 1.4000000000000015,
+          "geometry": {
+            "center": [
+              0,
+              0.09,
+              -80
+            ],
+            "laneWidth": 3.5,
+            "stopDistance": 8.625,
+            "crosswalkDistance": 6
+          },
+          "colors": {
+            "N": "GREEN",
+            "S": "GREEN",
+            "E": "RED",
+            "W": "RED"
+          },
+          "approaches": [
+            {
+              "id": "N",
+              "lane": "cedar-junction:N:in",
+              "stopLine": "cedar-junction:N:stop",
+              "signal": "cedar-junction:N:signal"
+            },
+            {
+              "id": "S",
+              "lane": "cedar-junction:S:in",
+              "stopLine": "cedar-junction:S:stop",
+              "signal": "cedar-junction:S:signal"
+            },
+            {
+              "id": "E",
+              "lane": "cedar-junction:E:in",
+              "stopLine": "cedar-junction:E:stop",
+              "signal": "cedar-junction:E:signal"
+            },
+            {
+              "id": "W",
+              "lane": "cedar-junction:W:in",
+              "stopLine": "cedar-junction:W:stop",
+              "signal": "cedar-junction:W:signal"
+            }
+          ],
+          "agents": [
+            {
+              "id": "cedar-junction:N:in:agent:0",
+              "approach": "N",
+              "s": -16.200000000000006,
+              "front": -14.100000000000007,
+              "speed": 4.799999999999993,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:N:in:agent:1",
+              "approach": "N",
+              "s": -28.263716774142086,
+              "front": -26.163716774142085,
+              "speed": 4.327726261141462,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:S:in:agent:0",
+              "approach": "S",
+              "s": -16.200000000000006,
+              "front": -14.100000000000007,
+              "speed": 4.799999999999993,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:S:in:agent:1",
+              "approach": "S",
+              "s": -28.263716774142086,
+              "front": -26.163716774142085,
+              "speed": 4.327726261141462,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:E:in:agent:0",
+              "approach": "E",
+              "s": -16.41139539113695,
+              "front": -14.31139539113695,
+              "speed": 3.560568122823672,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:E:in:agent:1",
+              "approach": "E",
+              "s": -28.272959982837467,
+              "front": -26.172959982837465,
+              "speed": 4.246302034810087,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:W:in:agent:0",
+              "approach": "W",
+              "s": -16.41139539113695,
+              "front": -14.31139539113695,
+              "speed": 3.560568122823672,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:W:in:agent:1",
+              "approach": "W",
+              "s": -28.272959982837467,
+              "front": -26.172959982837465,
+              "speed": 4.246302034810087,
+              "committed": false
+            }
+          ]
+        },
+        {
+          "id": "training-junction",
+          "phase": "NS_GREEN",
+          "elapsed": 1.4000000000000015,
+          "geometry": {
+            "center": [
+              0,
+              0.09,
+              -400
+            ],
+            "laneWidth": 3.5,
+            "stopDistance": 8.625,
+            "crosswalkDistance": 6
+          },
+          "colors": {
+            "N": "GREEN",
+            "S": "GREEN",
+            "E": "RED",
+            "W": "RED"
+          },
+          "approaches": [
+            {
+              "id": "N",
+              "lane": "training-junction:N:in",
+              "stopLine": "training-junction:N:stop",
+              "signal": "training-junction:N:signal"
+            },
+            {
+              "id": "S",
+              "lane": "training-junction:S:in",
+              "stopLine": "training-junction:S:stop",
+              "signal": "training-junction:S:signal"
+            },
+            {
+              "id": "E",
+              "lane": "training-junction:E:in",
+              "stopLine": "training-junction:E:stop",
+              "signal": "training-junction:E:signal"
+            },
+            {
+              "id": "W",
+              "lane": "training-junction:W:in",
+              "stopLine": "training-junction:W:stop",
+              "signal": "training-junction:W:signal"
+            }
+          ],
+          "agents": [
+            {
+              "id": "training-junction:N:in:agent:0",
+              "approach": "N",
+              "s": -16.200000000000006,
+              "front": -14.100000000000007,
+              "speed": 4.799999999999993,
+              "committed": false
+            },
+            {
+              "id": "training-junction:N:in:agent:1",
+              "approach": "N",
+              "s": -28.263716774142082,
+              "front": -26.16371677414208,
+              "speed": 4.327726261141437,
+              "committed": false
+            },
+            {
+              "id": "training-junction:S:in:agent:0",
+              "approach": "S",
+              "s": -16.200000000000006,
+              "front": -14.100000000000007,
+              "speed": 4.799999999999993,
+              "committed": false
+            },
+            {
+              "id": "training-junction:S:in:agent:1",
+              "approach": "S",
+              "s": -28.263716774142082,
+              "front": -26.16371677414208,
+              "speed": 4.327726261141437,
+              "committed": false
+            },
+            {
+              "id": "training-junction:E:in:agent:0",
+              "approach": "E",
+              "s": -16.41139539113695,
+              "front": -14.31139539113695,
+              "speed": 3.560568122823672,
+              "committed": false
+            },
+            {
+              "id": "training-junction:E:in:agent:1",
+              "approach": "E",
+              "s": -28.272959982837467,
+              "front": -26.172959982837465,
+              "speed": 4.246302034810087,
+              "committed": false
+            },
+            {
+              "id": "training-junction:W:in:agent:0",
+              "approach": "W",
+              "s": -16.41139539113695,
+              "front": -14.31139539113695,
+              "speed": 3.560568122823672,
+              "committed": false
+            },
+            {
+              "id": "training-junction:W:in:agent:1",
+              "approach": "W",
+              "s": -28.272959982837467,
+              "front": -26.172959982837465,
+              "speed": 4.246302034810087,
+              "committed": false
+            }
+          ]
+        }
+      ],
+      "position": [
+        -1.75,
+        0.09,
+        -155
+      ],
+      "speed": 0,
+      "gear": 1,
+      "engine": true,
+      "handbrake": true,
+      "seatAdjusted": false,
+      "mirrorChecked": false,
+      "lights": {
+        "headlights": [
+          0,
+          0
+        ],
+        "brakes": [
+          1,
+          1
+        ],
+        "indicators": [
+          {
+            "name": "Car_Indicator_FL",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_FR",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_RL",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_RR",
+            "intensity": 0
+          }
+        ],
+        "hazard": false,
+        "left": false,
+        "right": false
+      },
+      "camera": "TopDown",
+      "wheels": [
+        {
+          "name": "Car_Wheel_FL",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_FR",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_RL",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_RR",
+          "spin": 0,
+          "steer": 0
+        }
+      ],
+      "drawCalls": 134,
+      "triangles": 34730,
+      "elapsed": 1.6500000000000008
+    }
+  },
+  {
+    "map": "city",
+    "demo": "training-intersection",
+    "passed": true,
+    "errors": [],
+    "state": {
+      "ready": true,
+      "phase": "driving",
+      "map": "unified",
+      "vehicle": "MOBIL",
+      "loaded": true,
+      "intersection": {
+        "id": "cedar-junction",
+        "phase": "NS_GREEN",
+        "elapsed": 1.6000000000000008,
+        "geometry": {
+          "center": [
+            0,
+            0.09,
+            -80
+          ],
+          "laneWidth": 3.5,
+          "stopDistance": 8.625,
+          "crosswalkDistance": 6
+        },
+        "colors": {
+          "N": "GREEN",
+          "S": "GREEN",
+          "E": "RED",
+          "W": "RED"
+        },
+        "approaches": [
+          {
+            "id": "N",
+            "lane": "cedar-junction:N:in",
+            "stopLine": "cedar-junction:N:stop",
+            "signal": "cedar-junction:N:signal"
+          },
+          {
+            "id": "S",
+            "lane": "cedar-junction:S:in",
+            "stopLine": "cedar-junction:S:stop",
+            "signal": "cedar-junction:S:signal"
+          },
+          {
+            "id": "E",
+            "lane": "cedar-junction:E:in",
+            "stopLine": "cedar-junction:E:stop",
+            "signal": "cedar-junction:E:signal"
+          },
+          {
+            "id": "W",
+            "lane": "cedar-junction:W:in",
+            "stopLine": "cedar-junction:W:stop",
+            "signal": "cedar-junction:W:signal"
+          }
+        ],
+        "agents": [
+          {
+            "id": "cedar-junction:N:in:agent:0",
+            "approach": "N",
+            "s": -15.196666666666676,
+            "front": -13.096666666666676,
+            "speed": 5.199999999999991,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:N:in:agent:1",
+            "approach": "N",
+            "s": -27.392626850465323,
+            "front": -25.29262685046532,
+            "speed": 4.383491807527439,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:S:in:agent:0",
+            "approach": "S",
+            "s": -15.196666666666676,
+            "front": -13.096666666666676,
+            "speed": 5.199999999999991,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:S:in:agent:1",
+            "approach": "S",
+            "s": -27.392626850465323,
+            "front": -25.29262685046532,
+            "speed": 4.383491807527439,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:E:in:agent:0",
+            "approach": "E",
+            "s": -15.737391197370222,
+            "front": -13.637391197370222,
+            "speed": 3.211091443223977,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:E:in:agent:1",
+            "approach": "E",
+            "s": -27.431232924968032,
+            "front": -25.33123292496803,
+            "speed": 4.1728183621080275,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:W:in:agent:0",
+            "approach": "W",
+            "s": -15.737391197370222,
+            "front": -13.637391197370222,
+            "speed": 3.211091443223977,
+            "committed": false
+          },
+          {
+            "id": "cedar-junction:W:in:agent:1",
+            "approach": "W",
+            "s": -27.431232924968032,
+            "front": -25.33123292496803,
+            "speed": 4.1728183621080275,
+            "committed": false
+          }
+        ]
+      },
+      "intersections": [
+        {
+          "id": "cedar-junction",
+          "phase": "NS_GREEN",
+          "elapsed": 1.6000000000000008,
+          "geometry": {
+            "center": [
+              0,
+              0.09,
+              -80
+            ],
+            "laneWidth": 3.5,
+            "stopDistance": 8.625,
+            "crosswalkDistance": 6
+          },
+          "colors": {
+            "N": "GREEN",
+            "S": "GREEN",
+            "E": "RED",
+            "W": "RED"
+          },
+          "approaches": [
+            {
+              "id": "N",
+              "lane": "cedar-junction:N:in",
+              "stopLine": "cedar-junction:N:stop",
+              "signal": "cedar-junction:N:signal"
+            },
+            {
+              "id": "S",
+              "lane": "cedar-junction:S:in",
+              "stopLine": "cedar-junction:S:stop",
+              "signal": "cedar-junction:S:signal"
+            },
+            {
+              "id": "E",
+              "lane": "cedar-junction:E:in",
+              "stopLine": "cedar-junction:E:stop",
+              "signal": "cedar-junction:E:signal"
+            },
+            {
+              "id": "W",
+              "lane": "cedar-junction:W:in",
+              "stopLine": "cedar-junction:W:stop",
+              "signal": "cedar-junction:W:signal"
+            }
+          ],
+          "agents": [
+            {
+              "id": "cedar-junction:N:in:agent:0",
+              "approach": "N",
+              "s": -15.196666666666676,
+              "front": -13.096666666666676,
+              "speed": 5.199999999999991,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:N:in:agent:1",
+              "approach": "N",
+              "s": -27.392626850465323,
+              "front": -25.29262685046532,
+              "speed": 4.383491807527439,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:S:in:agent:0",
+              "approach": "S",
+              "s": -15.196666666666676,
+              "front": -13.096666666666676,
+              "speed": 5.199999999999991,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:S:in:agent:1",
+              "approach": "S",
+              "s": -27.392626850465323,
+              "front": -25.29262685046532,
+              "speed": 4.383491807527439,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:E:in:agent:0",
+              "approach": "E",
+              "s": -15.737391197370222,
+              "front": -13.637391197370222,
+              "speed": 3.211091443223977,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:E:in:agent:1",
+              "approach": "E",
+              "s": -27.431232924968032,
+              "front": -25.33123292496803,
+              "speed": 4.1728183621080275,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:W:in:agent:0",
+              "approach": "W",
+              "s": -15.737391197370222,
+              "front": -13.637391197370222,
+              "speed": 3.211091443223977,
+              "committed": false
+            },
+            {
+              "id": "cedar-junction:W:in:agent:1",
+              "approach": "W",
+              "s": -27.431232924968032,
+              "front": -25.33123292496803,
+              "speed": 4.1728183621080275,
+              "committed": false
+            }
+          ]
+        },
+        {
+          "id": "training-junction",
+          "phase": "NS_GREEN",
+          "elapsed": 1.6000000000000008,
+          "geometry": {
+            "center": [
+              0,
+              0.09,
+              -400
+            ],
+            "laneWidth": 3.5,
+            "stopDistance": 8.625,
+            "crosswalkDistance": 6
+          },
+          "colors": {
+            "N": "GREEN",
+            "S": "GREEN",
+            "E": "RED",
+            "W": "RED"
+          },
+          "approaches": [
+            {
+              "id": "N",
+              "lane": "training-junction:N:in",
+              "stopLine": "training-junction:N:stop",
+              "signal": "training-junction:N:signal"
+            },
+            {
+              "id": "S",
+              "lane": "training-junction:S:in",
+              "stopLine": "training-junction:S:stop",
+              "signal": "training-junction:S:signal"
+            },
+            {
+              "id": "E",
+              "lane": "training-junction:E:in",
+              "stopLine": "training-junction:E:stop",
+              "signal": "training-junction:E:signal"
+            },
+            {
+              "id": "W",
+              "lane": "training-junction:W:in",
+              "stopLine": "training-junction:W:stop",
+              "signal": "training-junction:W:signal"
+            }
+          ],
+          "agents": [
+            {
+              "id": "training-junction:N:in:agent:0",
+              "approach": "N",
+              "s": -15.196666666666676,
+              "front": -13.096666666666676,
+              "speed": 5.199999999999991,
+              "committed": false
+            },
+            {
+              "id": "training-junction:N:in:agent:1",
+              "approach": "N",
+              "s": -27.39262685046532,
+              "front": -25.292626850465318,
+              "speed": 4.383491807527439,
+              "committed": false
+            },
+            {
+              "id": "training-junction:S:in:agent:0",
+              "approach": "S",
+              "s": -20.704860515863462,
+              "front": -18.60486051586346,
+              "speed": 0.09783167871269649,
+              "committed": false
+            },
+            {
+              "id": "training-junction:S:in:agent:1",
+              "approach": "S",
+              "s": -28.580478921260852,
+              "front": -26.48047892126085,
+              "speed": 2.1391549064240047,
+              "committed": false
+            },
+            {
+              "id": "training-junction:E:in:agent:0",
+              "approach": "E",
+              "s": -15.737391197370222,
+              "front": -13.637391197370222,
+              "speed": 3.211091443223977,
+              "committed": false
+            },
+            {
+              "id": "training-junction:E:in:agent:1",
+              "approach": "E",
+              "s": -27.431232924968032,
+              "front": -25.33123292496803,
+              "speed": 4.1728183621080275,
+              "committed": false
+            },
+            {
+              "id": "training-junction:W:in:agent:0",
+              "approach": "W",
+              "s": -15.737391197370222,
+              "front": -13.637391197370222,
+              "speed": 3.211091443223977,
+              "committed": false
+            },
+            {
+              "id": "training-junction:W:in:agent:1",
+              "approach": "W",
+              "s": -27.431232924968032,
+              "front": -25.33123292496803,
+              "speed": 4.1728183621080275,
+              "committed": false
+            }
+          ]
+        }
+      ],
+      "position": [
+        -1.75,
+        0.09,
+        -385
+      ],
+      "speed": 0,
+      "gear": 1,
+      "engine": true,
+      "handbrake": true,
+      "seatAdjusted": false,
+      "mirrorChecked": false,
+      "lights": {
+        "headlights": [
+          0,
+          0
+        ],
+        "brakes": [
+          1,
+          1
+        ],
+        "indicators": [
+          {
+            "name": "Car_Indicator_FL",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_FR",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_RL",
+            "intensity": 0
+          },
+          {
+            "name": "Car_Indicator_RR",
+            "intensity": 0
+          }
+        ],
+        "hazard": false,
+        "left": false,
+        "right": false
+      },
+      "camera": "TopDown",
+      "wheels": [
+        {
+          "name": "Car_Wheel_FL",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_FR",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_RL",
+          "spin": 0,
+          "steer": 0
+        },
+        {
+          "name": "Car_Wheel_RR",
+          "spin": 0,
+          "steer": 0
+        }
+      ],
+      "drawCalls": 268,
+      "triangles": 29834,
+      "elapsed": 1.850000000000001
+    }
+  }
+]

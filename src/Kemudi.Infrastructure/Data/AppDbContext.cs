@@ -35,7 +35,9 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.TimeTakenMs).HasDefaultValue(0);
             e.Property(x => x.Violations).HasDefaultValue(0);
             e.Property(x => x.OffRoadCount).HasDefaultValue(0);
-            e.Property(x => x.ObstacleHits).HasDefaultValue(0);
+            // The existing RenameCollisionCountToObstacleHits migration renamed
+            // the database column; keep the public DTO name stable.
+            e.Property(x => x.CollisionCount).HasColumnName("ObstacleHits").HasDefaultValue(0);
             e.Property(x => x.Completed).HasDefaultValue(false);
             e.Property(x => x.VehicleType).HasConversion<string>();
             e.Property(x => x.TrainingMode)
@@ -127,25 +129,6 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(x => x.RegistrationId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        builder.Entity<Schedule>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasIndex(x => x.MentorId);
-            e.HasIndex(x => x.Date);
-            e.Property(x => x.VehicleType).HasConversion<string>();
-            e.HasOne(x => x.Mentor)
-                .WithMany()
-                .HasForeignKey(x => x.MentorId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        builder.Entity<AuditLog>(e =>
-        {
-            e.HasKey(x => x.Id);
-            e.HasIndex(x => x.CreatedAt);
-            e.HasIndex(x => x.AdminEmail);
         });
     }
 }

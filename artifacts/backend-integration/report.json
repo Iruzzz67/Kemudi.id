@@ -1,0 +1,25 @@
+{
+  "checks": [
+    "Anonymous save rejected",
+    "Register UI and HttpOnly session",
+    "Logout and login UI",
+    "CSRF and invalid result rejection",
+    "Concurrent retries save one row with all fields",
+    "User isolation and foreign attempt ownership"
+  ],
+  "attempts": [
+    {
+      "id": "276877db-6773-4587-aa06-351296dbab91",
+      "vehicleType": "TRUK",
+      "score": 82,
+      "timeTakenMs": 56321,
+      "violations": 1,
+      "offRoadCount": 2,
+      "collisionCount": 1,
+      "completed": true,
+      "createdAt": "2026-11-03T09:41:51.9194379"
+    }
+  ],
+  "passed": false,
+  "error": "locator.waitFor: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('iframe').contentFrame().locator('#vehicle-select') to be visible\u001b[22m\n"
+}

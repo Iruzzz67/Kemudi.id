@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checks": [
+    "training map loads and enters walking without JavaScript errors",
+    "missing GLB displays error and retry recovers after asset restored"
+  ]
+}

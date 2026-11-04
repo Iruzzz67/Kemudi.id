@@ -1,13 +1,3 @@
-# misc
-.DS_Store
-*.pem
-
-# testing
-/coverage
-
-# env files (opsional untuk di-commit)
-.env*
-
 # ===== .NET =====
 **/bin/
 **/obj/
@@ -15,8 +5,9 @@
 *.suo
 **/kemudi.db
 **/kemudi.db-*
+*.razor.css.bak
 
-# ===== Unity (simulation/) =====
+# ===== Unity =====
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -31,3 +22,10 @@ sysinfo.txt
 *.aab
 *.unitypackage
 crashlytics-build.properties
+
+# ===== Misc =====
+**/node_modules/
+.DS_Store
+*.pem
+.env*
+.vscode/launch.json

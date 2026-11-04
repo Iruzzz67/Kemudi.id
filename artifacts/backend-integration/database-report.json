@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "id": "4fe245b8-1bff-4bfa-8ffb-58a1e73db53a",
+      "vehicleType": "TRUK",
+      "score": 82,
+      "timeTakenMs": 56321,
+      "violations": 1,
+      "offRoadCount": 2,
+      "collisionCount": 1,
+      "completed": 1
+    },
+    {
+      "id": "708980e5-2dd4-4692-a50f-2df13d4acc23",
+      "vehicleType": "MOBIL",
+      "score": 100,
+      "timeTakenMs": 4800,
+      "violations": 0,
+      "offRoadCount": 0,
+      "collisionCount": 0,
+      "completed": 1
+    },
+    {
+      "id": "d92ce0a1-d98a-459a-9c6d-bb9d71d22712",
+      "vehicleType": "MOTOR",
+      "score": 0,
+      "timeTakenMs": 150,
+      "violations": 0,
+      "offRoadCount": 0,
+      "collisionCount": 1,
+      "completed": 0
+    }
+  ]
+}

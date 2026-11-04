@@ -6,7 +6,7 @@ namespace Kemudi.Simulation.Environment
     /// <summary>
     /// Pembangun rintangan lintasan — padanan array SCENERY_ITEMS di lib/scenery.ts
     /// versi web (layout celah LEBAR agar konsisten dengan versi web yang sudah
-    /// diperlonggar — lihat PANDUAN_PENEMPATAN_ASSET lama):
+    /// diperlonggar):
     ///
     ///   - Cone slalom di tepi jalan (lateral ±4.2 m) → koridor tengah ±8 m bebas.
     ///   - Water barrier / palang proyek di tepi jalan (lateral ±4.5 m).

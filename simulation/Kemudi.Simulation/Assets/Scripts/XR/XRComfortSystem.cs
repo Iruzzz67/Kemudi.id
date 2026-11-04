@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Kemudi.Simulation.XR
 {
@@ -10,14 +11,15 @@ namespace Kemudi.Simulation.XR
     {
         public enum ComfortMode { Normal, Comfort, Advanced }
 
-        // Kualifikasi penuh: namespace saudara Kemudi.Simulation.Camera
-        // menaungi nama tipe `Camera`.
         [SerializeField] private UnityEngine.Camera targetCamera = null!;
         [SerializeField] private float baseFov = 90f;
         [SerializeField] private float maxNarrowFov = 70f;
         [SerializeField] private float smooth = 0.1f;
 
         public ComfortMode Mode { get; set; } = ComfortMode.Comfort;
+
+        /// <summary>Toggle keseluruhan comfort system (di-set oleh KemudiSceneBootstrap).</summary>
+        public bool SystemActive { get; set; }
 
         // TODO: sumber nilai akselerasi — sambungkan ke VehiclePhysics.
         private float _accelMagnitude;

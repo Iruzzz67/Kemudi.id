@@ -1,16 +1,23 @@
 @page "/logout"
 @using Kemudi.Web.Services
-@inject AuthService Auth
+@inject IJSRuntime JS
 @inject NavigationManager Nav
 
 <div class="text-center" style="padding:3rem 0">
-    <p class="muted">Keluar dari akun...</p>
+    <p class="muted">@(_error ?? "Keluar dari akun...")</p>
+    @if (_error is not null) { <button class="btn" @onclick="LogoutAsync">Coba lagi</button> }
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
+    private string? _error;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await Auth.LogoutAsync();
-        Nav.NavigateTo("/", forceLoad: true);
+        if (firstRender) { await LogoutAsync(); StateHasChanged(); }
+    }
+    private async Task LogoutAsync()
+    {
+        await using var session = await JS.InvokeAsync<IJSObjectReference>("import", "/js/session-client.js");
+        _error = await session.InvokeAsync<string?>("submit", "logout");
+        if (_error is null) Nav.NavigateTo("/", forceLoad: true);
     }
 }

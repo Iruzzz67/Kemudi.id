@@ -1,3 +1,4 @@
+using Kemudi.Simulation.Input;
 using UnityEngine;
 
 namespace Kemudi.Simulation.XR
@@ -13,14 +14,39 @@ namespace Kemudi.Simulation.XR
 
         public Mode CurrentMode { get; private set; } = Mode.Desktop;
 
-        [SerializeField] private GameObject vrRig = null!;   // XR Origin (dibuat di Editor)
-        [SerializeField] private GameObject desktopCameraRig = null!;
+        /// <summary>Apakah VR sedang aktif (dibaca MainMenuUI, KemudiSceneBootstrap).</summary>
+        public bool IsVrActive => CurrentMode == Mode.VR;
+
+        [SerializeField] private GameObject? vrRig;   // XR Origin (dibuat di Editor)
+        [SerializeField] private GameObject? desktopCameraRig;
+
+        private UniversalInputSystem? _inputSystem;
+        private Transform? _vehicleTarget;
 
         private void Awake()
         {
             CurrentMode = IsVrSupported() ? Mode.VR : Mode.Desktop;
             ApplyMode();
         }
+
+        /// <summary>
+        /// Wire input system & kamera rig — dipanggil KemudiSceneBootstrap.
+        /// XRInputProvider didaftarkan ke input system bila VR aktif.
+        /// </summary>
+        public void Initialize(UniversalInputSystem input, GameObject cameraRig)
+        {
+            _inputSystem = input;
+
+            if (IsVrActive && input != null)
+            {
+                // Daftarkan XRInputProvider bila ada di bawah rig ini.
+                var xrInput = GetComponentInChildren<XRInputProvider>();
+                if (xrInput != null) input.Register(xrInput);
+            }
+        }
+
+        /// <summary>Target kendaraan untuk head tracking follow (VR only).</summary>
+        public void SetVehicleTarget(Transform target) => _vehicleTarget = target;
 
         private static bool IsVrSupported()
         {

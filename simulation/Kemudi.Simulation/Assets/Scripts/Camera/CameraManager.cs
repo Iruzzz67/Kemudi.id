@@ -3,24 +3,22 @@ using UnityEngine;
 namespace Kemudi.Simulation.Camera
 {
     /// <summary>
-    /// Kamera FPV / TPV (§34). Top-down HANYA tersedia sebagai debug mode
-    /// (Development Build) — user biasa hanya menelusuri TPV ↔ FPV agar
-    /// sesuai target performa. Di VR, head tracking mengambil alih; kamera
-    /// ini hanya relevan untuk mode desktop.
+    /// Kamera FPV / TPV / TopDown. Di VR, head tracking mengambil alih —
+    /// kamera ini hanya relevan untuk mode desktop.
     /// </summary>
     public sealed class CameraManager : MonoBehaviour
     {
         public enum CameraMode { Tpv, Fpv, TopDown }
 
-        // Kualifikasi penuh: namespace Kemudi.Simulation.Camera menaungi nama
-        // tipe `Camera` — tanpa UnityEngine.Camera, kompilasi gagal.
-        [SerializeField] private UnityEngine.Camera cam = null!;
-        [SerializeField] private Transform vehicle = null!;
+        [SerializeField] private UnityEngine.Camera? cam;
+        [SerializeField] private Transform? vehicle;
         [SerializeField] private float tpvFollowSpeed = 6f;
         [SerializeField] private Vector3 fpvEyeOffset = new(0f, 1.4f, 0.2f);
 
-        /// <summary>Mode kamera efektif yang dipakai user (tanpa TopDown).</summary>
         public CameraMode Mode { get; private set; } = CameraMode.Tpv;
+
+        /// <summary>Mode VR menonaktifkan semua kamera desktop.</summary>
+        public bool VrMode { get; private set; }
 
         private Vector3 _tpvPosition;
 
@@ -30,38 +28,37 @@ namespace Kemudi.Simulation.Camera
         }
 
         /// <summary>
-        /// Wire dependency — dipakai scene bootstrap (kamera & kendaraan dibuat
-        /// saat runtime sehingga tidak bisa di-assign lewat Inspector).
+        /// Wire kamera & target kendaraan — dipanggil KemudiSceneBootstrap.
         /// </summary>
-        public void Configure(UnityEngine.Camera camera, Transform target)
+        public void Configure(UnityEngine.Camera? camera, Transform? vehicleTransform)
         {
-            cam = camera;
-            vehicle = target;
+            if (camera != null) cam = camera;
+            if (vehicleTransform != null) vehicle = vehicleTransform;
         }
 
-        /// <summary>
-        /// Siklus kamera user: TPV ↔ FPV. TopDown hanya masuk bila debug
-        /// build mengizinkan (tombol debug memanggil <see cref="EnableDebugTopDown"/>).
-        /// </summary>
+        /// <summary>Aktifkan mode VR — kamera desktop dimatikan, head tracking aktif.</summary>
+        public void EnableVrMode()
+        {
+            VrMode = true;
+            // Di VR, kamera utama dikontrol oleh XR Origin — nonaktifkan
+            // gerakan manual (LateUpdate) supaya tidak bertabrakan.
+            if (cam != null) cam.enabled = false;
+        }
+
         public void CycleMode()
         {
-            var topDownAllowed = Debug.isDebugBuild && _debugTopDownRequested;
             Mode = Mode switch
             {
                 CameraMode.Tpv => CameraMode.Fpv,
-                CameraMode.Fpv when topDownAllowed => CameraMode.TopDown,
+                CameraMode.Fpv => CameraMode.TopDown,
                 _ => CameraMode.Tpv
             };
         }
 
-        private bool _debugTopDownRequested;
-
-        /// <summary>Debug build: izinkan TopDown dalam siklus kamera (§34).</summary>
-        public void EnableDebugTopDown(bool enabled) => _debugTopDownRequested = enabled;
-
         private void LateUpdate()
         {
-            if (vehicle == null) return;
+            if (VrMode) return; // VR: head tracking mengontrol kamera
+            if (vehicle == null || cam == null) return;
             switch (Mode)
             {
                 case CameraMode.Tpv: UpdateTpv(); break;

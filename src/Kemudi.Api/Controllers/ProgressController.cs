@@ -35,24 +35,33 @@ public sealed class ProgressController : ControllerBase
         if (userId is null) return Unauthorized();
 
         if (!ValidVehicles.Contains(request.VehicleType) ||
-            request.Score < 0 || request.Score > 100 ||   // §8: validasi 0..100
+            request.Score < 0 || request.Score > 1000 ||
             request.TimeTakenMs < 0 ||
             request.Violations < 0 ||
             request.OffRoadCount < 0 ||
-            request.ObstacleHits < 0)
+              request.CollisionCount < 0 || request.AttemptId == Guid.Empty)
         {
             return BadRequest(new { error = "Data tidak valid." });
         }
 
+        // Reuse the primary key as the idempotency key: retrying a lost response
+        // must not create a second history row. Ownership always comes from JWT.
+        var attemptId = request.AttemptId ?? Guid.NewGuid();
+        var existing = await _db.SimulationAttempts.AsNoTracking()
+            .SingleOrDefaultAsync(a => a.Id == attemptId);
+        if (existing is not null)
+            return existing.UserId == userId ? Ok(ToDto(existing)) : Conflict();
+
         var attempt = new SimulationAttempt
         {
+            Id = attemptId,
             UserId = userId,
             VehicleType = Enum.Parse<VehicleType>(request.VehicleType),
-            Score = request.Score,  // sudah divalidasi 0..100; tidak percaya nilai mentah (§8)
+            Score = Math.Clamp(request.Score, 0, 100),  // jangan percaya score mentah dari klien
             TimeTakenMs = Math.Max(0, request.TimeTakenMs),
             Violations = Math.Max(0, request.Violations),
             OffRoadCount = Math.Max(0, request.OffRoadCount),
-            ObstacleHits = Math.Max(0, request.ObstacleHits),
+            CollisionCount = Math.Max(0, request.CollisionCount),
             Completed = request.Completed,
             TrainingMode = request.TrainingMode is null
                 ? null
@@ -62,7 +71,15 @@ public sealed class ProgressController : ControllerBase
         };
 
         _db.SimulationAttempts.Add(attempt);
-        await _db.SaveChangesAsync();
+        try { await _db.SaveChangesAsync(); }
+        catch (DbUpdateException)
+        {
+            // A concurrent retry may have inserted the same primary key.
+            existing = await _db.SimulationAttempts.AsNoTracking()
+                .SingleOrDefaultAsync(a => a.Id == attemptId);
+            if (existing is null) throw;
+            return existing.UserId == userId ? Ok(ToDto(existing)) : Conflict();
+        }
 
         return Ok(ToDto(attempt));
     }
@@ -93,7 +110,7 @@ public sealed class ProgressController : ControllerBase
         TimeTakenMs: a.TimeTakenMs,
         Violations: a.Violations,
         OffRoadCount: a.OffRoadCount,
-        ObstacleHits: a.ObstacleHits,
+        CollisionCount: a.CollisionCount,
         Completed: a.Completed,
         CreatedAt: a.CreatedAt);
 }

@@ -9,7 +9,7 @@ namespace Kemudi.Simulation.Vehicles
     /// Assets → Create → Kemudi → Vehicle Config.
     /// </summary>
     [CreateAssetMenu(fileName = "VehicleConfig", menuName = "Kemudi/Vehicle Config")]
-    public sealed class VehicleConfig : ScriptableObject
+    public sealed class VehicleConfig : ScriptableObject, Transmission.EngineController.VehicleConfigProvider
     {
         public enum VehicleType { Motor, Mobil, Truk }
 
@@ -27,7 +27,7 @@ namespace Kemudi.Simulation.Vehicles
         public float Mass = 1300f;          // kg
 
         [Header("Performa (m/s & m/s²)")]
-        public float MaxSpeed = 19.44f;   // 70 km/j (batas maksimum semua kendaraan)
+        public float MaxSpeed = 22f;
         public float ReverseMaxSpeed = 6f;
         public float Acceleration = 6f;
         public float BrakeForce = 9f;
@@ -60,5 +60,9 @@ namespace Kemudi.Simulation.Vehicles
 
         public float TopSpeedInGear(int gear) =>
             gear < 0 || gear >= GearRatios.Length ? 0f : MaxSpeed / GearRatios[gear];
+
+        // Explicit interface implementation for VehicleConfigProvider
+        float Transmission.EngineController.VehicleConfigProvider.EngineIdleRpm => EngineIdleRpm;
+        float Transmission.EngineController.VehicleConfigProvider.EngineRedlineRpm => EngineRedlineRpm;
     }
 }

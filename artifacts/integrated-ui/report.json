@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "home to embedded simulator preserves website navigation and shared palette in light OS mode",
+    "embedded canvas accepts enter, ignition, handbrake, drive and pause keyboard input",
+    "return to home unmounts simulator",
+    "legacy URL retains vehicle/transmission, mobile layout has no horizontal overflow"
+  ],
+  "errors": []
+}

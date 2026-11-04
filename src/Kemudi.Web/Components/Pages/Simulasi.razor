@@ -1,162 +1,34 @@
-@page "/simulasi"
-@using Kemudi.Shared.DTOs
-@using Kemudi.Web.Services
-@inject ApiClient Api
-@inject AuthService Auth
-@inject NavigationManager Nav
-@inject IHttpClientFactory HttpClientFactory
+﻿@page "/simulasi"
+@page "/simulasi/play"
 
-<section class="hero">
-    <h1>Simulasi <span>3D Mengemudi</span></h1>
-    <p>
-        Berlatih mengemudi di lintasan ala Kota Bogor (±916 m) — motor, mobil, atau truk —
-        lengkap dengan lalu lintas, pejalan kaki, lampu merah, rintangan, dan skor akhir.
-        Simulasi dibuat dengan <strong>Unity (C#)</strong> dan bisa dimainkan langsung di browser (WebGL)
-        atau di aplikasi desktop/VR (OpenXR).
-    </p>
+<PageTitle>Simulasi Mengemudi | Kemudi.id</PageTitle>
+<section class="simulation-page" aria-labelledby="simulation-title">
+    <h1 id="simulation-title" class="simulation-accessible-title">Simulasi mengemudi</h1>
+    <div class="simulation-frame">
+        <iframe @key="_iframeSrc" src="@_iframeSrc" title="Simulasi mengemudi Kemudi.id"
+                loading="eager" allow="fullscreen; autoplay" allowfullscreen></iframe>
+    </div>
+    <details class="simulation-help">
+        <summary>Panduan kontrol dan penyimpanan hasil</summary>
+        <div class="simulation-help-grid">
+            <p><kbd>Enter</kbd> masuk kendaraan · <kbd>I</kbd> mesin · <kbd>Space</kbd> rem tangan</p>
+            <p><kbd>W</kbd> gas · <kbd>S</kbd> rem · <kbd>A</kbd> / <kbd>D</kbd> belok</p>
+            <p>Matic: berhenti dengan <kbd>S</kbd>, lalu <kbd>R</kbd> untuk berganti mundur / maju.</p>
+            <p><kbd>C</kbd> kamera · <kbd>P</kbd> jeda · Manual: <kbd>Shift</kbd> kopling, <kbd>Q</kbd> / <kbd>E</kbd> gigi.</p>
+        </div>
+        <p>Masuk ke akun sebelum latihan untuk menyimpan hasil ke dashboard. Simulator paling nyaman digunakan dengan keyboard.</p>
+    </details>
 </section>
 
-@if (_vehicles is null)
-{
-    <div class="loading">Memuat kendaraan...</div>
-}
-else
-{
-    <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">1. Pilih Kendaraan</h2>
-        <div class="grid grid-3 mt-2">
-            @foreach (var v in _vehicles)
-            {
-                <div class="card @(v.Type == _selectedVehicle ? "selected" : "")" style="@(v.Type == _selectedVehicle ? "outline:2px solid var(--accent,#2563eb)" : "")">
-                    <span class="chip" style="background:@v.Color"></span>
-                    <h3>@v.Label</h3>
-                    <p>@v.Description</p>
-                    <div class="meta mt-1">
-                        <span>Top speed: @Math.Round(v.MaxSpeed * 3.6) km/j</span>
-                        <span>@v.GearCount gigi</span>
-                    </div>
-                    <button class="btn @(v.Type == _selectedVehicle ? "btn-primary" : "btn-outline") mt-1"
-                            @onclick="() => SelectVehicle(v.Type)">
-                        @(v.Type == _selectedVehicle ? "✓ Dipilih" : "Pilih")
-                    </button>
-                </div>
-            }
-        </div>
-    </section>
-
-    <section class="section">
-        <h2 class="section-title" style="font-size:1.25rem">2. Mainkan</h2>
-
-        @if (_webGlAvailable == null)
-        {
-            <div class="loading">Memeriksa build WebGL...</div>
-        }
-        else if (_webGlAvailable == true)
-        {
-            <div class="card mt-2">
-                <div class="flex" style="justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
-                    <div>
-                        <h3 style="margin:0 0 0.25rem">▶ Mainkan di Browser (WebGL)</h3>
-                        <p class="muted" style="margin:0">
-                            Kendaraan: <strong>@SelectedLabel</strong> ·
-                            Status login: <strong>@(Auth.IsAuthenticated ? "Sudah masuk — hasil akan tersimpan" : "Belum masuk — hasil tidak tersimpan")</strong>
-                        </p>
-                    </div>
-                    <button class="btn btn-primary btn-lg" @onclick="ToggleWebGl" disabled="@(_selectedVehicle is null)">
-                        @(_playingWebGl ? "✕ Tutup Simulasi" : "▶ Mulai Simulasi")
-                    </button>
-                </div>
-                @if (!Auth.IsAuthenticated)
-                {
-                    <p class="muted mt-1">💡 <a href="login" style="color:#2563eb;text-decoration:underline">Masuk dulu</a> agar skor &amp; riwayat tersimpan di dashboard.</p>
-                }
-            </div>
-
-            @if (_playingWebGl)
-            {
-                <div class="sim-frame-wrap">
-                    <iframe class="sim-iframe" src="@_webGlUrl" allow="fullscreen; xr-spatial-tracking; gamepad" loading="lazy"></iframe>
-                    <p class="muted" style="text-align:center;margin-top:0.5rem">
-                        Kontrol: <strong>W/S</strong> gas/rem · <strong>A/D</strong> belok · <strong>Space</strong> rem tangan ·
-                        <strong>I</strong> mesin · <strong>C</strong> kamera · <strong>B/H/J/G/F</strong> checklist.
-                        Selesaikan checklist pra-jalan lalu meluncur hingga garis finish.
-                    </p>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="error-box mt-2" style="background:#fffbeb;border-color:#fcd34d;color:#92400e">
-                <strong>Build WebGL belum tersedia.</strong><br />
-                Simulasi browser membutuhkan hasil build WebGL dari proyek Unity
-                (<code>simulation/Kemudi.Simulation</code>) yang disalin ke
-                <code>src/Kemudi.Web/wwwroot/unity/</code> — lihat
-                <a href="https://github.com/Iruzzz67/Kemudi.id/blob/main/simulation/Kemudi.Simulation/README.md" style="color:#92400e;text-decoration:underline">README Unity</a>.
-            </div>
-        }
-    </section>
-
-    <section class="section">
-        <div class="card mt-2" style="text-align:center;padding:1.5rem">
-            <h3 style="margin-top:0">🖥️ Aplikasi Desktop / VR (OpenXR)</h3>
-            <p class="muted">
-                Untuk pengalaman VR penuh (PC VR &amp; Meta Quest), buka proyek
-                <em>Kemudi.Simulation</em> di Unity, build, lalu mainkan. Hasil latihan
-                dikirim otomatis ke server via <code>POST /api/progress</code>.
-            </p>
-            <a class="btn btn-outline" href="https://github.com/Iruzzz67/Kemudi.id/tree/main/simulation/Kemudi.Simulation" target="_blank" rel="noopener">
-                Panduan Build Unity
-            </a>
-        </div>
-    </section>
-}
-
 @code {
-    private List<VehicleDto>? _vehicles;
-    private string? _selectedVehicle;
-    private bool? _webGlAvailable;
-    private bool _playingWebGl;
-
-    private string SelectedLabel => _vehicles?.FirstOrDefault(v => v.Type == _selectedVehicle)?.Label ?? "—";
-
-    private string? _webGlUrl;
-    private string? WebGlUrl
+    [SupplyParameterFromQuery] public string? Vehicle { get; set; }
+    [SupplyParameterFromQuery] public string? Transmission { get; set; }
+    [SupplyParameterFromQuery] public string? Map { get; set; }
+    private string _iframeSrc = "/simulation-3d/index.html";
+    protected override void OnParametersSet()
     {
-        get
-        {
-            if (_selectedVehicle is null) return null;
-            var token = Auth.IsAuthenticated ? Uri.EscapeDataString(Api.Token ?? "") : "";
-            return Nav.BaseUri + "unity/index.html?token=" + token + "&vehicle=" + _selectedVehicle;
-        }
-    }
-
-    private void SelectVehicle(string type)
-    {
-        _selectedVehicle = type;
-        _webGlUrl = WebGlUrl;
-    }
-
-    private void ToggleWebGl()
-    {
-        _webGlUrl = WebGlUrl;
-        _playingWebGl = !_playingWebGl;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _vehicles = await Api.GetAsync<List<VehicleDto>>("/api/vehicles");
-
-        // Cek apakah build WebGL tersedia di /unity/index.html.
-        try
-        {
-            var http = HttpClientFactory.CreateClient();
-            using var request = new HttpRequestMessage(HttpMethod.Head, new Uri(Nav.BaseUri + "unity/index.html"));
-            using var response = await http.SendAsync(request);
-            _webGlAvailable = response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            _webGlAvailable = false;
-        }
+        var vehicle = Vehicle?.ToUpperInvariant() is "MOTOR" or "TRUK" ? Vehicle.ToUpperInvariant() : "MOBIL";
+        var transmission = Transmission == "manual" ? "manual" : "automatic";
+        _iframeSrc = $"/simulation-3d/index.html?vehicle={vehicle}&transmission={transmission}&map=unified&autostart=1";
     }
 }

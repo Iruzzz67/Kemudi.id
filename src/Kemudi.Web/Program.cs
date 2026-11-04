@@ -1,5 +1,6 @@
 using Kemudi.Web.Components;
 using Kemudi.Web.Services;
+using Microsoft.AspNetCore.StaticFiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,12 @@ builder.Services.AddHttpClient<ApiClient>(client =>
 });
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
+builder.Services.AddHttpClient("BrowserBackend", client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 
 var app = builder.Build();
 
@@ -28,8 +35,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = new FileExtensionContentTypeProvider
+    {
+        Mappings =
+        {
+            [".glb"] = "model/gltf-binary",
+            [".gltf"] = "model/gltf+json",
+        }
+    }
+});
 app.UseAntiforgery();
+app.MapBrowserApi();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

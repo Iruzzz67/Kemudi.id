@@ -1,7 +1,6 @@
 using System.Text;
 using Kemudi.App.Data;
 using Kemudi.App.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,19 +13,6 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(dbPath)
 // DataProtection (required by Identity token providers)
 builder.Services.AddDataProtection();
 
-// TimeProvider (required by Identity in .NET 8+)
-builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
-
-// Authentication — Identity.Application scheme for SignInManager
-builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
-    .AddCookie(IdentityConstants.ApplicationScheme, options =>
-    {
-        options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
-        options.AccessDeniedPath = "/login";
-        options.ExpireTimeSpan = TimeSpan.FromDays(7);
-    });
-
 // ASP.NET Core Identity
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {
@@ -37,10 +23,18 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
         options.Password.RequiredLength = 6;
         options.User.RequireUniqueEmail = true;
     })
-    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
+
+// Cookie authentication
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/login";
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -72,22 +66,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Fallback: serve route-specific HTML files, then index.html for unknown routes
-app.MapFallback(async (HttpContext context) =>
-{
-    var path = context.Request.Path.Value?.TrimStart('/');
-    if (!string.IsNullOrEmpty(path))
-    {
-        var htmlFile = Path.Combine(app.Environment.WebRootPath, $"{path}.html");
-        if (File.Exists(htmlFile))
-        {
-            context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.SendFileAsync(htmlFile);
-            return;
-        }
-    }
-    context.Response.ContentType = "text/html; charset=utf-8";
-    await context.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, "index.html"));
-});
+// Fallback: serve index.html for any unmatched route (SPA-style)
+app.MapFallbackToFile("index.html");
 
 app.Run();

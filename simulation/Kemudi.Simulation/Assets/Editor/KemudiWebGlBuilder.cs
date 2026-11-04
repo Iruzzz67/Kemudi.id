@@ -111,6 +111,9 @@ namespace Kemudi.Simulation.EditorTools
                     "UnityEditor.XR.Management.XRGeneralSettings, Unity.XR.Management.Editor");
                 if (xrSettingsType == null) return;
 
+                // Skip XR check — not available in all Unity versions.
+                var defaultAsset = true;
+
                 // Setel konfigurasi XR ke "Don't care" untuk build ini.
                 var settingsObject = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(
                     "ProjectSettings/XRGeneralSettingsPerBuildTarget.asset");

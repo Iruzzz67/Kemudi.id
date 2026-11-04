@@ -40,7 +40,7 @@ namespace Kemudi.Simulation.Vehicles
 
             var input = _controller.Input;
             var isReversing = _controller.Transmission != null && _controller.Transmission.IsReverse;
-            var speed = _rb.linearVelocity.magnitude;
+            var speed = _rb.velocity.magnitude;
             SpeedKmh = speed * 3.6f;
             _controller.SetSpeed(speed);
 
@@ -69,13 +69,13 @@ namespace Kemudi.Simulation.Vehicles
             if (input.Brake > 0f)
             {
                 var brakePower = cfg.BrakeForce * input.Brake;
-                _rb.AddForce(-_rb.linearVelocity.normalized * brakePower * _rb.mass, ForceMode.Force);
+                _rb.AddForce(-_rb.velocity.normalized * brakePower * _rb.mass, ForceMode.Force);
             }
 
             // Rem tangan: selip (kurangi cengkeraman lateral)
             if (_controller.HandbrakeActive)
             {
-                _rb.AddForce(-_rb.linearVelocity.normalized * cfg.HandbrakeForce * _rb.mass, ForceMode.Force);
+                _rb.AddForce(-_rb.velocity.normalized * cfg.HandbrakeForce * _rb.mass, ForceMode.Force);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Kemudi.Simulation.Vehicles
 
             // Komponen kecepatan yang tegak lurus arah hadap dikurangi.
             var right = transform.right;
-            var lateralVel = Vector3.Dot(_rb.linearVelocity, right) * right;
+            var lateralVel = Vector3.Dot(_rb.velocity, right) * right;
             var factor = _controller.HandbrakeActive ? handbrakeSlipFactor : cfg.RearGrip * 1.4f;
             _rb.AddForce(-lateralVel * lateralDamping * factor * _rb.mass, ForceMode.Force);
         }
@@ -103,7 +103,7 @@ namespace Kemudi.Simulation.Vehicles
         private void ApplyDrag(VehicleConfig cfg, float speed)
         {
             // Wheel damping rate (natural deceleration saat idle) + drag aerodinamis.
-            _rb.AddForce(-_rb.linearVelocity * (cfg.Friction + speed * 0.004f), ForceMode.Acceleration);
+            _rb.AddForce(-_rb.velocity * (cfg.Friction + speed * 0.004f), ForceMode.Acceleration);
         }
     }
 }
