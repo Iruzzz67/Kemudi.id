@@ -52,6 +52,26 @@ for (const [type, eye, seatZ] of [['MOTOR', 1.173, 0], ['MOBIL', 1.2886, -.38], 
   const display= cockpit.group.getObjectByName('InstrumentDisplay').getWorldPosition(new THREE.Vector3()).project(camera);
   assert.ok(Math.abs(display.x)<1&&Math.abs(display.y)<1&&display.z>-1&&display.z<1,'cluster centre is inside FPV frustum');
   const version = cockpit.texture.version; cockpit.update(1/60,vehicle,instruments); assert.equal(cockpit.texture.version,version,'unchanged display does not upload texture');
+  const forwardView=camera.getWorldDirection(new THREE.Vector3());
+  for(const [yaw,side] of [[-.6,1],[.6,-1]]) {
+    cockpit.update(1/60,vehicle,instruments,{yaw,pitch:0});
+    const direction=camera.getWorldDirection(new THREE.Vector3());
+    const local=direction.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-vehicle.rotation);
+    assert.ok(local.x*side>.5,'horizontal-only look turns toward the requested side');
+    assert.ok(Math.abs(direction.y-forwardView.y)<1e-8,'horizontal-only look must not move the vertical view');
+    assert.ok(camera.position.distanceTo(vehicle.getDriverSeatPosition())<.0001,'horizontal look stays at driver eye');
+  }
+  cockpit.update(1/60,vehicle,instruments,{yaw:-.6,pitch:.3});
+  const turnedView=camera.getWorldDirection(new THREE.Vector3());
+  const localView=turnedView.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-vehicle.rotation);
+  assert.ok(localView.x>.4&&turnedView.y>forwardView.y+.2,'right/up look reaches actual FPV camera');
+  assert.ok(camera.position.distanceTo(vehicle.getDriverSeatPosition())<.0001,'look rotates at driver eye, not vehicle orbit');
+  const bodyRotation=vehicle.group.rotation.y;
+  vehicle.mirrorYaw=.55;cockpit.update(1/60,vehicle,instruments,{yaw:-.6,pitch:.3});
+  assert.ok(camera.getWorldDirection(new THREE.Vector3()).distanceTo(turnedView)>.5,'mirror look still composes with stick view');
+  assert.equal(vehicle.group.rotation.y,bodyRotation,'looking never rotates the vehicle/cockpit');
+  vehicle.mirrorYaw=0;cockpit.update(1/60,vehicle,instruments);
+  assert.ok(camera.getWorldDirection(new THREE.Vector3()).distanceTo(forwardView)<.0001,'default camera remains backwards compatible');
   assert.equal(cockpit.group.name, 'Cockpit_' + type);
   cockpit.setMode('TopDown'); assert.equal(vehicle.model.visible,true); assert.equal(character.head.visible,true); assert.equal(cockpit.group.visible,false);
   vehicle.model.visible=false; cockpit.setMode('FPV'); cockpit.setMode('TPV'); assert.equal(vehicle.model.visible,false,'restore preexisting visibility, not unconditional true');

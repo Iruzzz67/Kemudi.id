@@ -1,0 +1,2 @@
+### Result
+{"empty":{"url":"http://127.0.0.1:5891/login","text":"🚗\nMasuk\n\nLanjutkan latihan dan pantau progresmu di dashboard.\n\nEmail atau password salah.\nEmail\nPassword\nMasuk\n\nBelum punya akun? Daftar"},"wrong":{"status":401,"url":"http://127.0.0.1:5891/login","text":"🚗\nMasuk\n\nLanjutkan latihan dan pantau progresmu di dashboard.\n\nEmail atau password salah.\nEmail\nPassword\nMasuk\n\nBelum punya akun? Daftar"}}

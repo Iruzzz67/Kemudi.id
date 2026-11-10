@@ -1,0 +1,6 @@
+[     534ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[     633ms] [INFO] [2026-11-10T09:03:42.896Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[     743ms] [INFO] [2026-11-10T09:03:43.007Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=yjPgMaFR6PbI8OdU-p1dzA. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[     896ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[   21452ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:5891/api/session/login:1
+[   23423ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://127.0.0.1:5891/api/session/login:1

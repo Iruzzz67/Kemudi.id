@@ -1,0 +1,82 @@
+[     179ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5891/:1
+[  172340ms] [INFO] [2026-11-10T08:17:25.361Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  172550ms] [INFO] [2026-11-10T08:17:25.573Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=xSy48j88in4zlpOBvUAz7g. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  433712ms] [INFO] [2026-11-10T08:21:46.735Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  433732ms] [INFO] [2026-11-10T08:21:46.755Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=Mu0uYccS-0Yn85GepwbKSA. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  434799ms] [INFO] [2026-11-10T08:21:47.821Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  434813ms] [INFO] [2026-11-10T08:21:47.836Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=yOtxfwqkiCmSaVWaZDgTOw. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  435382ms] [INFO] [2026-11-10T08:21:48.405Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  435394ms] [INFO] [2026-11-10T08:21:48.417Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=Viw3kdaUPcIR0rz7h212KQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  436118ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[  436133ms] [INFO] [2026-11-10T08:21:49.156Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  436148ms] [INFO] [2026-11-10T08:21:49.170Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=1tN1rWxaAIUqAcEdaypW1g. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  436268ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[  436912ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  436931ms] [INFO] [2026-11-10T08:21:49.953Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  436950ms] [INFO] [2026-11-10T08:21:49.972Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=CFgEb8MJbVOtROmvWaoMSw. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  437072ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  437917ms] [INFO] [2026-11-10T08:21:50.939Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  437935ms] [INFO] [2026-11-10T08:21:50.958Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=s91Pcvz66Y3jyq6-DQpjfw. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  438695ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ chrome-error://chromewebdata/:1
+[  555874ms] [INFO] [2026-11-10T08:23:48.894Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  555915ms] [INFO] [2026-11-10T08:23:48.938Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=9OyHaSWUsEUsatkFIkuhYA. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  556598ms] [INFO] [2026-11-10T08:23:49.621Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  556606ms] [INFO] [2026-11-10T08:23:49.628Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=OewJLLg6qupwBGgegpYh_Q. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  557133ms] [INFO] [2026-11-10T08:23:50.155Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  557147ms] [INFO] [2026-11-10T08:23:50.169Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=wamFnCU61t0Icjw94YozAQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  557815ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[  557831ms] [INFO] [2026-11-10T08:23:50.854Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  557844ms] [INFO] [2026-11-10T08:23:50.866Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=IWmAKjaNNa6n7LefIcT1Fg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  557968ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[  558654ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  558684ms] [INFO] [2026-11-10T08:23:51.706Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  558701ms] [INFO] [2026-11-10T08:23:51.724Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=9LYNNkdBTFmwnvg0hmSbcg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  558821ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  559418ms] [INFO] [2026-11-10T08:23:52.440Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  559434ms] [INFO] [2026-11-10T08:23:52.457Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=zPotJkt5zhdgpaJ2fQL9pg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  559906ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ chrome-error://chromewebdata/:1
+[  559963ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ chrome-error://chromewebdata/:1
+[  702931ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  702955ms] [INFO] [2026-11-10T08:26:15.977Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  703007ms] [INFO] [2026-11-10T08:26:16.029Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=AEoOhqzZ7mRO-NQexhbqqQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  703151ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/register:1
+[  863448ms] [INFO] [2026-11-10T08:28:56.470Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  863500ms] [INFO] [2026-11-10T08:28:56.523Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=I-FRpNmo88aCPFokLzo-_A. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  878647ms] [INFO] [2026-11-10T08:29:11.669Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[  878672ms] [INFO] [2026-11-10T08:29:11.694Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=Jl59D7Z6WQYl73gEdXcuxg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 1318684ms] [INFO] [2026-11-10T08:36:31.706Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 1318693ms] [INFO] [2026-11-10T08:36:31.715Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=fqt6r8vq7fhrWbB1zM7cFA. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 1319407ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[ 1319458ms] [INFO] [2026-11-10T08:36:32.480Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 1319469ms] [INFO] [2026-11-10T08:36:32.491Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=UiFAHJo0rO4TrdVAge5ouA. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 1319590ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://127.0.0.1:5891/login:1
+[ 1321683ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:5891/api/session/login:1
+[ 1323599ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://127.0.0.1:5891/api/session/login:1
+[ 2384782ms] [WARNING] Allow attribute will take precedence over 'allowfullscreen'. @ http://127.0.0.1:5891/simulasi:31
+[ 2384867ms] [INFO] [2026-11-10T08:54:17.890Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2386060ms] [INFO] [2026-11-10T08:54:19.083Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=sAwckYwI8h-HWW0_s5g1SQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2721339ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[ 2721357ms] [INFO] [2026-11-10T08:59:54.379Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2721376ms] [INFO] [2026-11-10T08:59:54.399Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=IWb4mp5Rixh_QPLPeuLsuQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2721500ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[ 2725149ms] [INFO] [2026-11-10T08:59:58.171Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2725166ms] [INFO] [2026-11-10T08:59:58.189Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=EkAKKUFMwB7mn7BbDBXP5A. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2780707ms] [INFO] [2026-11-10T09:00:53.729Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2780753ms] [INFO] [2026-11-10T09:00:53.776Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=VjlBOynbykokaFUfIf9ruw. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2780944ms] [INFO] [2026-11-10T09:00:53.967Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2780958ms] [INFO] [2026-11-10T09:00:53.980Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=wWy9kF__eikrJkgM8F9e_g. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781100ms] [INFO] [2026-11-10T09:00:54.123Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781134ms] [INFO] [2026-11-10T09:00:54.157Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=fWFKy8hlXDrcNNRCKVkR8w. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781322ms] [INFO] [2026-11-10T09:00:54.344Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781332ms] [INFO] [2026-11-10T09:00:54.354Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=6cKxpEWZe9sTzMUe6VFjAg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781701ms] [INFO] [2026-11-10T09:00:54.724Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2781711ms] [INFO] [2026-11-10T09:00:54.733Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=ctKbWToij9paEZCqmqPHJQ. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2876769ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[ 2876790ms] [INFO] [2026-11-10T09:02:29.812Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2876798ms] [INFO] [2026-11-10T09:02:29.820Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=_eGPWjWqrqvygHyHG7zZTg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2876932ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:5891/login:1
+[ 2879314ms] [INFO] [2026-11-10T09:02:32.337Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 2879324ms] [INFO] [2026-11-10T09:02:32.347Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=QG9m-e4qx3jnCLvF17dzrw. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 3166566ms] [WARNING] Allow attribute will take precedence over 'allowfullscreen'. @ http://127.0.0.1:5891/simulasi/play:31
+[ 3166689ms] [INFO] [2026-11-10T09:07:19.711Z] Information: Normalizing '_blazor' to 'http://127.0.0.1:5891/_blazor'. @ http://127.0.0.1:5891/_framework/blazor.web.js:1
+[ 3166846ms] [INFO] [2026-11-10T09:07:19.869Z] Information: WebSocket connected to ws://127.0.0.1:5891/_blazor?id=_Hhn1mbLFRR74YCoSa8jeg. @ http://127.0.0.1:5891/_framework/blazor.web.js:1

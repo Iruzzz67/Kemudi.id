@@ -29,3 +29,6 @@ crashlytics-build.properties
 *.pem
 .env*
 .vscode/launch.json
+
+# Disposable local realism QA database (never commit accounts/session data).
+artifacts/realism/preview.db*

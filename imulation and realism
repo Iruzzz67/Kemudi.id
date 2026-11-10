@@ -1,0 +1,49 @@
+ .gitignore                                         |     3 [32m+[m
+ AGENTS.md                                          |    10 [32m+[m
+ CAKUPAN_PROJECT.md                                 |   124 [31m-[m
+ CLAUDE.md                                          |     1 [31m-[m
+ README.md                                          |   213 [32m+[m
+ ...EALISME_SIMULASI_KEMUDI_ID_MULTI_AGENT_CODEX.md |   782 [31m-[m
+ api-5078.stderr.log                                |     0
+ api-5078.stdout.log                                |    52 [31m-[m
+ api-server.log                                     |    59 [31m-[m
+ artifacts/backend-integration/failure.png          |   Bin [31m17576[m -> [32m145636[m bytes
+ artifacts/backend-integration/report.json          |   792 [32m+[m[31m-[m
+ artifacts/realism/browser-report-2026-11-04.json   |  4852 [32m++[m
+ artifacts/realism/browser-report.json              |  1116 [32m+[m[31m-[m
+ artifacts/realism/dotnet-build-2026-11-04.log      |    56 [32m+[m
+ artifacts/realism/iframe-preview.png               |   Bin [31m0[m -> [32m179664[m bytes
+ artifacts/realism/iframe-report.json               |   793 [32m+[m
+ artifacts/realism/mobil-cockpit-day.png            |   Bin [31m173268[m -> [32m172872[m bytes
+ artifacts/realism/motor-cockpit-day.png            |   Bin [31m0[m -> [32m167155[m bytes
+ artifacts/realism/night-heavy-rain-cockpit.png     |   Bin [31m142412[m -> [32m144108[m bytes
+ artifacts/realism/night-heavy-rain-stability.png   |   Bin [31m0[m -> [32m183603[m bytes
+ artifacts/realism/stability-report-2026-11-04.json |  1598 [32m+[m
+ artifacts/realism/stability-samples.json           | 45036 [32m+++++++++++++++++++[m
+ artifacts/realism/truk-cockpit-day.png             |   Bin [31m0[m -> [32m184662[m bytes
+ build-pc.log                                       |  4650 [31m--[m
+ build-webgl-2022.log                               |  4416 [31m--[m
+ build-webgl-final.log                              |  4231 [31m--[m
+ build-webgl-live.log                               |  1135 [31m-[m
+ build-webgl.log                                    |   420 [31m-[m
+ debug.log                                          |   125 [31m-[m
+ docs/REALISM_INTEGRATION_CONTRACT.md               |    19 [32m+[m
+ docs/REALISM_PROGRESS.md                           |    45 [32m+[m
+ docs/REALISM_QA_REPORT.md                          |    24 [32m+[m
+ docs/REALISM_SESSION_LOG.md                        |    65 [32m+[m
+ src/Kemudi.Web/wwwroot/simulation-3d/index.html    |     1 [32m+[m
+ src/Kemudi.Web/wwwroot/simulation-3d/main.js       |     7 [32m+[m[31m-[m
+ .../simulation-3d/systems/collision-system.js      |    25 [32m+[m[31m-[m
+ .../simulation-3d/systems/traffic-routes.js        |    23 [32m+[m[31m-[m
+ .../simulation-3d/systems/traffic-system.js        |    21 [32m+[m[31m-[m
+ tools/webgl/backend-smoke.cjs                      |    43 [32m+[m[31m-[m
+ tools/webgl/debug.log                              |    12 [32m+[m
+ tools/webgl/package.json                           |     5 [32m+[m[31m-[m
+ tools/webgl/realism-browser.cjs                    |    11 [32m+[m[31m-[m
+ tools/webgl/realism-collision.cjs                  |    16 [32m+[m
+ tools/webgl/realism-iframe.cjs                     |    41 [32m+[m
+ tools/webgl/realism-traffic.cjs                    |    72 [32m+[m[31m-[m
+ web-5260.stderr.log                                |     0
+ web-5260.stdout.log                                |    50 [31m-[m
+ web-server.log                                     |    69 [31m-[m
+ 48 files changed, 54716 insertions(+), 16297 deletions(-)

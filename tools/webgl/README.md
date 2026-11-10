@@ -70,6 +70,83 @@ melihat hasil sesi. Hindari bangunan/pagar serta batas lingkungan.
 
 ## Build dan pengujian
 
+### Controller / gamepad standard
+
+Dukungan gamepad dipasang pada runtime browser yang sama, tanpa Unity atau
+endpoint input. Hubungkan USB/Bluetooth, fokuskan simulator, lalu tekan dan
+lepaskan tombol controller untuk discovery. Tekan **A/Cross** lagi untuk masuk.
+Jika lebih dari satu controller terhubung, pilih perangkat lewat **Controller /
+Aksi**. Perangkat dengan mapping nonstandard ditolak secara jelas, bukan ditebak.
+
+| Kontrol standard | Fungsi |
+| --- | --- |
+| Stick kiri | Setir analog; vertikal untuk berjalan saat di luar kendaraan |
+| Stick kanan | Saat di kendaraan: aktifkan first-person dan tengok kiri/kanan/atas/bawah |
+| RT/R2 · LT/L2 | Gas · rem analog; rem diprioritaskan jika keduanya aktif |
+| A/Cross | Interaksi / konfirmasi menu |
+| B/Circle | Klakson tahan saat driving / kembali di menu |
+| X/Square · Y/Triangle | Mesin · kamera |
+| LB/L1 · RB/R1 | Sein kiri · kanan |
+| D-pad atas · bawah | Lampu utama · rem tangan |
+| D-pad kiri · kanan (otomatis) | Reverse · Drive, hanya berhenti + tahan LT |
+| L3 + D-pad kiri/kanan (manual) | Tahan kopling + turun/naik gigi |
+| R3 | Hazard |
+| Menu/Options | Pause/resume |
+| View/Share | Aksi kendaraan, perlengkapan, settings dan mapping |
+
+Menu aksi mem-pause simulasi; D-pad memilih, A mengonfirmasi, B kembali. Mobil/
+truk memiliki sabuk; motor memiliki helm, jaket, sarung tangan dan sepatu.
+Deadzone, sensitivitas, kurva, remap, device aktif, bantuan kopling dan reset
+dapat diatur di dialog. Bantuan kopling default OFF dan bukan manual penuh.
+
+Bagian **Handling & setir / stang** memiliki preset **Ringan / Normal / Berat**
+dan berat 0–100 (default 50). Nilai kecil membuat respons belok lebih cepat,
+nilai besar lebih lambat/berat; sudut maksimum dan pembatas belok pada kecepatan
+tinggi tetap sama. **Kembali ke tengah** 0,5–2× mengatur kecepatan pemusatan.
+Preset berat tidak menghapus nilai kembali ke tengah yang sudah disetel.
+Ini respons simulasi untuk keyboard/gamepad, bukan force feedback fisik.
+Pengaturan tersimpan di browser dan ikut dipakai kendaraan berikutnya; reset
+default mengembalikan berat 50 dan pemusatan 1×. Saat menutup menu, netralkan
+stick/trigger lalu beri input baru agar kontrol aktif lagi.
+
+Analog kanan berhenti menggerakkan pandangan ketika dilepas, tanpa otomatis
+kembali ke tengah. Batas tengok horizontal100 derajat/vertikal55 derajat.
+Y/Triangle atau C tetap mengganti mode kamera sekaligus mereset arah pandang;
+lepaskan lalu gerakkan analog kanan lagi untuk kembali ke first-person.
+Preferensi disimpan lokal dengan schema tervalidasi; penyimpanan browser yang
+diblokir tidak membuat simulator crash. Mapping aksi boleh diubah, sedangkan
+navigasi menu tetap D-pad/A/B agar tidak kehilangan akses ke pengaturan.
+
+Disconnect, blur, tab hidden dan pause mengosongkan input. Resume memerlukan
+kontrol netral **lalu input baru**; trigger lama tidak boleh langsung memberi gas.
+Manual: setelah netral, tahan L3 kembali sebelum mengoperasikan gigi/bergerak.
+Jika controller error, resume dengan sengaja dan gunakan keyboard, atau matikan
+controller di settings. Bila API diblokir browser, gunakan localhost/HTTPS dan
+periksa kebijakan embedding; jangan melonggarkan keamanan semua origin.
+
+Verifikasi otomatis memakai gamepad sintetis, **bukan controller USB/Bluetooth
+nyata**. Belum ada model perangkat fisik yang dinyatakan lulus. Lihat
+[`GAMEPAD_QA.md`](../../docs/GAMEPAD_QA.md) dan checklist hardware di dalamnya.
+
+```powershell
+npm.cmd --prefix tools/webgl run test:gamepad
+# Server port8080 aktif; WEB_URL opsional untuk website iframe:
+$env:WEB_URL = 'http://127.0.0.1:5891'
+npm.cmd --prefix tools/webgl run test:gamepad:browser
+# Fokus kamera analog kanan (hapus filter untuk enam kombinasi):
+$env:GAMEPAD_LOOK_CASE = 'MOBIL/automatic'
+npm.cmd --prefix tools/webgl run test:gamepad:look
+Remove-Item Env:GAMEPAD_LOOK_CASE
+# Unit handling dan browser settings (server tetap aktif untuk browser):
+npm.cmd --prefix tools/webgl run test:handling
+npm.cmd --prefix tools/webgl run test:handling:browser
+```
+
+Laporan/screenshot gamepad ada di `artifacts/gamepad/`. Keyboard tetap tersedia;
+pergantian sumber mengikuti aktivitas bermakna dan tidak mencampur gas/setir
+dari dua perangkat. Jika gamepad belum terlihat, tekan tombol saat iframe fokus,
+periksa driver/browser serta `standard mapping`, lalu pilih device yang tepat.
+
 Revisi aset dan hasil pemeriksaan terbaru dicatat di
 [`LAPORAN_PERBAIKAN_SIMULASI.md`](../../LAPORAN_PERBAIKAN_SIMULASI.md).
 Build memeriksa hash paket `models/city/manifest.json` sebelum menyalin aset.

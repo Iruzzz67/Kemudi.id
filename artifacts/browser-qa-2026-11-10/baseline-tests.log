@@ -1,0 +1,99 @@
+﻿Baseline start: 2026-11-10T14:49:36.7466885+07:00
+Scope: non-browser syntax/functions/realism; no runtime or test edits.
+
+COMMAND: npm.cmd --prefix tools/webgl run test:syntax
+npm.cmd : npm notice run test:syntax
+At line:2 char:480
++ ... og -Append; npm.cmd --prefix tools/webgl run test:syntax 2>&1 | Tee-O ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm notice run test:syntax:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm notice run node syntax.cjs
+PASS 60 authored JavaScript files parse
+EXIT_CODE: 0
+
+COMMAND: npm.cmd --prefix tools/webgl run test:realism
+npm.cmd : npm notice run test:realism
+At line:2 char:740
++ ... og -Append; npm.cmd --prefix tools/webgl run test:realism 2>&1 | Tee- ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm notice run test:realism:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm notice run node realism-state.cjs && node realism-collision.cjs && node realism-environment.cjs && node 
+realism-lights.cjs && node realism-visual.cjs && node realism-traffic.cjs && node realism-lod.cjs
+PASS shared registry/clock, committed instruments, reverse/zero/nonfinite, input repeat/form/blur/cleanup
+PASS mixed shapes stop before stationary player at 15/30/60 FPS and frame spike
+PASS simultaneous head-on and swap cannot tunnel; proposal order does not matter
+PASS reverse and crossing traffic are constrained by the same world
+PASS contact propagation stops a three-actor queue against a static barrier
+PASS rotation sweeps are conservative and a clear rotation succeeds
+PASS steering away near a wall clears the conservative rotation envelope without tunneling
+PASS static wall sweep, spawn validation, release and vertical clearance
+PASS lead obstacle uses bumper gaps, includes stopped engine-off player and ignores neighbouring lane
+PASS a contact can reverse away; non-finite proposals never poison transforms
+PASS motion planning defers pose and visuals; commit uses actual travel and contact speed
+PASS deferred engine cranking counts simulation time, not paused wall time
+Collision realism: 11 groups passed
+PASS pagi off
+PASS pagi light
+PASS pagi heavy
+PASS siang off
+PASS siang light
+PASS siang heavy
+PASS sore off
+PASS sore light
+PASS sore heavy
+PASS malam off
+PASS malam light
+PASS malam heavy
+PASS wet road isolation, invalid presets, pooled rain, cabin exclusion, pause and idempotent cleanup
+PASS player lights MOTOR
+PASS player lights MOBIL
+PASS player lights TRUK
+PASS AI auto lights, braking, bounded illumination and cleanup
+PASS bounded per-type horns, cooldown/mute/autoplay/pause, pooled skid and cleanup
+PASS procedural visual contracts: 7 role/type cases; pause, camera restore, shared snapshot, texture reuse, disposal
+PASS turn adapters follow existing inbound/outbound lanes with smooth pre-turn intent
+PASS green turn clears while perpendicular red queue remains behind its stop line
+PASS routes use both real intersections and the continuous long-road lanes
+PASS actual three Vehicle classes register safely, and old demo agents are removed once
+PASS all vehicle types indicate before/during turns, obey red, and cancel after exit
+PASS reset does not spawn over the registered player at the intersection demo
+PASS three mixed AI queue behind an engine-off player and resume for 20 stop-go cycles
+PASS red signal stops before front bumper line, green releases without deadlock
+PASS heavy rain lowers cruise speed and enlarges following margins
+PASS pedestrians request real zebra crossings, wait for occupied road and walk without teleporting
+PASS AI yields to a requested crossing then resumes when it clears
+PASS a new crossing request lets an already-entered vehicle clear before the walker enters
+PASS route ends stop safely instead of recycling visibly, and pause/invalid dt do not move actors
+PASS 15/30/60 FPS mixed queues retain consistent stopped poses without overlap
+SIMULATION {"seconds":120,"crossingTicks":5233,"movingTicks":7198,"completedTurns":["traffic:5","traffic:7","traffic:13","traffic:15"],"advances":[129.64,136.84,247.67,234.47,75.44,90.05,76.64,75.47,192.41,199.81,74.44,77.56,76.64,70.18,74.53,58.85]}
+PASS bounded real static world, both signal controllers and walkers remains safe and live
+{"passed":true,"groups":15}
+PASS traffic render LOD: 3 silhouettes (18 proxy drawables total), <=4 shared geometries/10 materials, hysteresis, inactivity, player exclusion, restoration and idempotent disposal
+EXIT_CODE: 0
+
+HARNESS NOTE: An attempted concurrent log append failed with file-lock IOException while realism held Tee-Object; no product failure. Functions verification rerun sequentially below.
+COMMAND: node -e (in-memory report-write redirect) tools/webgl/functions.cjs
+NOTE: Same assertions executed unchanged; report fs.writeFileSync redirected to stdout to preserve prior artifacts/webgl/functions-report.json.
+PASS Blender source matches exported package provenance
+PASS training map traffic signals: initial state, order and full cycle
+PASS manual requires clutch, shifts, stalls and restarts
+PASS handbrake prevents acceleration, off-road limits speed, steering returns
+PASS motor safety and seat limits
+PASS city colliders, road boundaries and finish direction
+FUNCTIONS_REPORT {
+  "passed": true,
+  "checks": [
+    "Blender source matches exported package provenance",
+    "training map traffic signals: initial state, order and full cycle",
+    "manual requires clutch, shifts, stalls and restarts",
+    "handbrake prevents acceleration, off-road limits speed, steering returns",
+    "motor safety and seat limits",
+    "city colliders, road boundaries and finish direction"
+  ]
+}
+EXIT_CODE: 0
+Baseline completed: 2026-11-10T14:51:28.4884481+07:00

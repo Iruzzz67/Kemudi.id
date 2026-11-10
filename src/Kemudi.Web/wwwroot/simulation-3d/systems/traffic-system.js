@@ -21,6 +21,8 @@
           vehicle.id = 'traffic:' + index++; vehicle.group.visible = false; vehicle.active = false;
           vehicle.junction = junction; vehicle.approach = approach;
           vehicle.route = this.routes.byApproach.get(junction.definition.config.id + ':' + approach.id);
+          if (laneIndex === 1 && (approach.id === 'E' || approach.id === 'W'))
+            vehicle.route = this.routes.turns.get(junction.definition.config.id + ':' + approach.id + ':' + (approach.id === 'E' ? 'right' : 'left'));
           vehicle.spawnProgress = vehicle.route.project(junction.definition.point(approach, -22 - laneIndex * 14));
           vehicle.routeProgress = vehicle.spawnProgress; vehicle.yellowDecisions = new Map();
           vehicle.blockedTimer = 0; vehicle.hornCooldown = 0;
@@ -96,6 +98,16 @@
           if (other === vehicle || other.active === false) return false;
           const rel = other.position.clone().sub(d.center);
           const direction = other.getForwardDirection();
+          const inJunction = Math.abs(rel.x) < d.stopDistance + other.config.dimensions.length / 2
+            && Math.abs(rel.z) < d.stopDistance + other.config.dimensions.length / 2;
+          // Turning movements yield to occupied/conflicting approaches, even when
+          // opposing heads share green. Deterministic priority prevents two turns
+          // claiming an empty junction on the same tick.
+          if (vehicle.route.turn && inJunction) return true;
+          if (vehicle.route.turn && other.junction === gate.junction && other.approach !== vehicle.approach
+            && other.position.distanceTo(d.center) < 22
+            && gate.junction.controller.current.colors[other.approach.id] !== 'RED'
+            && (!other.route?.turn || other.id < vehicle.id)) return true;
           return Math.abs(direction.dot(gate.approach.forward)) < .6
             && Math.abs(rel.x) < d.config.laneWidth + other.config.dimensions.length / 2
             && Math.abs(rel.z) < d.config.laneWidth + other.config.dimensions.length / 2;
@@ -140,6 +152,8 @@
         const braking = Math.max(2, Math.min(4.5, vehicle.config.braking * .5)) * grip;
         const acceleration = vehicle.type === 'TRUK' ? 1.1 : vehicle.type === 'MOTOR' ? 2 : 1.7;
         let target = CRUISE[vehicle.type] * weatherSpeed, reason = 'CRUISE';
+        if (vehicle.route.turn && vehicle.routeProgress >= vehicle.route.turn.start - 15
+          && vehicle.routeProgress <= vehicle.route.turn.end + length / 2) target = Math.min(target, 2.5 * weatherSpeed);
         const baseGap = BASE_GAP[vehicle.type] * (1 + (1 - grip));
         const headway = HEADWAY[vehicle.type] * (1 + 2 * (1 - grip));
         const lead = this.world.getLeadObstacle(vehicle.id, Math.max(50, oldSpeed * headway + 30));
@@ -190,7 +204,12 @@
         if (vehicle.blockedTimer > 6 && vehicle.hornCooldown === 0) {
           vehicle.hornRequested = true; vehicle.hornCooldown = 20; vehicle.blockedTimer = 0;
         }
-        vehicle.signalTime += dt; vehicle.signalLeft = false; vehicle.signalRight = false;
+        const turn = vehicle.route.turn;
+        const indicating = turn && vehicle.routeProgress >= turn.start - 20
+          && vehicle.routeProgress <= turn.end + vehicle.config.dimensions.length / 2;
+        vehicle.signalTime += dt;
+        vehicle.signalLeft = !!indicating && turn.direction === 'left';
+        vehicle.signalRight = !!indicating && turn.direction === 'right';
         vehicle._updateAutomaticTransmission(); vehicle._updateRPM({ forward: decision.target > 0 });
         const speed = vehicle.speed;
         vehicle.speed = Math.max(0, result.travelSpeed); vehicle._updateMeshPosition(dt); vehicle.speed = speed;

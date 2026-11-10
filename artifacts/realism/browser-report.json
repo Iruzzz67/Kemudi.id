@@ -1,5 +1,5 @@
 {
-  "started": "2026-11-03T09:43:28.691Z",
+  "started": "2026-11-04T09:01:06.549Z",
   "passed": true,
   "cases": [
     {
@@ -23,10 +23,32 @@
         "map": "unified",
         "vehicle": "MOBIL",
         "loaded": true,
+        "equipment": {
+          "seatbelt": true,
+          "helmet": false,
+          "jacket": false,
+          "gloves": false,
+          "shoes": false
+        },
+        "gamepad": {
+          "source": "keyboard",
+          "status": "disconnected",
+          "neutralGate": false,
+          "continuous": {
+            "throttle": 0,
+            "brakeAmount": 0,
+            "parkingBrake": false,
+            "steer": 0,
+            "clutch": false,
+            "horn": false,
+            "walk": 0
+          },
+          "menuOpen": false
+        },
         "intersection": {
           "id": "cedar-junction",
-          "phase": "NS_GREEN",
-          "elapsed": 15.25000000000034,
+          "phase": "NS_YELLOW",
+          "elapsed": 2.249999999999861,
           "geometry": {
             "center": [
               0,
@@ -38,8 +60,8 @@
             "crosswalkDistance": 6
           },
           "colors": {
-            "N": "GREEN",
-            "S": "GREEN",
+            "N": "YELLOW",
+            "S": "YELLOW",
             "E": "RED",
             "W": "RED"
           },
@@ -74,8 +96,8 @@
         "intersections": [
           {
             "id": "cedar-junction",
-            "phase": "NS_GREEN",
-            "elapsed": 15.25000000000034,
+            "phase": "NS_YELLOW",
+            "elapsed": 2.249999999999861,
             "geometry": {
               "center": [
                 0,
@@ -87,8 +109,8 @@
               "crosswalkDistance": 6
             },
             "colors": {
-              "N": "GREEN",
-              "S": "GREEN",
+              "N": "YELLOW",
+              "S": "YELLOW",
               "E": "RED",
               "W": "RED"
             },
@@ -122,8 +144,8 @@
           },
           {
             "id": "training-junction",
-            "phase": "NS_GREEN",
-            "elapsed": 15.25000000000034,
+            "phase": "NS_YELLOW",
+            "elapsed": 2.249999999999861,
             "geometry": {
               "center": [
                 0,
@@ -135,8 +157,8 @@
               "crosswalkDistance": 6
             },
             "colors": {
-              "N": "GREEN",
-              "S": "GREEN",
+              "N": "YELLOW",
+              "S": "YELLOW",
               "E": "RED",
               "W": "RED"
             },
@@ -172,10 +194,17 @@
         "position": [
           -1.75,
           0.09,
-          22.013869766242205
+          23.369739379744086
         ],
         "speed": 0,
         "gear": -1,
+        "rotation": 0,
+        "steerAngle": 0,
+        "navigationTarget": [
+          -1.75,
+          0.09,
+          17.369739379744086
+        ],
         "engine": true,
         "handbrake": false,
         "seatAdjusted": true,
@@ -215,28 +244,28 @@
         "wheels": [
           {
             "name": "Car_Wheel_FL",
-            "spin": -5.367919550696742,
+            "spin": -1.703407081772742,
             "steer": 0
           },
           {
             "name": "Car_Wheel_FR",
-            "spin": -5.367919550696742,
+            "spin": -1.703407081772742,
             "steer": 0
           },
           {
             "name": "Car_Wheel_RL",
-            "spin": -5.367919550696742,
+            "spin": -1.703407081772742,
             "steer": 0
           },
           {
             "name": "Car_Wheel_RR",
-            "spin": -5.367919550696742,
+            "spin": -1.703407081772742,
             "steer": 0
           }
         ],
         "clock": {
-          "elapsed": 16.25,
-          "tick": 975,
+          "elapsed": 28.25,
+          "tick": 1695,
           "fixedDt": 0.016666666666666666
         },
         "environment": {
@@ -287,12 +316,12 @@
             "position": [
               1.75,
               0.09,
-              -86.95000000031558
+              17.61594999967696
             ],
             "rotation": -3.141592653589793,
-            "speed": 0,
-            "braking": true,
-            "reason": "YIELD_PEDESTRIAN",
+            "speed": 3.8999999999998636,
+            "braking": false,
+            "reason": "CRUISE",
             "lights": {
               "lowBeam": true,
               "highBeam": false,
@@ -300,7 +329,7 @@
               "right": false,
               "hazard": false,
               "blink": true,
-              "brake": true,
+              "brake": false,
               "reverse": false
             }
           },
@@ -313,12 +342,12 @@
             "position": [
               1.75,
               0.09,
-              -93.7254919647652
+              -46.93912818818147
             ],
             "rotation": -3.141592653589793,
-            "speed": 0,
-            "braking": true,
-            "reason": "FOLLOW",
+            "speed": 3.8999999999998636,
+            "braking": false,
+            "reason": "CRUISE",
             "lights": {
               "lowBeam": true,
               "highBeam": false,
@@ -326,7 +355,7 @@
               "right": false,
               "hazard": false,
               "blink": true,
-              "brake": true,
+              "brake": false,
               "reverse": false
             }
           },
@@ -335,16 +364,16 @@
             "type": "TRUK",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               -1.75,
               0.09,
-              -75.30947011281152
+              -114.52214752051799
             ],
             "rotation": 0,
-            "speed": 0,
-            "braking": true,
-            "reason": "YIELD_PEDESTRIAN",
+            "speed": 3.11999999999955,
+            "braking": false,
+            "reason": "CRUISE",
             "lights": {
               "lowBeam": true,
               "highBeam": false,
@@ -352,7 +381,7 @@
               "right": false,
               "hazard": false,
               "blink": true,
-              "brake": true,
+              "brake": false,
               "reverse": false
             }
           },
@@ -361,15 +390,15 @@
             "type": "MOTOR",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               -1.75,
               0.09,
-              -69.64500000000001
+              -108.06843638151886
             ],
             "rotation": 0,
-            "speed": 0,
-            "braking": true,
+            "speed": 3.1204537254347997,
+            "braking": false,
             "reason": "FOLLOW",
             "lights": {
               "lowBeam": true,
@@ -378,7 +407,7 @@
               "right": false,
               "hazard": false,
               "blink": true,
-              "brake": true,
+              "brake": false,
               "reverse": false
             }
           },
@@ -396,7 +425,7 @@
             "rotation": 1.5707963267948966,
             "speed": 0,
             "braking": true,
-            "reason": "RED_LIGHT",
+            "reason": "YIELD_PEDESTRIAN",
             "lights": {
               "lowBeam": true,
               "highBeam": false,
@@ -415,7 +444,7 @@
             "loaded": true,
             "groupVisible": true,
             "position": [
-              22.08991598121998,
+              21.989071278780187,
               0.09,
               -78.25
             ],
@@ -427,7 +456,7 @@
               "lowBeam": true,
               "highBeam": false,
               "left": false,
-              "right": false,
+              "right": true,
               "hazard": false,
               "blink": true,
               "brake": true,
@@ -467,7 +496,7 @@
             "loaded": true,
             "groupVisible": true,
             "position": [
-              -16.954867768517353,
+              -16.867300198297748,
               0.09,
               -81.75
             ],
@@ -478,7 +507,7 @@
             "lights": {
               "lowBeam": true,
               "highBeam": false,
-              "left": false,
+              "left": true,
               "right": false,
               "hazard": false,
               "blink": true,
@@ -491,14 +520,14 @@
             "type": "TRUK",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
-              1.75,
+              1.961913765573313,
               0.09,
-              -367.580025000535
+              -336.0412426555993
             ],
-            "rotation": -3.141592653589793,
-            "speed": 3.1199999999978445,
+            "rotation": -3.0569036888021586,
+            "speed": 1.6500518398738173,
             "braking": false,
             "reason": "CRUISE",
             "lights": {
@@ -517,14 +546,14 @@
             "type": "MOTOR",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               1.75,
               0.09,
-              -373.87703202184537
+              -342.3029062787473
             ],
             "rotation": -3.141592653589793,
-            "speed": 3.119999999994434,
+            "speed": 1.6290890534378377,
             "braking": false,
             "reason": "FOLLOW",
             "lights": {
@@ -543,14 +572,40 @@
             "type": "MOBIL",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               -1.75,
               0.09,
-              -448.17767222267344
+              -452.44225582709447
             ],
             "rotation": 0,
-            "speed": 3.8999999999998636,
+            "speed": 0,
+            "braking": true,
+            "reason": "ROUTE_END",
+            "lights": {
+              "lowBeam": true,
+              "highBeam": false,
+              "left": false,
+              "right": false,
+              "hazard": false,
+              "blink": true,
+              "brake": true,
+              "reverse": false
+            }
+          },
+          {
+            "id": "traffic:11",
+            "type": "TRUK",
+            "active": true,
+            "loaded": true,
+            "groupVisible": false,
+            "position": [
+              -1.75,
+              0.09,
+              -428.7302499998128
+            ],
+            "rotation": 0,
+            "speed": 3.120000000001255,
             "braking": false,
             "reason": "CRUISE",
             "lights": {
@@ -565,37 +620,11 @@
             }
           },
           {
-            "id": "traffic:11",
-            "type": "TRUK",
-            "active": true,
-            "loaded": true,
-            "groupVisible": true,
-            "position": [
-              -1.75,
-              0.09,
-              -400.2345281765401
-            ],
-            "rotation": 0,
-            "speed": 0,
-            "braking": true,
-            "reason": "YIELD_PEDESTRIAN",
-            "lights": {
-              "lowBeam": true,
-              "highBeam": false,
-              "left": false,
-              "right": false,
-              "hazard": false,
-              "blink": true,
-              "brake": true,
-              "reverse": false
-            }
-          },
-          {
             "id": "traffic:12",
             "type": "MOTOR",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               10.388246888412965,
               0.09,
@@ -621,9 +650,9 @@
             "type": "MOBIL",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
-              16.954867768517353,
+              16.867300198297748,
               0.09,
               -398.25
             ],
@@ -635,7 +664,7 @@
               "lowBeam": true,
               "highBeam": false,
               "left": false,
-              "right": false,
+              "right": true,
               "hazard": false,
               "blink": true,
               "brake": true,
@@ -647,7 +676,7 @@
             "type": "TRUK",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
               -12.491252750065499,
               0.09,
@@ -673,9 +702,9 @@
             "type": "MOTOR",
             "active": true,
             "loaded": true,
-            "groupVisible": true,
+            "groupVisible": false,
             "position": [
-              -18.755033550666212,
+              -18.755033550666276,
               0.09,
               -401.75
             ],
@@ -686,7 +715,7 @@
             "lights": {
               "lowBeam": true,
               "highBeam": false,
-              "left": false,
+              "left": true,
               "right": false,
               "hazard": false,
               "blink": true,
@@ -699,34 +728,34 @@
           {
             "id": "pedestrian:0",
             "position": [
-              4.3,
+              0.7600000000000744,
               0.09,
               -86
             ],
-            "crossing": false
+            "crossing": true
           },
           {
             "id": "pedestrian:1",
             "position": [
-              -4.3,
+              -2.424000000000061,
               0.09,
               -74
             ],
-            "crossing": false
+            "crossing": true
           },
           {
             "id": "pedestrian:2",
             "position": [
               6,
               0.09,
-              -84.3
+              -77.81549999999999
             ],
-            "crossing": false
+            "crossing": true
           },
           {
             "id": "pedestrian:3",
             "position": [
-              -1.3541666666666519,
+              -3.092499999999913,
               0.09,
               -406
             ],
@@ -735,25 +764,33 @@
           {
             "id": "pedestrian:4",
             "position": [
-              1.7475000000000163,
+              4.299999999999958,
               0.09,
               -394
             ],
-            "crossing": true
+            "crossing": false
           },
           {
             "id": "pedestrian:5",
             "position": [
               6,
               0.09,
-              -399.782833333336
+              -404.3
             ],
-            "crossing": true
+            "crossing": false
           }
         ],
         "resources": {
-          "geometries": 2269,
+          "geometries": 678,
           "textures": 3
+        },
+        "trafficLOD": {
+          "registered": 16,
+          "near": 1,
+          "proxy": 5,
+          "culled": 10,
+          "sharedGeometries": 3,
+          "sharedMaterials": 8
         },
         "characters": {
           "count": 17,
@@ -782,11 +819,12 @@
         "exteriorVisible": false,
         "audio": {
           "state": "running",
-          "activeHornVoices": 0
+          "activeHornVoices": 0,
+          "lastPlayerHorn": 15.516666666666666
         },
-        "drawCalls": 2134,
-        "triangles": 322498,
-        "elapsed": 15.333333333333675
+        "drawCalls": 589,
+        "triangles": 105328,
+        "elapsed": 20.33333333333346
       }
     }
   ],
@@ -806,5 +844,6 @@
   "gaps": [
     "Website iframe smoke not requested: set WEB_URL to a local website"
   ],
-  "finished": "2026-11-03T09:51:54.470Z"
+  "updatedAt": "2026-11-04T09:15:36.207Z",
+  "finished": "2026-11-04T09:15:36.207Z"
 }

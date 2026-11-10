@@ -2,6 +2,8 @@
   "passed": true,
   "checks": [
     "two safe junctions in one world; pedestrian crossings disabled",
+    "all actual vehicle footprints cross the housing/north-road join in both lanes and directions",
+    "external edges and uncovered seam corners remain blocked for the full truck footprint",
     "continuous aligned seams, left/right lanes and truck clearance across full curved road",
     "road and pavement face upward",
     "finish moved beyond second junction",

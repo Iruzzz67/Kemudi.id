@@ -7,7 +7,7 @@
       this.group=null;this.mode='TPV';this.texture=null;this.lastDisplay='';
       this.originalNear=camera.near;this.originalVisibility=null;this.instrumentSnapshot=null;
       this._appliedMode=null;
-      this._look=new THREE.Vector3();this._up=new THREE.Vector3(0,1,0);
+      this._look=new THREE.Vector3();this._up=new THREE.Vector3(0,1,0);this._right=new THREE.Vector3();
     }
     attachToVehicle(vehicle,characterHandle) {
       this._detach();this.vehicle=vehicle;this.character=characterHandle||null;
@@ -87,7 +87,7 @@
       }
       this.camera.updateProjectionMatrix();
     }
-    update(dt,vehicle,instruments) {
+    update(dt,vehicle,instruments,look={}) {
       if(!this.group||vehicle!==this.vehicle)return;
       this.instrumentSnapshot=instruments||this.instrumentSnapshot;
       this.group.position.y=vehicle.config.dimensions.height*vehicle.config.driverEyeRatio+(vehicle.seatHeight||0);
@@ -99,7 +99,12 @@
         this.camera.position.copy(vehicle.getDriverSeatPosition());
         this._look.copy(vehicle.getForwardDirection());
         if(vehicle.mirrorYaw>0)this._look.applyAxisAngle(this._up,Math.PI*.75*Math.sin(Math.PI*vehicle.mirrorYaw/1.1));
+        const yaw=Number.isFinite(look.yaw)?THREE.MathUtils.clamp(look.yaw,-Math.PI*5/9,Math.PI*5/9):0;
+        const pitch=Number.isFinite(look.pitch)?THREE.MathUtils.clamp(look.pitch,-Math.PI*11/36,Math.PI*11/36):0;
+        this._look.applyAxisAngle(this._up,yaw);
         this._look.multiplyScalar(10);this._look.y-=vehicle.type==='MOTOR'?.4:.55;
+        this._right.crossVectors(this._look,this._up).normalize();
+        this._look.applyAxisAngle(this._right,pitch);
         this._look.add(this.camera.position);this.camera.lookAt(this._look);
       }
       const s=this.instrumentSnapshot;

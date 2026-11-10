@@ -30,4 +30,23 @@ A0 exclusive: main.js, controls.js, screens.js, index.html, build.cjs/package.js
 
 ## Verification/release
 
+Turn-route extension (2026-11-04): `TrafficRoutes.build().turns` maps
+`junctionId:approachId:left|right` to RoutePath with `.turn = {direction,start,end}`.
+Incoming stop gates stay authoritative. Trailing E/W runtime actors select right/
+left respectively; straight/spine actors stay unchanged. Commit publishes indicator
+intent before/during the curve, cancelling after rear clearance. Turning entry
+yields to central occupancy regardless signal; near-approach priority only applies
+to permitted (non-RED) approaches. Never treat an outside red-held queue as a
+committed junction occupant. Full-world tests require all four turns to clear over
+120 simulation seconds with existing signals, pedestrian yielding and static bodies.
+
+2026-11-04 continuation: `TrafficVisualLOD` is loaded before main, constructed after
+traffic initialization and registered when AI character visuals are mounted. Player
+registration is excluded. Update runs once immediately before rendering, after
+camera/character updates, and only changes visual visibility. Never unregister
+collision bodies or skip planning for culled vehicles. `snapshot().trafficLOD`
+exposes registered/near/proxy/culled counts. Runtime traffic reset reuses actors;
+if future code replaces/disposes actors, unregister their LOD before disposal and
+register the replacement after visuals are ready.
+
 Build copies systems recursively and retains city hashes/wheel validation. Regression baseline + deterministic sweep/queue tests + browser 4×3 environment and 3 vehicle cockpit/light/horn checks. Website iframe/backend result tests separate from static. Report missing environment/benchmark/manual perceptual evidence as gaps, never PASS. No release declaration until all mandatory acceptance passes.

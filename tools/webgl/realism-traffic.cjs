@@ -64,6 +64,38 @@ function assertQueue(actors) {
   }
 }
 (async () => {
+  await check('turn adapters follow existing inbound/outbound lanes with smooth pre-turn intent', () => {
+    const f = fixture(), routes = TrafficRoutes.build(f.track);
+    for (const j of f.track.intersections) for (const a of j.definition.approaches) for (const turn of ['left', 'right']) {
+      const route = routes.turns.get(j.definition.config.id + ':' + a.id + ':' + turn);
+      assert.ok(route, 'missing ' + turn + ' route');
+      assert.ok(route.sample(0).position.distanceTo(j.definition.point(a, -a.armLength + 4)) < .001);
+      assert.ok(route.sample(0).forward.dot(a.forward) > .999);
+      assert.ok(route.sample(route.length).forward.dot(turn === 'left' ? a.left : a.left.clone().negate()) > .999);
+      for (let s = .5; s < route.length - .5; s += .25) {
+        const delta = route.sample(s).rotation - route.sample(s - .25).rotation;
+        assert.ok(Math.abs(Math.atan2(Math.sin(delta), Math.cos(delta))) < .3, 'no instant heading jump');
+      }
+    }
+  });
+  await check('green turn clears while perpendicular red queue remains behind its stop line', async () => {
+    const f = fixture(); await f.traffic.init();
+    const v = f.traffic.getVehicles().find(v => v.route.turn?.direction === 'right');
+    const blocker = f.traffic.getVehicles().find(o => o.junction === v.junction && o.approach.id === 'N');
+    for (const o of f.traffic.getVehicles()) { f.world.unregisterBody(o.id); o.active = false; }
+    for (const o of [v, blocker]) { o.active = true; o.speed = 0; f.world.registerBody(o.id, o); }
+    const d = v.junction.definition;
+    blocker.routeProgress = blocker.route.project(d.point(blocker.approach, -d.stopDistance - d.config.buffer - blocker.config.dimensions.length / 2 - .2));
+    let pose = blocker.route.sample(blocker.routeProgress); blocker.position.copy(pose.position); blocker.rotation = pose.rotation;
+    v.routeProgress = v.route.turn.start - 18;
+    pose = v.route.sample(v.routeProgress); v.position.copy(pose.position); v.rotation = pose.rotation;
+    v.junction.controller = { current: { colors: { N: 'RED', S: 'RED', E: 'GREEN', W: 'GREEN' } } };
+    const before = blocker.position.clone();
+    for (let i = 0; i < 1000 && v.routeProgress <= v.route.turn.end + v.config.dimensions.length; i++) tick(f, 1 / 30);
+    assert.ok(blocker.position.distanceTo(before) < .25, 'red queue must remain stopped');
+    assert.ok(v.routeProgress > v.route.turn.end + v.config.dimensions.length / 2, 'red cross-road queue must not reserve green turn');
+    f.traffic.dispose();
+  });
   await check('routes use both real intersections and the continuous long-road lanes', () => {
     const f = fixture(), routes = TrafficRoutes.build(f.track);
     assert.equal(routes.routes.length, 6);
@@ -93,6 +125,36 @@ function assertQueue(actors) {
     assert.deepEqual(f.traffic.getVehicles().map(v => v.id), ids);
     assert.ok(f.traffic.getVehicles().every((v, i) => v === refs[i]));
     f.traffic.dispose(); assert.equal(f.world.bodies.size, 0); assert.equal(f.registry.getVehicles().length, 0);
+  });
+  await check('all vehicle types indicate before/during turns, obey red, and cancel after exit', async () => {
+    for (const type of ['MOTOR', 'MOBIL', 'TRUK']) for (const direction of ['left', 'right']) {
+      const f = fixture(); await f.traffic.init(); const [v] = isolate(f, [type]);
+      const city = JSON.parse(fs.readFileSync(path.join(source, 'models/city/colliders.json')));
+      city.colliders.forEach((c, i) => {
+        if (c.max[1] > .29 && c.max.every((value, axis) => value > c.min[axis]))
+          f.world.registerStaticBox('turn-static:' + i, new THREE.Vector3(...c.min), new THREE.Vector3(...c.max));
+      });
+      const junction = f.track.intersections[0], approach = junction.definition.approaches.find(a => a.id === 'E');
+      v.route = f.traffic.routes.turns.get(junction.definition.config.id + ':E:' + direction);
+      v.routeProgress = v.route.turn.start - 18;
+      const pose = v.route.sample(v.routeProgress); v.position.copy(pose.position); v.rotation = pose.rotation;
+      junction.controller = { current: { colors: { N: 'RED', S: 'RED', E: 'RED', W: 'RED' } } };
+      for (let i = 0; i < 240; i++) tick(f, 1 / 30);
+      assert.equal(v.speed, 0); assert.equal(v.stopReason, 'RED_LIGHT');
+      assert.equal(v.signalLeft, direction === 'left'); assert.equal(v.signalRight, direction === 'right');
+      const gate = v.route.gates[0]; assert.ok(v.routeProgress + v.config.dimensions.length / 2 <= gate.s + .05);
+      green(f); let seen = false;
+      for (let i = 0; i < 1000 && v.routeProgress < v.route.turn.end + 6; i++) {
+        const yaw = v.rotation; tick(f, 1 / 30);
+        assert.ok(Math.abs(Math.atan2(Math.sin(v.rotation - yaw), Math.cos(v.rotation - yaw))) < .12, 'bounded yaw per tick');
+        if (v.routeProgress > v.route.turn.start && v.routeProgress < v.route.turn.end) {
+          seen = true; assert.equal(direction === 'left' ? v.signalLeft : v.signalRight, true);
+        }
+      }
+      assert.ok(seen && v.routeProgress > v.route.turn.end + v.config.dimensions.length / 2, type + ' must clear turn');
+      assert.equal(v.signalLeft, false); assert.equal(v.signalRight, false);
+      f.traffic.dispose();
+    }
   });
   await check('reset does not spawn over the registered player at the intersection demo', async () => {
     const f = fixture(); await f.traffic.init();
@@ -233,7 +295,9 @@ function assertQueue(actors) {
     const pedestrians = new PedestrianSystem(f.scene, f.track, f.world); await f.traffic.init();
     const starts = f.traffic.getVehicles().map(v => v.routeProgress);
     let crossingTicks = 0, movingTicks = 0;
-    const frames = Number(process.env.REALISM_TRAFFIC_STEPS) || 1800;
+    // Two full signal cycles plus walker clearance: the first EW window can be
+    // consumed by leading straight vehicles and pedestrians before trailing turns.
+    const frames = Number(process.env.REALISM_TRAFFIC_STEPS) || 7200;
     for (let frame = 0; frame < frames; frame++) {
       f.track.intersections.forEach(j => j.controller.update(1 / 60));
       pedestrians.update(1 / 60, f.registry.getVehicles());
@@ -253,7 +317,13 @@ function assertQueue(actors) {
       actors: f.traffic.getVehicles().map((v, i) => ({ id: v.id, advance: v.routeProgress - starts[i], speed: v.speed, reason: v.stopReason })),
       walkers: pedestrians.getActiveAgents().map(p => ({ id: p.id, crossing: p.crossing, requesting: p.requesting, progress: p.progress, speed: p.speed })) }));
     assert.ok(f.traffic.getVehicles().filter((v, i) => v.routeProgress > starts[i] + 10).length >= (frames >= 3600 ? 12 : 6), 'traffic progresses through real signals');
+    const completedTurns = f.traffic.getVehicles().filter(v => v.route.turn
+      && v.routeProgress > v.route.turn.end + v.config.dimensions.length / 2);
+    if (frames >= 7200) assert.equal(completedTurns.length, f.traffic.getVehicles().filter(v => v.route.turn).length,
+      'all full-world turning traffic must actually clear a turn, not only approach: ' + JSON.stringify(
+      f.traffic.getVehicles().filter(v => v.route.turn).map(v => ({ id: v.id, progress: v.routeProgress, turn: v.route.turn, reason: v.stopReason, speed: v.speed }))));
     console.log('SIMULATION', JSON.stringify({ seconds: frames / 60, crossingTicks, movingTicks,
+      completedTurns: completedTurns.map(v => v.id),
       advances: f.traffic.getVehicles().map((v, i) => +(v.routeProgress - starts[i]).toFixed(2)) }));
     pedestrians.dispose(); f.traffic.dispose();
   });
