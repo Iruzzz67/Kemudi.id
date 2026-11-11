@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "author": "Kemudi.id project",
+  "provenance": "Original procedural geometry authored for this project; no third-party models or textures.",
+  "units": "metres",
+  "up": "+Y",
+  "forward": "-Z",
+  "assets": [
+    {
+      "type": "mobil",
+      "file": "mobil.glb",
+      "bytes": 1239716,
+      "sha256": "f452aa3d5a9dfade761836a5c51a4e674b011d7d14531925a52832e42a4aa48c",
+      "triangles": 16716,
+      "meshes": 32,
+      "bounds": {
+        "min": [
+          -1.0700000524520874,
+          7.152557379708213e-9,
+          -2.114000082015991
+        ],
+        "max": [
+          1.0700000524520874,
+          1.5075000524520874,
+          2.1050000190734863
+        ]
+      },
+      "animations": [
+        "Wheel_Roll",
+        "Drive_Forward"
+      ]
+    },
+    {
+      "type": "motor",
+      "file": "motor.glb",
+      "bytes": 538012,
+      "sha256": "df184a0a9944402c356b68521cf7562d90273818af61bdad9e1cb8641de8630c",
+      "triangles": 7196,
+      "meshes": 17,
+      "bounds": {
+        "min": [
+          -0.38499999046325684,
+          -1.1920928966180355e-8,
+          -1.025
+        ],
+        "max": [
+          0.38499999046325684,
+          1.337500023841858,
+          0.950000011920929
+        ]
+      },
+      "animations": [
+        "Wheel_Roll",
+        "Drive_Forward"
+      ]
+    },
+    {
+      "type": "truk",
+      "file": "truk.glb",
+      "bytes": 1569000,
+      "sha256": "9c3c67a57cc780870fa922ed36b5138b3110c6e6079b5aa1517e4a88e7f91928",
+      "triangles": 21158,
+      "meshes": 36,
+      "bounds": {
+        "min": [
+          -1.2799999713897705,
+          -7.152557379708213e-9,
+          -3.365000009536743
+        ],
+        "max": [
+          1.2799999713897705,
+          2.879999876022339,
+          3.25
+        ]
+      },
+      "animations": [
+        "Wheel_Roll",
+        "Drive_Forward"
+      ]
+    }
+  ]
+}
