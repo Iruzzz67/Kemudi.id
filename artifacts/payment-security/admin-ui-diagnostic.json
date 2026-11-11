@@ -1,0 +1,338 @@
+{
+  "events": [
+    "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+  ],
+  "snapshots": [
+    {
+      "stage": "before-click",
+      "buttonCount": 1,
+      "disabled": false,
+      "error": [],
+      "row": "11 Nov 2026, 15.34\tDiagnostic Cash 34432a\npayment-diagnostic-d4e8d334-6164-4d89-a754-76ae2d41f4ff@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-first-click",
+      "buttonCount": 1,
+      "disabled": false,
+      "error": [],
+      "row": "11 Nov 2026, 15.34\tDiagnostic Cash 34432a\npayment-diagnostic-d4e8d334-6164-4d89-a754-76ae2d41f4ff@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-second-click",
+      "buttonCount": 0,
+      "disabled": null,
+      "error": [],
+      "row": "11 Nov 2026, 15.34\tDiagnostic Cash 34432a\npayment-diagnostic-d4e8d334-6164-4d89-a754-76ae2d41f4ff@example.test\tBayar di Tempat\nReferensi: diagnostic-cash-receipt\tRp 350.000\tDikonfirmasi\t",
+      "payment": {
+        "status": "paid",
+        "paidAt": "2026-11-11T08:34:05.0375848"
+      },
+      "blazorError": false
+    }
+  ],
+  "clickTrace": [
+    {
+      "type": "pointerdown",
+      "target": "BUTTON",
+      "text": "Verifikasi",
+      "button": "Verifikasi",
+      "disabled": false,
+      "x": 1237.969970703125,
+      "y": 456.5299987792969,
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 810.3999999985099
+    },
+    {
+      "type": "pointerup",
+      "target": "BUTTON",
+      "text": "Verifikasi",
+      "button": "Verifikasi",
+      "disabled": false,
+      "x": 1237.969970703125,
+      "y": 456.5299987792969,
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 810.7999999970198
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Verifikasi",
+      "button": "Verifikasi",
+      "disabled": false,
+      "x": 1237,
+      "y": 456,
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 810.8999999985099
+    },
+    {
+      "type": "change",
+      "target": "INPUT",
+      "text": "",
+      "checked": false,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 863.5999999977648
+    },
+    {
+      "type": "pointerdown",
+      "target": "INPUT",
+      "text": "",
+      "checked": false,
+      "x": 1186.8399658203125,
+      "y": 517.1199951171875,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 907
+    },
+    {
+      "type": "pointerup",
+      "target": "INPUT",
+      "text": "",
+      "checked": false,
+      "x": 1186.8399658203125,
+      "y": 517.1199951171875,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 907.2999999970198
+    },
+    {
+      "type": "click",
+      "target": "INPUT",
+      "text": "",
+      "checked": true,
+      "x": 1186,
+      "y": 517,
+      "confirm": {
+        "x": 968.578125,
+        "y": 605.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 605.453125,
+        "right": 1203.640625,
+        "bottom": 649.453125,
+        "left": 968.578125
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 908
+    },
+    {
+      "type": "change",
+      "target": "INPUT",
+      "text": "",
+      "checked": true,
+      "confirm": {
+        "x": 968.578125,
+        "y": 605.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 605.453125,
+        "right": 1203.640625,
+        "bottom": 649.453125,
+        "left": 968.578125
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 908.5
+    },
+    {
+      "type": "pointerdown",
+      "target": "BUTTON",
+      "text": "Konfirmasi penerimaan dana",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "x": 1099.2099609375,
+      "y": 601.4500122070312,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 990.2999999970198
+    },
+    {
+      "type": "pointerup",
+      "target": "DIV",
+      "text": "Referensi penerimaan dana / kuitansi\n                                           ",
+      "x": 1099.2099609375,
+      "y": 601.4500122070312,
+      "confirm": {
+        "x": 968.578125,
+        "y": 605.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 605.453125,
+        "right": 1203.640625,
+        "bottom": 649.453125,
+        "left": 968.578125
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 991.6999999992549
+    },
+    {
+      "type": "click",
+      "target": "DIV",
+      "text": "Referensi penerimaan dana / kuitansi\n                                           ",
+      "x": 1099,
+      "y": 601,
+      "confirm": {
+        "x": 968.578125,
+        "y": 605.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 605.453125,
+        "right": 1203.640625,
+        "bottom": 649.453125,
+        "left": 968.578125
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 991.6999999992549
+    },
+    {
+      "type": "pointerdown",
+      "target": "BUTTON",
+      "text": "Konfirmasi penerimaan dana",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "x": 1099.2099609375,
+      "y": 601.4500122070312,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 2540.5
+    },
+    {
+      "type": "pointerup",
+      "target": "BUTTON",
+      "text": "Konfirmasi penerimaan dana",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "x": 1099.2099609375,
+      "y": 601.4500122070312,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 2540.599999997765
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Konfirmasi penerimaan dana",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "x": 1099,
+      "y": 601,
+      "confirm": {
+        "x": 981.6875,
+        "y": 579.453125,
+        "width": 235.0625,
+        "height": 44,
+        "top": 579.453125,
+        "right": 1216.75,
+        "bottom": 623.453125,
+        "left": 981.6875
+      },
+      "scroll": [
+        0,
+        0
+      ],
+      "time": 2540.699999999255
+    }
+  ]
+}

@@ -2,6 +2,24 @@
 
 Terakhir diperbarui: 2026-11-11 (Asia/Jakarta).
 
+## Lanjutan keamanan pembayaran — 11 November 2026
+
+- Celah pembayaran anonymous/otomatis lunas ditutup pada source utama: JWT owner
+  wajib, pelanggan hanya Pending, Admin melakukan rekonsiliasi dengan referensi,
+  status+audit atomic, retry/paralel tanpa duplikasi dan Paid tidak dibuka ulang.
+- Login admin memakai gateway CSRF dan profil role tervalidasi; keydevelopment
+  ditolak di luar Development, account/role yang dinonaktifkan ditolak segera.
+  Rekening/QR contoh dihapus; digitalUI default belum tersedia sampai instruksi resmi.
+- PASS fullsolution0warning/0error,50regresiC#,26HTTP/browser pada DBuji baru,
+  syntax61/functions6/resultgatewayrecovery4. Review independen APPROVE bounded.
+- Uji browser awal22PASS/1FAIL: form inline bergeser saat klik. Dipindah keluar
+  tabel dan guard rekonsiliasi diperiksa ulang; runfinal26/26PASS dengan satu klik.
+- Preview terbaru Web5903/API5902 aktif dengan DBuji; konfigurasi dummy5905
+  sudah dihentikan. Tidak mengubah runtime simulator/results/scoring/gamepad.
+- Detail bukti/batas: `docs/PAYMENT_SECURITY.md`. Provider/transaksi nyata,
+  deploymentTLS/secret dan rekonsiliasi riwayat lama belum diterima. Rilis proyek
+  keseluruhan tetap belum lengkap; matriks simulator tidak diulang pada patch ini.
+
 ## QA fitur dan 13 warning — 11 November 2026
 
 - Tiga sumber warning diperbaiki: import AdminBadge, predicate nullable gear

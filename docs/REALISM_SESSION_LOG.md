@@ -335,3 +335,66 @@ Catatan bersifat append-only per sesi; pembaruan status ringkas ada di `REALISM_
   adminlogin dengan regresi, lanjut query/summary/labels/mobile, diagnosis iframe
   hydration/fokus, kemudian real journey finish/save/retry/dashboard pada host
   dan batas waktu memadai. Pengujian luas ini bukan bukti seluruh fitur sempurna.
+
+## 2026-11-11 — payment security dan kelanjutan uji yang tertunda
+
+- Target: tutup customer-confirm-as-Paid, ownership/duplicate gap dan sediakan
+  verifikasi manual yang bisa dioperasikan; bukan integrasi provider/produksi.
+  Perubahan awal sudah ada pada commit pengguna38e8562 saat lanjut; tidak di-reset.
+- API utama Payments/CourseRegistration kini JWT-owner, customerPending/nullPaidAt,
+  amountserver, reference/methodvalidation, retry dan transaksiSQLite. AdminPayments
+  memakai role/reconciliationreference, terminalPaid/idempotensi dan audit atomic;
+  AdminRegistrations tidak dapat mensintesis pembayaran lunas. Tidak ada migrasi,
+  penghapusan atau sertifikasi ulang historicalPaid/duplicate/unowned records.
+- ApiProgram/AuthController menolak accountinactive/rolerevoked, keykosong/public
+  development di luarDevelopment; keypublik hanya konfigurasiDevelopment. Webadmin
+  memakai CSRFsessiongateway khusus dan profilbackendvalid, bukan emailsubstring.
+  Authoutage tertampil eksplisit tanpa bodyprivileged. CookieSecure nonDevelopment.
+- Payment/PersonalUI wajib akunpemilik; customerPending jelas; dummybank/QR hilang,
+  digitaldisabledtanpakonfigurasiofficial. ApiClient status-awareGET membedakan404
+  dari409/503/malformed sehingga outage tidak menyuruh pengguna transfer lagi.
+- RED24controllerchecks pada sourceawal; final50C#PASS (27payment,7paymentpage,
+ 16existing/adminaccess) melalui `dotnet run --project tools/Kemudi.RegressionTests
+  --artifacts-path artifacts/dotnet-payments-final --no-restore
+  -p:BuildProjectReferences=false` setelah restore cachelokal. Log
+  `artifacts/payment-security/regression-final-latest.log`.
+- HTTPbrowserawal22PASS/1FAIL pada inlinecashconfirmation. Diagnostik mempertahankan
+  paymentPending setelah klikpertama; pointerdownbutton→pointerupDIV, buttonbergeser
+ 26px di tabel. Perbaikan lanjutan hanya form verifikasi menjadi panel di luar
+  tabel dan guard serverUI untuk checked/reference/busy; tes mengganti scope keform,
+  tidak menghapus requirementcheckbox atau mengulang klik sampai berhasil.
+- Fresh fullsolution `dotnet build Kemudi.slnx --artifacts-path
+  artifacts/dotnet-payments-final --source $env:USERPROFILE/.nuget/packages
+  --nologo -warnaserror`: PASS0warnings/0errors,25,33s; dotnet-build-ui-fix.log.
+- Fresh DBtest-d599dcf0c0d94fc7bd794d3617193009.db dibuat khusus di ignored
+  artifacts/payment-security. Hanya3proses preview yang commandline+PID cocok
+  bukti milik sesi sebelumnya dihentikan untuk restart; tidak mengganggu userDB.
+- `API_URL=5902 WEB_URL=5903 PAYMENT_QA_DB=<fresh guardedDB>
+  PAYMENT_CONFIGURED_WEB_URL=5905 node tools/webgl/payment-security.cjs` PASS26/26,
+  exit0, `http-browser-final.log`/`http-browser-report.json`. Hanya fixture sendiri;
+  script menolak externalorigin/non-QADB/populatedDB sebelum melakukan mutasi.
+ 10customerparallel satuPending record;5adminparallel satuaudit/stablePaidAt;
+  ownership, invalidreference/method, bypassPaid, CSRF, active/revokedrole,
+  customer/adminlogin HttpOnly dan genuinecashUI satu klik/reload PASS.
+- ConfiguredQA instructions diuji escapedplaintext/digitalPending; defaultdigital
+  tidak menampilkan rekening/QRcontoh atau enabledsubmission. DummyconfiguredWeb5905
+  dihentikan setelah run melalui PID23000+commandline yang cocok.
+- PASS duaProductionkeyguard (kosong danpublicdevelopment ditolak sebelum serving),
+  syntax61, functions6, result-errors4 padaWeb5903, scopedgitdiffcheck. Log JSON/
+  terminal ada di artifacts/payment-security. npmnotice padastderr berbentuk
+  NativeCommandError PowerShell bukanfailure; exitcode/assertion yang dipakai.
+- Reviewindependen awal3temuan (lookupfailopen, inconsistentPaidreplay, adminoutage
+  masked) diperbaiki dengan regresi. Re-review final8files APPROVE0outstanding;
+  tidak menjalankan ulang tes olehreviewer. Tidak mengklaim fullrepopenetrationaudit.
+- Previewbaru sengaja aktif: Web5903PID8328/API5902PID3052, DLL dari
+  artifacts/dotnet-payments-final dan isolatedtestDB di atas. Akun tes ownerdi-disable
+  dan roletestAdmin dicabut oleh regresi; tidak menyimpan credentials/token/cookies.
+  DB/WAL/SHM tetapignored, verifiedgitcheckignore. Oldpreviewportlain tidak
+  dianggap otomatis diperbarui. Semua browsertes ditutup.
+- Dokumentasi root/srcREADME/PAYMENT_SECURITY diperbarui dengan breakingauth
+  requirement, instruksibank resmi, privateJWT/HTTPS dan batasprovider. Tidak ada
+  dependencybaru atau perubahan simulator/Unity/score/results gatewaycontract.
+- NOT RUN: settlementprovider/bank nyata, historicalreconciliation, refund/upload,
+  TLS/reverseproxy/secret produksi/compliance. Fullsimulator/gamepad/iframe tidak
+  diulang. Next: operatorkonfigurasi resmi via secretmanager, rekonsiliasi data lama,
+  dan integrasiprovider terverifikasi bila pembayaranotomatis memang dipilih.

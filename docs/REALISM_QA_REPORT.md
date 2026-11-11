@@ -1,5 +1,26 @@
 # Realism QA report
 
+## Payment hardening continuation — 2026-11-11
+
+- Bounded payment/auth/UI patch PASS:50C# checks,26HTTP/browser checks, rebuild
+  warning-as-error0warnings/0errors; source/admin review final APPROVE.
+- Existing result gateway recovery4checks, functions6 dan syntax61PASS. Tidak
+  mengubah simulator/physics/input/results contract atau mengulang fullmatrix.
+- Anonymous/cross-owner payment access ditolak; customer submission tetap Pending;
+ 10concurrent submissions satu record;5admin confirmations satu audit/PaidAt.
+  CSRF, legitimateAdminUI, ordinary-user403, active/role revocation, digitaldefault
+  unavailable dan escapedconfiguredinstructions diuji di DBbaru terisolasi.
+- Awalbrowser22PASS/1FAIL dipertahankan: pointertrace menunjukkan form di tabel
+  bergeser26px sebelum mouseup; bukan backendsettlement yang gagal. Form dipisah,
+  serverUIguard ditambah; singleclick finalsettlement dan reload PASS tanpa retry.
+- Lookup409/503/invalidresponse kini memblokir transfer ulang; adminoutage tidak
+  menyamar sebagai loginerror; paidlegacyinconsistent409. Ketiganya memiliki tes.
+- Bukti: `artifacts/payment-security/`, kontrak/report `docs/PAYMENT_SECURITY.md`.
+  PreviewWeb5903/API5902 aktif; configuredQA5905 sudah dihentikan. Uji provider/
+  bank nyata, datahistoris, refund/upload dan deploymentTLS/secret NOT RUN.
+  Tidak mengklaim production certification atau menyelesaikan gap perjalanan
+  simulator/iframe/hardware pada laporan sebelumnya.
+
 ## QA fitur dan perbaikan warning — 2026-11-11
 
 - Full solution .NET rebuild `-warnaserror` PASS0warning/0error; tiga penyebab

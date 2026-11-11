@@ -304,3 +304,235 @@ info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
       Received HTTP response headers after 4.149ms - 200
 info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
       End processing HTTP request after 4.2427ms - 200
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 170.467ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 170.854ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.788ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.0531ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.9667ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.0453ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.9112ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.9885ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.6295ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.7735ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/c33eb1b7-fbb4-4239-a732-6923e4909176
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/c33eb1b7-fbb4-4239-a732-6923e4909176
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 8.0839ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 8.163ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.3367ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.4138ms - 200
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 93.4843ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 93.544ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.1712ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.2424ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.7505ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.8045ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1.9903ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.0628ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.9125ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.95ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/e43c4b97-bc6a-40d3-b27e-8536eb5a6247
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/e43c4b97-bc6a-40d3-b27e-8536eb5a6247
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.791ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.8336ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1.9586ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1.9902ms - 200
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 100.1597ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 100.2167ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.964ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.007ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.7883ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.0222ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.8921ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.9453ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.9116ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.9588ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/793c44de-ec50-4b0c-a4fa-2b5aa9c8c017
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/793c44de-ec50-4b0c-a4fa-2b5aa9c8c017
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 21.158ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 21.5465ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 12.4507ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 12.5812ms - 200
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 81.7714ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 81.8698ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.7571ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.799ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.6617ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.7089ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.0643ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.1203ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 5.5868ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 5.6535ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/4661646b-fd8d-4ca1-9be2-9c98e9792a1e
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PATCH http://127.0.0.1:5902/api/admin/payments/4661646b-fd8d-4ca1-9be2-9c98e9792a1e
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.9112ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.9714ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.5881ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.769ms - 200

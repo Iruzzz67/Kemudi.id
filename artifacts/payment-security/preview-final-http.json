@@ -1,0 +1,10 @@
+[
+    {
+        "url":  "http://127.0.0.1:5903/",
+        "status":  200
+    },
+    {
+        "url":  "http://127.0.0.1:5902/swagger/v1/swagger.json",
+        "status":  200
+    }
+]

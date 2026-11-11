@@ -26,6 +26,24 @@
         <span class="admin-count">@_payments.Count transaksi</span>
     </div>
 
+    @if (_verifying is Guid verifyingId && _payments.FirstOrDefault(p => p.Id == verifyingId) is { Status: "pending" } selected)
+    {
+        <form id="payment-verification" class="card" style="padding:1.5rem;margin:1rem 0;"
+              aria-labelledby="payment-verification-title" @onsubmit="@(() => SetStatus(selected, "paid"))" @onsubmit:preventDefault>
+            <h2 id="payment-verification-title">Verifikasi penerimaan dana</h2>
+            <p>@selected.RegistrantName — @PaymentMethodLabel(selected.Method) — @FormatRp(selected.Amount)</p>
+            <div class="field">
+                <label for="payment-verification-reference">Referensi penerimaan dana / kuitansi</label>
+                <input id="payment-verification-reference" maxlength="128" @bind="_verificationReference" autofocus />
+            </div>
+            <label class="flex"><input type="checkbox" @bind="_reconciled" /> Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.</label>
+            <div class="flex mt-2">
+                <button type="submit" class="btn btn-success" disabled="@(_busy || !_reconciled || _verificationReference.Trim().Length < 3)">Konfirmasi penerimaan dana</button>
+                <button type="button" class="btn btn-outline" disabled="@_busy" @onclick="@(() => _verifying = null)">Batal verifikasi</button>
+            </div>
+        </form>
+    }
+
     @if (_loading)
     {
         <div class="loading">Memuat data...</div>
@@ -55,16 +73,6 @@
                                     @if (p.Status == "pending" && _verifying != p.Id)
                                     {
                                         <button class="btn btn-success" disabled="@_busy" @onclick="@(() => BeginVerification(p))">Verifikasi</button>
-                                    }
-                                    @if (p.Status == "pending" && _verifying == p.Id)
-                                    {
-                                        <div class="field">
-                                            <label for="@($"verification-{p.Id:N}")">Referensi penerimaan dana / kuitansi</label>
-                                            <input id="@($"verification-{p.Id:N}")" maxlength="128" @bind="_verificationReference" />
-                                            <label><input type="checkbox" @bind="_reconciled" /> Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.</label>
-                                            <button class="btn btn-success" disabled="@(_busy || !_reconciled || _verificationReference.Trim().Length < 3)" @onclick="@(() => SetStatus(p, "paid"))">Konfirmasi penerimaan dana</button>
-                                            <button class="btn btn-outline" disabled="@_busy" @onclick="@(() => _verifying = null)">Batal verifikasi</button>
-                                        </div>
                                     }
                                     @if (p.Status == "pending")
                                     {
@@ -103,6 +111,12 @@
 
     private async Task SetStatus(AdminPaymentDto p, string status)
     {
+        if (_busy) return;
+        if (status == "paid" && (_verifying != p.Id || !_reconciled || _verificationReference.Trim().Length < 3))
+        {
+            _error = "Cocokkan penerimaan dana dan isi referensi sebelum mengonfirmasi.";
+            return;
+        }
         _busy = true;
         _error = null;
         try

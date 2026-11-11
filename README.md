@@ -103,6 +103,27 @@ Port di atas dipilih untuk preview terisolasi. Tanpa override, profil HTTP API m
 
 Hasil latihan dikirim melalui gateway website `/api/simulation/results`. Penyimpanan membutuhkan sesi login; panel hasil menyediakan retry dengan `AttemptId` yang sama. Hasil yang belum tersimpan berada di memori halaman: jangan reload/tutup halaman sebelum konfirmasi berhasil.
 
+## Pembayaran dan batas produksi
+
+- Pendaftaran kursus, detail pendaftaran dan pengajuan pembayaran kini wajib
+  login dan hanya dapat diakses pemiliknya. Pendaftaran anonim lama tidak
+  diklaim otomatis berdasarkan email; perlu peninjauan admin.
+- Tombol pelanggan hanya mengajukan **pending**, bukan menandai lunas.
+  Admin harus mencocokkan penerimaan dana melalui sumber resmi dan mencatat
+  referensi rekonsiliasi. Status lunas dan audit disimpan dalam satu transaksi.
+- Nomor rekening/QR contoh dihapus. Transfer/e-wallet pada UI dinonaktifkan
+  sampai operator mengisi `Payments__TransferInstructions` atau
+  `Payments__EWalletInstructions` pada website dengan instruksi resmi.
+  Konfigurasi tersebut berupa teks, bukan HTML atau integrasi provider.
+- Kunci JWT development hanya ada pada konfigurasi Development. Di luar
+  Development, API menolak kunci kosong, terlalu pendek atau kunci development;
+  pasok `Jwt__SecretKey` acak privat melalui pengelola secret. Gunakan HTTPS.
+- Tidak ada provider otomatis, refund atau sertifikasi kepatuhan pembayaran.
+  Riwayat lama yang telanjur lunas/duplikat harus direkonsiliasi, bukan dihapus
+  atau dianggap aman oleh perubahan kode ini.
+
+Kontrak, konfigurasi dan bukti tes: [PAYMENT_SECURITY.md](docs/PAYMENT_SECURITY.md).
+
 ## Kontrol simulator
 
 | Tombol | Fungsi |

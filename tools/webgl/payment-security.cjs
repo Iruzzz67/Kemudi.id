@@ -278,11 +278,13 @@ async function login(page, origin, account, admin = false, expected = 200) {
     await check('admin UI requires reference plus reconciliation checkbox before cash settlement', async () => {
       const row = adminPage.locator('tbody tr').filter({ hasText: cashName });
       await row.getByRole('button', { name: 'Verifikasi', exact: true }).click();
-      const confirm = row.getByRole('button', { name: 'Konfirmasi penerimaan dana', exact: true });
+      const form = adminPage.locator('#payment-verification');
+      assert.ok((await form.innerText()).includes(cashName), 'Verification panel identifies the selected customer');
+      const confirm = form.getByRole('button', { name: 'Konfirmasi penerimaan dana', exact: true });
       assert.ok(await confirm.isDisabled());
-      await fill(row.getByLabel('Referensi penerimaan dana / kuitansi', { exact: true }), 'qa-cash-receipt');
+      await fill(form.getByLabel('Referensi penerimaan dana / kuitansi', { exact: true }), 'qa-cash-receipt');
       assert.ok(await confirm.isDisabled(), 'Reference alone must not imply reconciliation');
-      await row.getByRole('checkbox').check();
+      await form.getByRole('checkbox').check();
       await confirm.click();
       await row.getByText('Dikonfirmasi', { exact: true }).waitFor();
       const state = expectStatus(await request('/api/payment/' + cash.id, { token: owner.token }), 200);

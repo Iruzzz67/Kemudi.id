@@ -1,6 +1,6 @@
 {
-  "started": "2026-11-11T05:03:34.465Z",
-  "passed": false,
+  "started": "2026-11-11T08:57:52.091Z",
+  "passed": true,
   "checks": [
     {
       "name": "explicit local origins and empty fresh QA database guards",
@@ -92,19 +92,28 @@
     },
     {
       "name": "admin UI requires reference plus reconciliation checkbox before cash settlement",
-      "result": "FAIL",
-      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('tbody tr').filter({ hasText: 'Payment QA Cash UI' }).getByText('Dikonfirmasi', { exact: true }) to be visible\u001b[22m\n"
+      "result": "PASS"
+    },
+    {
+      "name": "configured official instructions remain plain text and digital submission stays pending",
+      "result": "PASS"
+    },
+    {
+      "name": "disabled customer JWT and revoked Admin JWT stop authorizing immediately",
+      "result": "PASS"
+    },
+    {
+      "name": "browser flows produce no unhandled JavaScript/circuit errors",
+      "result": "PASS"
     }
   ],
   "notRun": [
-    "Checks after the failed prerequisite were not executed; this is not a complete passing suite",
     "Real payment provider/bank settlement, uploads/refunds and production deployment were not tested"
   ],
   "scope": "Loopback HTTP/browser and own fixtures in an explicitly fresh QA SQLite database; no provider/real payments",
-  "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('tbody tr').filter({ hasText: 'Payment QA Cash UI' }).getByText('Dikonfirmasi', { exact: true }) to be visible\u001b[22m\n",
-  "finished": "2026-11-11T05:04:23.738Z",
+  "finished": "2026-11-11T08:58:16.446Z",
   "summary": {
-    "pass": 22,
-    "fail": 1
+    "pass": 26,
+    "fail": 0
   }
 }
