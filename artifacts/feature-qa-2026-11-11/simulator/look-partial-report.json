@@ -1,0 +1,25 @@
+{
+  "started": "2026-11-11T03:47:10.874Z",
+  "passed": false,
+  "cases": [
+    {
+      "type": "MOBIL",
+      "transmission": "automatic",
+      "passed": false,
+      "checks": [
+        "right stick does not enter first-person while walking",
+        "horizontal-only right stick turns actual camera right without vertical input",
+        "horizontal-only right stick turns actual camera left without vertical input",
+        "right stick selects FPV and turns the actual camera right and upward",
+        "release holds camera orientation without recentering",
+        "small right-stick jitter stays in deadzone",
+        "left steering and right look are independent simultaneous inputs",
+        "sustained look clamps yaw and pitch to head-turn limits",
+        "Y cycles camera and resets look without a held-stick override",
+        "fresh opposite stick selects FPV and reverses look direction",
+        "keyboard C camera cycle remains available"
+      ]
+    }
+  ],
+  "hardware": "NOT RUN: synthetic input is not physical controller acceptance"
+}

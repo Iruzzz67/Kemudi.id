@@ -62,7 +62,7 @@ public sealed class AppDbContext : IdentityDbContext<ApplicationUser>
                           .ToArray());
             gearRatios.Metadata.SetValueComparer(
                 new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<double[]>(
-                    (a, b) => a.SequenceEqual(b),
+                    (a, b) => a == b || (a != null && b != null && a.SequenceEqual(b)),
                     v => v.Aggregate(0, (hash, d) => HashCode.Combine(hash, d)),
                     v => v.ToArray()));
         });

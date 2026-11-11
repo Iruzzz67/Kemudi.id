@@ -1,5 +1,20 @@
 # Titik lanjut gamepad
 
+## 11 November 2026 — regresi sintetis seluruh kendaraan
+
+- Tidak mengubah runtime/input/mapping. PASS fresh device/domain/UI, handling19,
+  realism units dan browser6standalone combinations69checks (MOTOR/MOBIL/TRUK ×
+  manual/automatic): analog, guard transmisi, edge sekali, arbitration, menu,
+  pause/resume neutral gate, disconnect dan SecurityError keyboard fallback.
+- PASS browser handling MOBIL/automatic10checks. Full right-stick-look browser
+  dibatalkan setelah assertion parsial; bukan passed case/matrix. Lima kombinasi
+  handling lainnya, gamepad iframe baru dan hardware NOT RUN.
+- Main iframe keyboardTRUK/manual build terbaru5893 FAIL automation/timeout;
+  standalone6case tidak membuktikan iframe. Bukti dan batas:
+  `artifacts/feature-qa-2026-11-11/simulator/REPORT.md` serta laporan root.
+- Preview standalone8080 dan Web5893/API5892 aktif. Next: diagnosis hydration/
+  fokus iframe dan pengujian controller fisik teridentifikasi, bukan tebak mapping.
+
 ## 5 November 2026 — pengaturan handling setir/stang
 
 - Menu Controller / Aksi memiliki preset Ringan/Normal/Berat, berat0–100

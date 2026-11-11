@@ -9,7 +9,7 @@
   ],
   "attempts": [
     {
-      "id": "0dfdf03d-1391-47a0-a665-470fd31cc1e3",
+      "id": "8cedf990-b1ee-42c8-9e72-408e0c591192",
       "vehicleType": "TRUK",
       "score": 82,
       "timeTakenMs": 56321,
@@ -17,7 +17,7 @@
       "offRoadCount": 2,
       "collisionCount": 1,
       "completed": true,
-      "createdAt": "2026-11-04T03:08:25.7808731"
+      "createdAt": "2026-11-11T02:54:02.3492773"
     }
   ],
   "passed": false,
@@ -27,10 +27,34 @@
     "map": "unified",
     "vehicle": "MOBIL",
     "loaded": true,
+    "equipment": {
+      "seatbelt": true,
+      "helmet": false,
+      "jacket": false,
+      "gloves": false,
+      "shoes": false
+    },
+    "gamepad": {
+      "source": "keyboard",
+      "status": "disconnected",
+      "neutralGate": false,
+      "continuous": {
+        "lookX": 0,
+        "lookY": 0,
+        "throttle": 0,
+        "brakeAmount": 0,
+        "parkingBrake": false,
+        "steer": 0,
+        "clutch": false,
+        "horn": false,
+        "walk": 0
+      },
+      "menuOpen": false
+    },
     "intersection": {
       "id": "cedar-junction",
       "phase": "NS_GREEN",
-      "elapsed": 11.833333333333503,
+      "elapsed": 11.58333333333349,
       "geometry": {
         "center": [
           0,
@@ -79,7 +103,7 @@
       {
         "id": "cedar-junction",
         "phase": "NS_GREEN",
-        "elapsed": 11.833333333333503,
+        "elapsed": 11.58333333333349,
         "geometry": {
           "center": [
             0,
@@ -127,7 +151,7 @@
       {
         "id": "training-junction",
         "phase": "NS_GREEN",
-        "elapsed": 11.833333333333503,
+        "elapsed": 11.58333333333349,
         "geometry": {
           "center": [
             0,
@@ -176,16 +200,20 @@
     "position": [
       -1.75,
       0.09,
-      -25.4436721460907
+      -20.34564003956592
     ],
-    "speed": 5.992960182060827,
+    "speed": 5.614483752647814,
     "gear": 3,
     "rotation": 0,
     "steerAngle": 0,
+    "handling": {
+      "steeringWeight": 50,
+      "steeringReturn": 1
+    },
     "navigationTarget": [
       -1.75,
       0.09,
-      -31.443672146090698
+      -26.34564003956592
     ],
     "engine": true,
     "handbrake": false,
@@ -197,8 +225,8 @@
         0
       ],
       "brakes": [
-        0.1,
-        0.1
+        1,
+        1
       ],
       "indicators": [
         {
@@ -223,31 +251,47 @@
       "right": false
     },
     "camera": "TPV",
+    "cameraLook": {
+      "yaw": 0,
+      "pitch": 0
+    },
+    "cameraPose": {
+      "position": [
+        -1.7500000000000016,
+        3.090000000000003,
+        -10.982670927945252
+      ],
+      "direction": [
+        1.623439253340445e-16,
+        -0.20889486904007637,
+        -0.9779381031991388
+      ]
+    },
     "wheels": [
       {
         "name": "Car_Wheel_FL",
-        "spin": -133.63154634078572,
+        "spin": -119.8530811880159,
         "steer": 0
       },
       {
         "name": "Car_Wheel_FR",
-        "spin": -133.63154634078572,
+        "spin": -119.8530811880159,
         "steer": 0
       },
       {
         "name": "Car_Wheel_RL",
-        "spin": -133.63154634078572,
+        "spin": -119.8530811880159,
         "steer": 0
       },
       {
         "name": "Car_Wheel_RR",
-        "spin": -133.63154634078572,
+        "spin": -119.8530811880159,
         "steer": 0
       }
     ],
     "clock": {
-      "elapsed": 12.833333333333334,
-      "tick": 770,
+      "elapsed": 12.583333333333334,
+      "tick": 755,
       "fixedDt": 0.016666666666666666
     },
     "environment": {
@@ -261,12 +305,12 @@
       "precipitationCount": 0
     },
     "instruments": {
-      "speedKmh": 21.574656655418977,
-      "speedText": "22",
+      "speedKmh": 20.21214150953213,
+      "speedText": "20",
       "gear": "3",
       "engineOn": true,
       "handbrakeOn": false,
-      "braking": false,
+      "braking": true,
       "lights": {
         "lowBeam": false,
         "highBeam": false,
@@ -274,7 +318,7 @@
         "right": false,
         "hazard": false,
         "blink": true,
-        "brake": false,
+        "brake": true,
         "reverse": false
       },
       "timeOfDay": "siang",
@@ -283,7 +327,7 @@
     "cockpit": {
       "type": "MOBIL",
       "mode": "TPV",
-      "speedText": "22",
+      "speedText": "20",
       "gear": "3",
       "visible": false,
       "procedural": true
@@ -298,7 +342,7 @@
         "position": [
           1.75,
           0.09,
-          -34.85000000030402
+          -36.35000000030435
         ],
         "rotation": -3.141592653589793,
         "speed": 6.000000000001364,
@@ -506,7 +550,7 @@
         "position": [
           1.75,
           0.09,
-          -371.55275000047095
+          -372.7527500004707
         ],
         "rotation": -3.141592653589793,
         "speed": 4.799999999999045,
@@ -532,10 +576,10 @@
         "position": [
           1.75,
           0.09,
-          -377.7189099898408
+          -378.9191807586092
         ],
         "rotation": -3.141592653589793,
-        "speed": 4.8009802727051465,
+        "speed": 4.801209091380088,
         "braking": false,
         "reason": "FOLLOW",
         "lights": {
@@ -558,7 +602,7 @@
         "position": [
           -1.75,
           0.09,
-          -443.5617222226913
+          -442.06172222269095
         ],
         "rotation": 0,
         "speed": 6.000000000001364,
@@ -710,7 +754,7 @@
       {
         "id": "pedestrian:0",
         "position": [
-          -0.836666666666654,
+          -0.549166666666654,
           0.09,
           -86
         ],
@@ -719,7 +763,7 @@
       {
         "id": "pedestrian:1",
         "position": [
-          2.50600000000002,
+          2.1985000000000174,
           0.09,
           -74
         ],
@@ -730,14 +774,14 @@
         "position": [
           6,
           0.09,
-          -82.35916666666668
+          -82.03166666666668
         ],
         "crossing": true
       },
       {
         "id": "pedestrian:3",
         "position": [
-          0.9650000000000125,
+          1.252500000000011,
           0.09,
           -406
         ],
@@ -746,7 +790,7 @@
       {
         "id": "pedestrian:4",
         "position": [
-          -2.454999999999983,
+          -2.762499999999986,
           0.09,
           -394
         ],
@@ -803,9 +847,9 @@
       "state": "running",
       "activeHornVoices": 0
     },
-    "drawCalls": 699,
-    "triangles": 122448,
-    "elapsed": 11.500000000000151
+    "drawCalls": 700,
+    "triangles": 122450,
+    "elapsed": 10.500000000000101
   },
   "error": "real route did not finish within bounded wall time; last snapshot is in report\n+ actual - expected\n\n+ 'driving'\n- 'finished'\n"
 }

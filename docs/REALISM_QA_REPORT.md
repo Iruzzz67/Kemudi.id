@@ -1,5 +1,37 @@
 # Realism QA report
 
+## QA fitur dan perbaikan warning — 2026-11-11
+
+- Full solution .NET rebuild `-warnaserror` PASS0warning/0error; tiga penyebab
+  13warning diperbaiki, tanpa suppression. Dua regresi awal FAIL, final10PASS;
+  review independen APPROVE untuk diff warning/test, bukan seluruh produk.
+- PASS build42files/7.176.563bytes, syntax60, functions6, realism lengkap
+  (collision11/traffic15groups), handling19, gamepad device/domain/UI, unified7.
+- Browser PASS full realism6cases49checks (initial+paused12environment matrix),
+  full synthetic gamepad6standalonecases69checks, smoke3automatic vehicles,
+  intersection, legacy aliases, road seamTRUK5, handling MOBIL/automatic10.
+- Website60PASS/7FAIL dari67checks;3focused probes menambah/menguatkan temuan.
+  Pembayaran anonymous paid/duplicate dan circuit admin login adalah risiko
+  penting, belum diperbaiki. Batas API authorization user403 tetap lulus.
+- Backend awal gagal register-hydration; tes menunggu required-field response
+  sebelum mengisi input, bukan menghilangkan assertion. Ulang6checks auth/CSRF/
+  validation/concurrent idempotency/isolation PASS; drive180s FAIL masih driving
+  (clock12,58s/z=-20,35m). Downstream full real journey belum terverifikasi.
+- Build fix Web5893/API5892 HTTP200. Result recovery4checks PASS. Tes terpisah
+  payload hasil sintetis melalui real gateway/database: lost response→503→retry
+  tanpa duplikasi, completed/failed, dashboard reload3checks PASS; bukan real drive.
+- IframeTRUK/manual pada5893 FAIL automation: wait driving timeout; probe lain
+  mendeteksi frame detached saat hydration, lalu canvas click timeout. Penyebab
+  belum dipastikan. Standalone matrix bukan pengganti penerimaan iframe.
+- NOT RUN: authorized admin CRUD/settings, provider settlement, hardware,
+  audio/visual manusia, hardware FPS/stability baru. Full look browser dibatalkan
+  setelah assertion parsial, tidak dianggap PASS; lima handling cases lainnya
+  NOT RUN. Status rilis tetap NEEDS ATTENTION.
+- Arsip/report/commands: `artifacts/feature-qa-2026-11-11/REPORT.md`, subdirektori
+  website/simulator, `dotnet-build.log`, `warnings-before/after/final.log`,
+  `backend-smoke-retry.log`, `gateway-results-report.json`. Cache NuGet lokal
+  dipakai setelah akses online gagal; tidak mengklaim online vulnerability audit.
+
 ## Road-seam truck fix — 2026-11-05
 
 - Screenshot pengguna dan pure-source reproduction mengonfirmasi false boundary

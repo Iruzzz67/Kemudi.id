@@ -39,6 +39,9 @@ fs.mkdirSync(output, { recursive: true });
     check('Anonymous save rejected');
 
     await page.goto(web + '/register', { waitUntil: 'networkidle' });
+    // Prove Blazor is interactive before entering values into prerendered inputs.
+    await page.getByRole('button', { name: 'Daftar Sekarang', exact: true }).click();
+    await page.getByText('Nama, email valid, dan password minimal 6 karakter wajib diisi.', { exact: true }).waitFor();
     await page.getByLabel('Nama Lengkap').fill('WebGL Integration Test');
     await page.getByLabel('Email', { exact: true }).fill(email);
     await page.getByLabel('Password', { exact: true }).fill(password);
@@ -53,6 +56,8 @@ fs.mkdirSync(output, { recursive: true });
     await page.waitForURL(web + '/');
     assert.equal((await context.request.get(web + '/api/simulation/results')).status(), 401);
     await page.goto(web + '/login', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Masuk', exact: true }).click();
+    await page.locator('.error-box').waitFor();
     await page.getByLabel('Email', { exact: true }).fill(email);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Masuk', exact: true }).click();

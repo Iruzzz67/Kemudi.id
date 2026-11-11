@@ -1,5 +1,5 @@
 {
-  "started": "2026-11-05T04:17:34.867Z",
+  "started": "2026-11-11T03:43:39.416Z",
   "passed": true,
   "case": "MOBIL/automatic",
   "checks": [
@@ -49,7 +49,7 @@
     "intersection": {
       "id": "cedar-junction",
       "phase": "NS_GREEN",
-      "elapsed": 0.16666666666666805,
+      "elapsed": 0.08333333333333472,
       "geometry": {
         "center": [
           0,
@@ -98,7 +98,7 @@
       {
         "id": "cedar-junction",
         "phase": "NS_GREEN",
-        "elapsed": 0.16666666666666805,
+        "elapsed": 0.08333333333333472,
         "geometry": {
           "center": [
             0,
@@ -146,7 +146,7 @@
       {
         "id": "training-junction",
         "phase": "NS_GREEN",
-        "elapsed": 0.16666666666666805,
+        "elapsed": 0.08333333333333472,
         "geometry": {
           "center": [
             0,
@@ -285,8 +285,8 @@
       }
     ],
     "clock": {
-      "elapsed": 1.1666666666666667,
-      "tick": 70,
+      "elapsed": 1.0833333333333333,
+      "tick": 65,
       "fixedDt": 0.016666666666666666
     },
     "environment": {
@@ -315,10 +315,10 @@
         "position": [
           1.75,
           0.09,
-          -100.61944444449279
+          -100.80833333337505
         ],
         "rotation": -3.141592653589793,
-        "speed": 2.3333333332516304,
+        "speed": 2.1666666665907997,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -341,10 +341,10 @@
         "position": [
           1.75,
           0.09,
-          -114.82652777772702
+          -114.98708333328952
         ],
         "rotation": -3.141592653589793,
-        "speed": 1.9833333334190684,
+        "speed": 1.8416666667462778,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -367,10 +367,10 @@
         "position": [
           -1.75,
           0.09,
-          -58.75930555555722
+          -58.6554166666681
         ],
         "rotation": 0,
-        "speed": 1.2833333333361452,
+        "speed": 1.1916666666692777,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -393,10 +393,10 @@
         "position": [
           -1.75,
           0.09,
-          -45.38055555554253
+          -45.19166666665542
         ],
         "rotation": 0,
-        "speed": 2.333333333311316,
+        "speed": 2.166666666646222,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -417,12 +417,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          20.826527777780022,
+          20.98708333333527,
           0.09,
           -78.25
         ],
         "rotation": 1.5707963267948966,
-        "speed": 1.98333333332954,
+        "speed": 1.8416666666631443,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -443,12 +443,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          35.24069444444278,
+          35.3445833333319,
           0.09,
           -78.25
         ],
         "rotation": 1.5707963267948966,
-        "speed": 1.2833333333361452,
+        "speed": 1.1916666666692777,
         "braking": false,
         "reason": "FOLLOW",
         "lights": {
@@ -469,12 +469,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          -20.619444444439814,
+          -20.808333333329337,
           0.09,
           -81.75
         ],
         "rotation": -1.5707963267948966,
-        "speed": 2.3333333333411588,
+        "speed": 2.166666666673933,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -495,12 +495,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          -34.82652777778002,
+          -34.98708333333527,
           0.09,
           -81.75
         ],
         "rotation": -1.5707963267948966,
-        "speed": 1.98333333332954,
+        "speed": 1.8416666666631443,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -523,10 +523,10 @@
         "position": [
           1.75,
           0.09,
-          -421.2406944444781
+          -421.3445833333624
         ],
         "rotation": -3.141592653589793,
-        "speed": 1.2833333332764596,
+        "speed": 1.1916666666138553,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -549,10 +549,10 @@
         "position": [
           1.75,
           0.09,
-          -434.6194444444928
+          -434.80833333337506
         ],
         "rotation": -3.141592653589793,
-        "speed": 2.3333333332516304,
+        "speed": 2.1666666665907997,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -575,10 +575,10 @@
         "position": [
           -1.75,
           0.09,
-          -379.17347222227295
+          -379.01291666671045
         ],
         "rotation": 0,
-        "speed": 1.9833333334190684,
+        "speed": 1.8416666667462778,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -601,10 +601,10 @@
         "position": [
           -1.75,
           0.09,
-          -364.7593055555219
+          -364.6554166666376
         ],
         "rotation": 0,
-        "speed": 1.2833333332764596,
+        "speed": 1.1916666666138553,
         "braking": false,
         "reason": "FOLLOW",
         "lights": {
@@ -625,12 +625,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          20.619444444439814,
+          20.808333333329337,
           0.09,
           -398.25
         ],
         "rotation": 1.5707963267948966,
-        "speed": 2.3333333333411588,
+        "speed": 2.166666666673933,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -651,12 +651,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          34.82652777778002,
+          34.98708333333527,
           0.09,
           -398.25
         ],
         "rotation": 1.5707963267948966,
-        "speed": 1.98333333332954,
+        "speed": 1.8416666666631443,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -677,12 +677,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          -21.24069444444278,
+          -21.344583333331897,
           0.09,
           -401.75
         ],
         "rotation": -1.5707963267948966,
-        "speed": 1.2833333333361452,
+        "speed": 1.1916666666692777,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -703,12 +703,12 @@
         "loaded": true,
         "groupVisible": false,
         "position": [
-          -34.61944444445747,
+          -34.80833333334458,
           0.09,
           -401.75
         ],
         "rotation": -1.5707963267948966,
-        "speed": 2.333333333311316,
+        "speed": 2.166666666646222,
         "braking": false,
         "reason": "CRUISE",
         "lights": {
@@ -824,5 +824,5 @@
     "triangles": 111678,
     "elapsed": 0
   },
-  "finished": "2026-11-05T04:21:45.324Z"
+  "finished": "2026-11-11T03:47:09.824Z"
 }

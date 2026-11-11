@@ -1,0 +1,8 @@
+{
+  "started": "2026-11-11T04:28:01.020Z",
+  "web": "http://127.0.0.1:5893",
+  "passed": false,
+  "errors": [],
+  "error": "frame.waitForFunction: Timeout 30000ms exceeded.",
+  "finished": "2026-11-11T04:28:52.666Z"
+}

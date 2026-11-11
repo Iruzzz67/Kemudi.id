@@ -1,6 +1,28 @@
 # Progres realisme — titik lanjut lintas sesi
 
-Terakhir diperbarui: 2026-11-05 (Asia/Jakarta).
+Terakhir diperbarui: 2026-11-11 (Asia/Jakarta).
+
+## QA fitur dan 13 warning — 11 November 2026
+
+- Tiga sumber warning diperbaiki: import AdminBadge, predicate nullable gear
+  ratios, dan default null berlebih pada lookup kendaraan legacy. Full .NET
+  rebuild dengan warning-as-error PASS0warning/0error; regresi C#10PASS setelah
+  dua kegagalan sebelum fix. Tidak menonaktifkan warning atau mengubah schema.
+- PASS fresh simulator build42file, syntax60, functions6, seluruh realism/gamepad/
+  handling units; browser full realism6kasus49checks, synthetic gamepad6kasus69,
+  smoke3kendaraan, intersection/alias/seam, handling MOBIL/auto10checks.
+- Website60PASS/7FAIL dari67checks; delapan temuan runtime termasuk probe tambahan.
+  Pembayaran anonymous langsung paid/duplikasi dan circuit login admin menjadi
+  prioritas, belum diperbaiki karena scope edit hanya warning.
+- Backend6checks security/auth/idempotensi PASS, real drive FAIL batas180s.
+  Result panel recovery4checks dan injected results/retry/dashboard3checks PASS,
+  tetapi bukan bukti finish/save/dashboard dari perjalanan penuh.
+- Iframe TRUK/manual build terbaru FAIL automation (timeout/detachment); belum
+  dianggap PASS atau dipastikan defect runtime. Acceptance/rilis tetap pending.
+- Bukti lengkap: `artifacts/feature-qa-2026-11-11/REPORT.md`. Preview build fix
+  Web5893/API5892 (DB preview terpisah), standalone8080 aktif; listener5890/5891
+  lama tidak dihentikan paksa. Berikutnya: pembayaran/admin, lalu iframe dan
+  real journey dengan diagnostik waktu/fokus; hardware/audio/FPS tetap NOT RUN.
 
 ## Perbaikan sambungan jalan — 5 November 2026
 

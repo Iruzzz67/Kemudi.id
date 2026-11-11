@@ -1,0 +1,8 @@
+{
+  "web": "http://127.0.0.1:5893",
+  "checks": [],
+  "errors": [],
+  "passed": false,
+  "scope": "Real iframe UI probe and injected result payloads through real gateway; NOT a completed driving journey",
+  "error": "frame.evaluate: Frame was detached"
+}

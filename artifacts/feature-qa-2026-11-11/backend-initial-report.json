@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Anonymous save rejected"
+  ],
+  "attempts": [],
+  "passed": false,
+  "error": "page.waitForURL: Timeout 60000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/dashboard\" until \"load\"\n============================================================"
+}

@@ -267,3 +267,71 @@ Catatan bersifat append-only per sesi; pembaruan status ringkas ada di `REALISM_
 - Server preview5891 (exec86214) dan API5890 (exec56466) sengaja dibiarkan hidup dengan DB terpisah artifacts/browser-qa-2026-11-10/test.db; sandbox server milik sesi sudah berhenti; tidak menjalankan8080.
 - NOT RUN pembayaran/enrollment final, admin berwenang, full6case, finish/save/retry/dashboard, controller fisik/audio/FPS/stability panjang/security audit. Tidak mengubah status acceptance/rilis.
 - Next: perbaiki query mentor dan ringkasan Razor, validasi/label form; tambah regression UI dan ulang pendaftaran sebelum pengujian pembayaran.
+
+## 2026-11-11 — QA fitur menyeluruh terjangkau dan perbaikan 13 warning
+
+- Pengguna meminta uji fitur, laporkan penyebab warning sebelum fix. Laporan
+  awal disampaikan sebelum edit aplikasi. Tiga edit produksi: VehicleData.cs
+  menghapus explicit null default FirstOrDefault; AppDbContext.cs null-safe
+  structural predicate; Components/_Imports.razor mengimpor namespace AdminBadge.
+  Tidak mengubah schema, CSV converter, simulator/input/results/scoring atau API.
+- Tambah tools/Kemudi.RegressionTests (console/self-check, tanpa dependency baru)
+  untuk lookup, comparer null/equality/hash, mutation/snapshot EF, render actual
+  AdminKursus. RED dua checks sebelum fix; GREEN10/10 sesudah dan final ulang.
+  tools/webgl/backend-smoke.cjs menunggu validasi form kosong agar input masuk
+  setelah Blazor interactive; assertion auth/results/drive lama dipertahankan.
+- Command PASS: `dotnet restore Kemudi.slnx --artifacts-path
+  artifacts/dotnet-warning-tests --source $env:USERPROFILE/.nuget/packages`, lalu
+  `dotnet build Kemudi.slnx --artifacts-path artifacts/dotnet-warning-tests
+  --no-restore -t:Rebuild --nologo -warnaserror` =>0warnings/0errors. NuGetonline
+  sebelumnya gagal sandbox, retry approved masih bermasalah/audit tidak terambil;
+  cache restore bukan bukti online vulnerability audit. Tidak ada suppression.
+- PASS `dotnet run --project tools/Kemudi.RegressionTests --artifacts-path
+  artifacts/dotnet-warning-tests --no-restore`, final `--no-build --no-restore`;
+  node syntax dan scoped git diff --check. Review independen APPROVE tanpa temuan
+  pada diff warning/tes. Bukti warnings-before/after/final.log, dotnet-build.log.
+- Native QA lane website:60PASS/7FAIL67checks +3focused probes. Public routes,
+ 3course filters,4mentor profiles,4materi details, auth/reload/profile,12adminAPI
+  authorization dan9UI redirects,3local enrollment/payment instruction flows.
+  Temuan8: pembayaran anonymous paid/duplicate; login admin circuit failure;
+  invalid-cookie authenticated UI; mentor query hilang; literal ?? summary;
+ 7label tanpa control; pesan login kosong; mobile home390→495px overflow.
+  Pembayaran dibuktikan hanya pada dummy milik tes; bukan transaksi bank.
+  Temuan fitur tidak diperbaiki diam-diam di scope warning.
+- PASS simulator `npm.cmd --prefix tools/webgl run build`42files/7.176.563bytes,
+  test:syntax60, test:functions6, test:realism collision11/traffic15fullworld120s,
+  test:gamepad device/domain/UI, test:handling19, intersection/unified unit7.
+- PASS browser smoke3automatic vehicles, intersection, unifiedlegacyaliases,
+  road-seamTRUK5. Fullrealism6vehicle/transmission49checks+environment matrices
+  PASS35m33s; syntheticgamepad6standalone69checks PASS24m43s; focused handling
+  MOBIL/automatic10checks. Waktu wall bukan hardware FPS benchmark. Fulllook
+  dibatalkan saat kasus pertama (partial bukan PASS), handling5lainnya NOT RUN.
+- Backend awal FAIL register input hilang/hydration; evidence baseline disimpan.
+  Sesudah observable readiness, `WEB_URL=5891 API_URL=5890
+  BACKEND_DRIVE_TIMEOUT_MS=180000 node tools/webgl/backend-smoke.cjs` meluluskan
+ 6checks anonymous/HttpOnly/logout-login/CSRF+validation/concurrentretry/isolation,
+  kemudian FAIL belum finis (clock12,58s, z=-20,35m). Tidak mengklaim downstream
+  fulljourney save/failure/retry/dashboard. Result-errors4checks PASS5891 dan5893.
+- Fresh build Web5893/API5892 HTTP200 (root/login/kursus/Swagger), API tidak perlu
+  migrasi baru. `WEB_URL=5893 node tools/webgl/realism-iframe.cjs` FAIL wait driving;
+  diagnostic artifact menangkap initial detached frame dan retry canvas-click
+  timeout. Penyebab belum dipastikan, tidak dicatat sebagai PASS iframe.
+- `node artifacts/feature-qa-2026-11-11/gateway-results.cjs` PASS3checks tanpa3D:
+  respons sudah-save hilang→503→retry satuAttemptId; completed/failed tersimpan;
+  dashboard kedua status bertahan reload. Payload diinjeksi tes, bukan perjalanan.
+- Evidence lengkap `artifacts/feature-qa-2026-11-11/REPORT.md`, website/REPORT.md,
+  simulator/REPORT.md dan report/log/screenshots terkait. Existing test scripts
+  memperbarui canonical artifact/screenshot di artifacts/{webgl,realism,gamepad,
+  intersection,unified,backend-integration}; tidak menghapus/memulihkan artefak lama.
+  Tidak menyimpan credential/token/cookie; DBpreview di-ignore, bukan produksi.
+- Preview baru sengaja aktif: Web5893 exec9001, API5892 exec95111, memakai
+  `dotnet run --artifacts-path artifacts/dotnet-warning-tests --no-build
+  --no-launch-profile` dan DB artifacts/realism/preview.db. Standalone8080
+  exec80413 tetapaktif. Upaya stop tool sessions lama tidak membebaskan listener
+ 5890/5891; startup ulang portlama gagalbind, tidak memaksa kill PID tanpa proof.
+- NOT RUN: genuineauthorizedadmin CRUD/settings/schedules, externalproviders,
+  hardwarecontroller, audio/visual manusia, hardwareFPS dan stability5menitbaru.
+  Rilis tetap NEEDSATTENTION. Next spesifik: perbaiki payment trust boundary dan
+  adminlogin dengan regresi, lanjut query/summary/labels/mobile, diagnosis iframe
+  hydration/fokus, kemudian real journey finish/save/retry/dashboard pada host
+  dan batas waktu memadai. Pengujian luas ini bukan bukti seluruh fitur sempurna.

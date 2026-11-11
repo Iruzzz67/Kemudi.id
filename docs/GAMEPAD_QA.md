@@ -1,5 +1,19 @@
 # Gamepad QA dan status implementasi
 
+## Regresi 11 November 2026
+
+- PASS6kasus standalone sintetis69checks, fresh pada source saat ini. Seluruh
+  kendaraan/transmisi, input analog, guarded gears, menu/edge-once, arbitration,
+  pause/held-resume/disconnect/error safety. Tidak ada runtime gamepad diubah.
+- PASS unit device/domain/UI, handling19 dan focused handling browserMOBIL/auto10.
+  Arsip `artifacts/feature-qa-2026-11-11/simulator/gamepad-full-report.json`,
+  `handling-report.json`, log dan `REPORT.md`; full realism6kasus49 juga PASS.
+- Full look browser dibatalkan saat kasus pertama setelah assertion parsial;
+  `look-partial-report.json` bukan PASS. Lima handling cases browser lain NOT RUN.
+- Gamepad iframe, USB/Bluetooth fisik, kenyamanan/FFB, audio manusia, FPS dan
+  sustained stability baru NOT RUN. Main keyboard iframe5893 timeout/detachment
+  belum didiagnosis tuntas; jangan mengklaim iframe acceptance dari standalone.
+
 ## Handling / berat setir-stang — 5 November 2026
 
 - Settings v1 menambah steeringWeight0..100/default50 dan steeringReturn.5..2/

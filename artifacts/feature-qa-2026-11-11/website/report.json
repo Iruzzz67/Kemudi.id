@@ -1,0 +1,473 @@
+{
+    "date":  "2026-11-11T02:30:38.264Z",
+    "checks":  [
+                   {
+                       "name":  "public route /",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  1905
+                                  }
+                   },
+                   {
+                       "name":  "public route /kursus",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  1758
+                                  }
+                   },
+                   {
+                       "name":  "public route /materi",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  1059
+                                  }
+                   },
+                   {
+                       "name":  "public route /login",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  369
+                                  }
+                   },
+                   {
+                       "name":  "public route /register",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  433
+                                  }
+                   },
+                   {
+                       "name":  "public route /kursus/personal",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  1146
+                                  }
+                   },
+                   {
+                       "name":  "public route /kursus/payment",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  200,
+                                      "textLength":  305
+                                  }
+                   },
+                   {
+                       "name":  "guest dashboard protected",
+                       "result":  "PASS",
+                       "detail":  "Sign-in invitation; no history"
+                   },
+                   {
+                       "name":  "public API courses",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "count":  7
+                                  }
+                   },
+                   {
+                       "name":  "public API mentors",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "count":  4
+                                  }
+                   },
+                   {
+                       "name":  "public API vehicles",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "count":  3
+                                  }
+                   },
+                   {
+                       "name":  "course/mentor filter MOTOR",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "expectedCourses":  2,
+                                      "expectedMentors":  2
+                                  }
+                   },
+                   {
+                       "name":  "course/mentor filter MOBIL",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "expectedCourses":  3,
+                                      "expectedMentors":  3
+                                  }
+                   },
+                   {
+                       "name":  "course/mentor filter TRUK",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "expectedCourses":  2,
+                                      "expectedMentors":  1
+                                  }
+                   },
+                   {
+                       "name":  "mentor profile agus-wirawan",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "name":  "Agus Wirawan"
+                                  }
+                   },
+                   {
+                       "name":  "mentor profile budi-santoso",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "name":  "Budi Santoso"
+                                  }
+                   },
+                   {
+                       "name":  "mentor profile dewi-lestari",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "name":  "Dewi Lestari"
+                                  }
+                   },
+                   {
+                       "name":  "mentor profile siti-rahma",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "name":  "Siti Rahma"
+                                  }
+                   },
+                   {
+                       "name":  "mentor query preselection",
+                       "result":  "FAIL",
+                       "detail":  "Expected values to be strictly equal:\n\n\u0027\u0027 !== \u0027agus-wirawan\u0027\n"
+                   },
+                   {
+                       "name":  "course summary has no source expression",
+                       "result":  "FAIL",
+                       "detail":  "[\"MentorAgus Wirawan ?? \\\"Belum dipilih\\\"\",\"PaketMotor Reguler ?? \\\"Belum dipilih\\\"\",\"StatusMenunggu pembayaran\"]"
+                   },
+                   {
+                       "name":  "course fields have accessible labels",
+                       "result":  "FAIL",
+                       "detail":  "[{\"text\":\"Nama Lengkap\",\"associated\":false},{\"text\":\"Email\",\"associated\":false},{\"text\":\"No. Telepon (opsional)\",\"associated\":false},{\"text\":\"NIK\",\"associated\":false},{\"text\":\"Alamat\",\"associated\":false},{\"text\":\"Mentor\",\"associated\":false},{\"text\":\"Paket Kursus\",\"associated\":false}]"
+                   },
+                   {
+                       "name":  "enrollment required validation",
+                       "result":  "PASS",
+                       "detail":  "Required fields rejected"
+                   },
+                   {
+                       "name":  "learning detail materi/rambu-lalu-lintas",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "title":  "Mengenal Rambu Lalu Lintas"
+                                  }
+                   },
+                   {
+                       "name":  "learning detail materi/dasar-berkendara-motor",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "title":  "Dasar Berkendara Sepeda Motor"
+                                  }
+                   },
+                   {
+                       "name":  "learning detail materi/dasar-mengemudikan-mobil",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "title":  "Dasar Mengemudikan Mobil"
+                                  }
+                   },
+                   {
+                       "name":  "learning detail materi/dasar-mengemudikan-truk",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "title":  "Dasar Mengemudikan Truk"
+                                  }
+                   },
+                   {
+                       "name":  "unknown learning detail handled",
+                       "result":  "PASS",
+                       "detail":  "Not-found message"
+                   },
+                   {
+                       "name":  "registration required validation",
+                       "result":  "PASS",
+                       "detail":  "Required fields rejected"
+                   },
+                   {
+                       "name":  "register -\u003e authenticated dashboard",
+                       "result":  "PASS",
+                       "detail":  "Fresh account dashboard visible"
+                   },
+                   {
+                       "name":  "logout clears session",
+                       "result":  "PASS",
+                       "detail":  "Guest dashboard restored"
+                   },
+                   {
+                       "name":  "empty login validation",
+                       "result":  "FAIL",
+                       "detail":  "Email atau password salah."
+                   },
+                   {
+                       "name":  "incorrect password rejected",
+                       "result":  "PASS",
+                       "detail":  "Rejected with credential error"
+                   },
+                   {
+                       "name":  "valid login persists reload",
+                       "result":  "PASS",
+                       "detail":  "Dashboard survives reload"
+                   },
+                   {
+                       "name":  "authenticated profile API",
+                       "result":  "PASS",
+                       "detail":  "Own profile returned"
+                   },
+                   {
+                       "name":  "regular account denied admin login API",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "status":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/auth/me",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/courses",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/courses/packages",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/dashboard",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/mentors",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/payments",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/registrations",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/schedules",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/settings/audit-logs",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/settings/admins",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/stats",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "admin API authorization /api/admin/users",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "guest":  401,
+                                      "regularUser":  403
+                                  }
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/dashboard",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/pendaftaran",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/pengguna",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/mentor",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/jadwal",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/pembayaran",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/kursus",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/statistik",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "regular user admin UI /admin/pengaturan",
+                       "result":  "PASS",
+                       "detail":  "Redirected to admin login"
+                   },
+                   {
+                       "name":  "admin form rejects regular user without circuit failure",
+                       "result":  "FAIL",
+                       "detail":  "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator(\u0027.error-box\u0027) to be visible\u001b[22m\n"
+                   },
+                   {
+                       "name":  "enrollment/payment UI transfer",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "method":  "transfer",
+                                      "status":  "paid"
+                                  }
+                   },
+                   {
+                       "name":  "enrollment/payment UI e-wallet",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "method":  "e-wallet",
+                                      "status":  "paid"
+                                  }
+                   },
+                   {
+                       "name":  "enrollment/payment UI cash",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "method":  "cash",
+                                      "status":  "paid"
+                                  }
+                   },
+                   {
+                       "name":  "payment requires auth/proof and rejects duplicate confirmation",
+                       "result":  "FAIL",
+                       "detail":  "{\"anonymousFirst\":200,\"anonymousSecond\":200,\"firstStatus\":\"paid\",\"distinctPaymentRecords\":true}"
+                   },
+                   {
+                       "name":  "mobile no horizontal overflow /",
+                       "result":  "FAIL",
+                       "detail":  {
+                                      "configuredViewport":  390,
+                                      "clientWidth":  390,
+                                      "scrollWidth":  495,
+                                      "expandedInnerWidth":  495,
+                                      "correction":  "Focused probe corrected initial innerWidth-based false positive"
+                                  }
+                   },
+                   {
+                       "name":  "mobile no horizontal overflow /kursus",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "scroll":  390,
+                                      "width":  390
+                                  }
+                   },
+                   {
+                       "name":  "mobile no horizontal overflow /materi",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "scroll":  390,
+                                      "width":  390
+                                  }
+                   },
+                   {
+                       "name":  "mobile no horizontal overflow /register",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "scroll":  390,
+                                      "width":  390
+                                  }
+                   },
+                   {
+                       "name":  "mobile no horizontal overflow /kursus/personal",
+                       "result":  "PASS",
+                       "detail":  {
+                                      "scroll":  390,
+                                      "width":  390
+                                  }
+                   },
+                   {
+                       "name":  "no uncaught website page errors",
+                       "result":  "PASS",
+                       "detail":  "No pageerror events"
+                   }
+               ],
+    "pageErrors":  [
+
+                   ],
+    "unexpectedResponses":  [
+
+                            ],
+    "gaps":  [
+                 "No authorized Admin credentials: admin CRUD/statistics/settings success paths NOT RUN; no privilege promotion.",
+                 "No profile edit route exists; own profile read API tested.",
+                 "Payment methods tested against local SQLite only; no real bank/e-wallet/provider transaction.",
+                 "Interactive visual/audio/hardware/performance and simulator are outside this website lane."
+             ],
+    "summary":  {
+                    "pass":  60,
+                    "fail":  7
+                }
+}

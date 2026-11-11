@@ -10,7 +10,7 @@ public static class VehicleData
     };
 
     public static VehicleInfo? ByType(string type)
-        => List.FirstOrDefault(v => v.Type == type, null);
+        => List.FirstOrDefault(v => v.Type == type);
 }
 
 public record VehicleInfo(string Type, string Label, string Description, string Color, double MaxSpeed, int GearCount);

@@ -1,0 +1,10 @@
+{
+  "web": "http://127.0.0.1:5893",
+  "checks": [
+    "Lost saved response and 503 recover via real panel retry without duplicate AttemptId",
+    "Injected completed and failed results persist",
+    "Dashboard shows both statuses and persists after reload"
+  ],
+  "passed": true,
+  "scope": "Injected completed/failed results, real gateway/database/dashboard; NOT a driving journey"
+}

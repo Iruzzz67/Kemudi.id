@@ -1,0 +1,70 @@
+PASS public route /: {"status":200,"textLength":1905}
+PASS public route /kursus: {"status":200,"textLength":1758}
+PASS public route /materi: {"status":200,"textLength":1059}
+PASS public route /login: {"status":200,"textLength":369}
+PASS public route /register: {"status":200,"textLength":433}
+PASS public route /kursus/personal: {"status":200,"textLength":1146}
+PASS public route /kursus/payment: {"status":200,"textLength":305}
+PASS guest dashboard protected: "Sign-in invitation; no history"
+PASS public API courses: {"count":7}
+PASS public API mentors: {"count":4}
+PASS public API vehicles: {"count":3}
+PASS course/mentor filter MOTOR: {"expectedCourses":2,"expectedMentors":2}
+PASS course/mentor filter MOBIL: {"expectedCourses":3,"expectedMentors":3}
+PASS course/mentor filter TRUK: {"expectedCourses":2,"expectedMentors":1}
+PASS mentor profile agus-wirawan: {"name":"Agus Wirawan"}
+PASS mentor profile budi-santoso: {"name":"Budi Santoso"}
+PASS mentor profile dewi-lestari: {"name":"Dewi Lestari"}
+PASS mentor profile siti-rahma: {"name":"Siti Rahma"}
+FAIL mentor query preselection: "Expected values to be strictly equal:\n\n'' !== 'agus-wirawan'\n"
+FAIL course summary has no source expression: "[\"MentorAgus Wirawan ?? \\\"Belum dipilih\\\"\",\"PaketMotor Reguler ?? \\\"Belum dipilih\\\"\",\"StatusMenunggu pembayaran\"]"
+FAIL course fields have accessible labels: "[{\"text\":\"Nama Lengkap\",\"associated\":false},{\"text\":\"Email\",\"associated\":false},{\"text\":\"No. Telepon (opsional)\",\"associated\":false},{\"text\":\"NIK\",\"associated\":false},{\"text\":\"Alamat\",\"associated\":false},{\"text\":\"Mentor\",\"associated\":false},{\"text\":\"Paket Kursus\",\"associated\":false}]"
+PASS enrollment required validation: "Required fields rejected"
+PASS learning detail materi/rambu-lalu-lintas: {"title":"Mengenal Rambu Lalu Lintas"}
+PASS learning detail materi/dasar-berkendara-motor: {"title":"Dasar Berkendara Sepeda Motor"}
+PASS learning detail materi/dasar-mengemudikan-mobil: {"title":"Dasar Mengemudikan Mobil"}
+PASS learning detail materi/dasar-mengemudikan-truk: {"title":"Dasar Mengemudikan Truk"}
+PASS unknown learning detail handled: "Not-found message"
+PASS registration required validation: "Required fields rejected"
+PASS register -> authenticated dashboard: "Fresh account dashboard visible"
+PASS logout clears session: "Guest dashboard restored"
+FAIL empty login validation: "Email atau password salah."
+PASS incorrect password rejected: "Rejected with credential error"
+PASS valid login persists reload: "Dashboard survives reload"
+PASS authenticated profile API: "Own profile returned"
+PASS regular account denied admin login API: {"status":403}
+PASS admin API authorization /api/admin/auth/me: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/courses: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/courses/packages: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/dashboard: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/mentors: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/payments: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/registrations: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/schedules: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/settings/audit-logs: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/settings/admins: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/stats: {"guest":401,"regularUser":403}
+PASS admin API authorization /api/admin/users: {"guest":401,"regularUser":403}
+PASS regular user admin UI /admin/dashboard: "Redirected to admin login"
+PASS regular user admin UI /admin/pendaftaran: "Redirected to admin login"
+PASS regular user admin UI /admin/pengguna: "Redirected to admin login"
+PASS regular user admin UI /admin/mentor: "Redirected to admin login"
+PASS regular user admin UI /admin/jadwal: "Redirected to admin login"
+PASS regular user admin UI /admin/pembayaran: "Redirected to admin login"
+PASS regular user admin UI /admin/kursus: "Redirected to admin login"
+PASS regular user admin UI /admin/statistik: "Redirected to admin login"
+PASS regular user admin UI /admin/pengaturan: "Redirected to admin login"
+FAIL admin form rejects regular user without circuit failure: "locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.error-box') to be visible\u001b[22m\n"
+PASS enrollment/payment UI transfer: {"method":"transfer","registrationId":"[dummy-id-redacted]","status":"paid"}
+PASS enrollment/payment UI e-wallet: {"method":"e-wallet","registrationId":"[dummy-id-redacted]","status":"paid"}
+PASS enrollment/payment UI cash: {"method":"cash","registrationId":"[dummy-id-redacted]","status":"paid"}
+FAIL payment requires auth/proof and rejects duplicate confirmation: "{\"anonymousFirst\":200,\"anonymousSecond\":200,\"firstStatus\":\"paid\",\"distinctPaymentRecords\":true}"
+PASS mobile no horizontal overflow /: {"scroll":495,"width":495}
+PASS mobile no horizontal overflow /kursus: {"scroll":390,"width":390}
+PASS mobile no horizontal overflow /materi: {"scroll":390,"width":390}
+PASS mobile no horizontal overflow /register: {"scroll":390,"width":390}
+PASS mobile no horizontal overflow /kursus/personal: {"scroll":390,"width":390}
+PASS no uncaught website page errors: "No pageerror events"
+{"pass":61,"fail":6}
+
+CORRECTION: mobile home initial innerWidth assertion was a false positive; focused probe proves clientWidth390 vs scrollWidth495. Corrected report:60 PASS /7 FAIL.

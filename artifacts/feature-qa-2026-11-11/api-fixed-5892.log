@@ -1,0 +1,184 @@
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM "__EFMigrationsHistory"
+      ORDER BY "MigrationId";
+info: Microsoft.EntityFrameworkCore.Migrations[20405]
+      No migrations were applied. The database is already up to date.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5892
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\user\Kemudi.id\src\Kemudi.Api
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "c"."Slug", "c0"."VehicleType", "c"."Label", "c"."Level", "c"."Price", "c"."Sessions", "c"."SessionDurationMin", "c"."Description", "c"."Includes"
+      FROM "CoursePackages" AS "c"
+      INNER JOIN "Courses" AS "c0" ON "c"."CourseId" = "c0"."Id"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "m"."Id", "m"."Achievements", "m"."AvatarColor", "m"."Bio", "m"."Certifications", "m"."ExperienceYears", "m"."Initials", "m"."Name", "m"."Phone", "m"."Rating", "m"."Slug", "m"."Status", "m"."StudentsTrained", "m"."TestimonialsJson", "m"."Title", "m"."VehicleTypes"
+      FROM "Mentors" AS "m"
+      ORDER BY "m"."Name"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[@__normalizedUserName_0='?' (Size = 42)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__normalizedEmail_0='?' (Size = 42)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."NormalizedEmail" = @__normalizedEmail_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@p0='?' (Size = 36), @p1='?' (DbType = Int32), @p2='?', @p3='?' (Size = 36), @p4='?' (DbType = DateTime), @p5='?' (Size = 42), @p6='?' (DbType = Boolean), @p7='?' (Size = 20), @p8='?' (DbType = Boolean), @p9='?' (DbType = Boolean), @p10='?' (DbType = DateTimeOffset), @p11='?', @p12='?' (Size = 42), @p13='?' (Size = 42), @p14='?' (Size = 84), @p15='?', @p16='?' (DbType = Boolean), @p17='?' (Size = 32), @p18='?' (DbType = Boolean), @p19='?' (Size = 42)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "AspNetUsers" ("Id", "AccessFailedCount", "Address", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FullName", "IsActive", "LockoutEnabled", "LockoutEnd", "NIK", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__attemptId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."Id" = @__attemptId_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int64), @p6='?', @p7='?' (Size = 36), @p8='?' (Size = 5), @p9='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "SimulationAttempts" ("Id", "ObstacleHits", "CreatedAt", "OffRoadCount", "Score", "TimeTakenMs", "TrainingMode", "UserId", "VehicleType", "Violations")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)
+      RETURNING "Completed";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__normalizedUserName_0='?' (Size = 35)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."NormalizedUserName" = @__normalizedUserName_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__normalizedEmail_0='?' (Size = 35)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."NormalizedEmail" = @__normalizedEmail_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[@p0='?' (Size = 36), @p1='?' (DbType = Int32), @p2='?', @p3='?' (Size = 36), @p4='?' (DbType = DateTime), @p5='?' (Size = 35), @p6='?' (DbType = Boolean), @p7='?' (Size = 9), @p8='?' (DbType = Boolean), @p9='?' (DbType = Boolean), @p10='?' (DbType = DateTimeOffset), @p11='?', @p12='?' (Size = 35), @p13='?' (Size = 35), @p14='?' (Size = 84), @p15='?', @p16='?' (DbType = Boolean), @p17='?' (Size = 32), @p18='?' (DbType = Boolean), @p19='?' (Size = 35)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "AspNetUsers" ("Id", "AccessFailedCount", "Address", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FullName", "IsActive", "LockoutEnabled", "LockoutEnd", "NIK", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__attemptId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."Id" = @__attemptId_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = Int32), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p6='?' (DbType = Int64), @p7='?', @p8='?' (Size = 36), @p9='?' (Size = 4), @p10='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "SimulationAttempts" ("Id", "ObstacleHits", "Completed", "CreatedAt", "OffRoadCount", "Score", "TimeTakenMs", "TrainingMode", "UserId", "VehicleType", "Violations")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__attemptId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."Id" = @__attemptId_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__attemptId_0='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."Id" = @__attemptId_0
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = Int32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = Int64), @p5='?', @p6='?' (Size = 36), @p7='?' (Size = 5), @p8='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO "SimulationAttempts" ("Id", "ObstacleHits", "CreatedAt", "OffRoadCount", "TimeTakenMs", "TrainingMode", "UserId", "VehicleType", "Violations")
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+      RETURNING "Completed", "Score";
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (Size = 36), @__p_1='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."Id", "s"."ObstacleHits", "s"."Completed", "s"."CreatedAt", "s"."OffRoadCount", "s"."Score", "s"."TimeTakenMs", "s"."TrainingMode", "s"."UserId", "s"."VehicleType", "s"."Violations"
+      FROM "SimulationAttempts" AS "s"
+      WHERE "s"."UserId" = @__userId_0
+      ORDER BY "s"."CreatedAt" DESC
+      LIMIT @__p_1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[@__p_0='?' (Size = 36)], CommandType='Text', CommandTimeout='30']
+      SELECT "a"."Id", "a"."AccessFailedCount", "a"."Address", "a"."ConcurrencyStamp", "a"."CreatedAt", "a"."Email", "a"."EmailConfirmed", "a"."FullName", "a"."IsActive", "a"."LockoutEnabled", "a"."LockoutEnd", "a"."NIK", "a"."NormalizedEmail", "a"."NormalizedUserName", "a"."PasswordHash", "a"."PhoneNumber", "a"."PhoneNumberConfirmed", "a"."SecurityStamp", "a"."TwoFactorEnabled", "a"."UserName"
+      FROM "AspNetUsers" AS "a"
+      WHERE "a"."Id" = @__p_0
+      LIMIT 1

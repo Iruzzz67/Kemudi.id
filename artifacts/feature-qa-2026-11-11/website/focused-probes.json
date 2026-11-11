@@ -1,0 +1,22 @@
+{
+  "mobileHome": {
+    "configuredViewport": 390,
+    "innerWidth": 495,
+    "clientWidth": 390,
+    "scrollWidth": 495,
+    "overflowElements": []
+  },
+  "invalidCookieDashboard": {
+    "showsAuthenticatedDashboard": true,
+    "showsGuestInvitation": false
+  },
+  "adminRegularLogin": {
+    "url": "http://127.0.0.1:5891/admin/login",
+    "errorBox": [],
+    "blazorErrorVisible": true,
+    "consoleErrors": [
+      "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED",
+      "[2026-11-11T02:37:06.846Z] Error: There was an unhandled exception on the current circuit, so this circuit will be terminated. For more details turn on detailed exceptions by setting 'DetailedErrors: true' in 'appSettings.Development.json' or set 'CircuitOptions.DetailedErrors'. "
+    ]
+  }
+}
