@@ -32,3 +32,6 @@ crashlytics-build.properties
 
 # Disposable local realism QA database (never commit accounts/session data).
 artifacts/realism/preview.db*
+
+# Disposable payment security test databases, never publish account/role fixtures.
+artifacts/payment-security/*.db*

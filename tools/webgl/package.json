@@ -12,6 +12,7 @@
     "test:handling": "node handling.cjs",
     "test:handling:browser": "node handling-browser.cjs",
     "test:backend": "node backend-smoke.cjs && node result-errors.cjs",
+    "test:payments": "node payment-security.cjs",
     "test:syntax": "node syntax.cjs",
     "test:realism": "node realism-state.cjs && node realism-collision.cjs && node realism-environment.cjs && node realism-lights.cjs && node realism-visual.cjs && node realism-traffic.cjs && node realism-lod.cjs",
     "test:realism:browser": "node realism-browser.cjs",

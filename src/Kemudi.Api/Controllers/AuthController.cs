@@ -68,7 +68,7 @@ public sealed class AuthController : ControllerBase
             return BadRequest(new { error = "Email dan password wajib diisi." });
 
         var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
+        if (user is null || !user.IsActive || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Unauthorized(new { error = "Email atau password salah." });
 
         return Ok(BuildAuthResponse(user));

@@ -3,6 +3,7 @@
 @using Kemudi.Web.Services
 @inject ApiClient Api
 @inject NavigationManager Nav
+@inject IConfiguration Configuration
 
 @if (_loading)
 {
@@ -10,7 +11,11 @@
 }
 else if (_registration is null)
 {
-    <div class="empty">Pendaftaran tidak ditemukan. <a href="kursus">Kembali ke kursus</a>.</div>
+    <div class="empty">Pendaftaran tidak ditemukan atau tidak dapat diakses. <a href="/login">Masuk dengan akun pemilik</a> atau <a href="/kursus">kembali ke kursus</a>.</div>
+}
+else if (_statusUnavailable)
+{
+    <div class="error-box" role="alert">Status pembayaran belum dapat dipastikan. Jangan mengulang transfer. <a href="@Nav.Uri">Muat ulang status</a> atau hubungi admin untuk rekonsiliasi.</div>
 }
 else
 {
@@ -18,7 +23,7 @@ else
         <div class="section-head">
             <div>
                 <h1 class="section-title" style="font-size:2rem;">Instruksi Pembayaran</h1>
-                <p class="section-sub" style="font-size:1.05rem;">Selesaikan pembayaran untuk mengaktifkan kursusmu.</p>
+                <p class="section-sub" style="font-size:1.05rem;">Pembayaran diperiksa manual. Pengajuan tidak otomatis melunasi atau mengaktifkan kursus.</p>
             </div>
         </div>
 
@@ -28,31 +33,44 @@ else
                 <div class="list-item"><span class="muted">Nama</span><br /><strong style="font-size:1.05rem;">@_registration.Name</strong></div>
                 <div class="list-item"><span class="muted">Metode</span><br /><strong>@MethodLabel(_registration.PaymentMethod)</strong></div>
                 <div class="list-item"><span class="muted">Mulai Kursus</span><br /><strong>@_registration.StartDate.ToLocalTime().ToString("dd MMM yyyy")</strong></div>
-                <div class="list-item"><span class="muted">Jumlah</span><br /><span class="price" style="font-size:1.5rem;">Rp @_registration.Amount.ToString("N0", new System.Globalization.CultureInfo("id-ID"))</span></div>
+                <div class="list-item"><span class="muted">Jumlah</span><br /><span class="price" style="font-size:1.5rem;">Rp @((_payment?.Amount ?? _registration.Amount).ToString("N0", new System.Globalization.CultureInfo("id-ID")))</span></div>
             </div>
 
             <div class="card" style="padding:2rem;">
                 <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1.25rem;">@MethodLabel(_registration.PaymentMethod)</h3>
 
-                @if (_registration.PaymentMethod == "transfer")
+                @if (_payment is not null || _registration.Status != "pending")
                 {
-                    <div class="payment-box">
-                        <div class="list-item"><strong>BCA</strong><br /><span class="muted" style="font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">1234-5678-901</span></div>
-                        <div class="list-item"><strong>BNI</strong><br /><span class="muted" style="font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">9876-5432-100</span></div>
-                        <div class="list-item"><strong>a.n. Kemudi.id</strong></div>
-                        <p class="muted mt-1" style="font-size:0.9rem;">Transfer sesuai jumlah di atas, lalu konfirmasi di bawah.</p>
+                    <div class="payment-box" role="status">
+                        @if ((_payment?.Status ?? _registration.Status) == "paid")
+                        {
+                            <p>Pembayaran tercatat lunas.</p>
+                        }
+                        else if (_payment?.Status == "pending")
+                        {
+                            <p>Pengajuan diterima. Menunggu verifikasi penerimaan dana oleh admin; kursus belum diaktifkan.</p>
+                        }
+                        else
+                        {
+                            <p>Pendaftaran atau pembayaran ditolak/dibatalkan. Hubungi admin melalui kanal resmi untuk peninjauan.</p>
+                        }
                     </div>
                 }
-                else if (_registration.PaymentMethod == "e-wallet")
+                else if (_registration.PaymentMethod != "cash")
                 {
-                    <div class="payment-box flex">
-                        <div class="qris">QRIS<br />Kemudi.id</div>
-                        <div>
-                            <strong>QRIS / E-Wallet</strong>
-                            <div class="muted">Scan QR pada aplikasi dompet digital Anda.</div>
-                            <div class="mt-1 muted">OVO / GoPay / Dana: <strong style="font-family:'JetBrains Mono',monospace;">0812-3456-7890</strong></div>
+                    @if (string.IsNullOrWhiteSpace(Instructions))
+                    {
+                        <p role="alert">Metode pembayaran ini belum dikonfigurasi. Jangan transfer ke rekening atau QR contoh. Hubungi admin melalui kanal resmi.</p>
+                    }
+                    else
+                    {
+                        <p class="payment-box" style="white-space:pre-line">@Instructions</p>
+                        <div class="field">
+                            <label for="payment-reference">Referensi transfer / transaksi</label>
+                            <input id="payment-reference" maxlength="128" minlength="3" @bind="_reference" aria-describedby="payment-reference-help" />
+                            <p id="payment-reference-help" class="muted">Referensi ini hanya untuk pencocokan admin, bukan bukti dana sudah diterima. Jangan kirim PIN, OTP atau data kartu.</p>
                         </div>
-                    </div>
+                    }
                 }
                 else
                 {
@@ -68,23 +86,30 @@ else
                     <div class="error-box mt-2">@_error</div>
                 }
 
-                <div class="flex mt-3">
-                    <button class="btn btn-success btn-lg" disabled="@_busy" @onclick="ConfirmAsync">@(_busy ? "Memproses..." : "✓ Saya sudah bayar")</button>
-                    <a class="btn btn-outline" href="kursus">Batalkan</a>
-                </div>
+                @if (_payment is null && _registration.Status == "pending")
+                {
+                    <div class="flex mt-3">
+                        <button class="btn btn-primary btn-lg" disabled="@(_busy || (_registration.PaymentMethod != "cash" && string.IsNullOrWhiteSpace(Instructions)))" @onclick="ConfirmAsync">@(_busy ? "Mengirim..." : "Ajukan verifikasi pembayaran")</button>
+                        <a class="btn btn-outline" href="/kursus">Kembali</a>
+                    </div>
+                }
             </div>
         </div>
     </div>
 }
 
 @code {
-    [SupplyParameterFromQuery] public string? Registration { get; set; }
-    [SupplyParameterFromQuery] public string? Method { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? Registration { get; set; }
 
     private CourseRegistrationDto? _registration;
+    private PaymentDto? _payment;
     private bool _loading = true;
     private bool _busy;
     private string? _error;
+    private string _reference = "";
+    private bool _statusUnavailable;
+    private string? Instructions => Configuration[_registration?.PaymentMethod == "e-wallet"
+        ? "Payments:EWalletInstructions" : "Payments:TransferInstructions"];
 
     private static string MethodLabel(string method) => method switch
     {
@@ -96,34 +121,55 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(Registration))
+        if (!Guid.TryParse(Registration, out var id) || id == Guid.Empty)
         {
             _loading = false;
             return;
         }
 
-        _registration = await Api.GetAsync<CourseRegistrationDto>($"/api/course-registration/{Registration}");
-        _loading = false;
+        try
+        {
+            _registration = await Api.GetAsync<CourseRegistrationDto>($"/api/course-registration/{id}");
+            if (_registration is not null)
+            {
+                var payment = await Api.GetWithStatusAsync<PaymentDto>($"/api/payment/{id}");
+                if (payment.Status == System.Net.HttpStatusCode.OK && payment.Data is not null)
+                    _payment = payment.Data;
+                else if (payment.Status != System.Net.HttpStatusCode.NotFound)
+                    _statusUnavailable = true;
+            }
+        }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            _statusUnavailable = true;
+        }
+        finally { _loading = false; }
     }
 
     private async Task ConfirmAsync()
     {
+        if (_registration is null || _payment is not null) return;
         _busy = true;
         _error = null;
         try
         {
-            var method = Method ?? _registration?.PaymentMethod ?? "transfer";
+            var method = _registration.PaymentMethod;
+            if (method != "cash" && (string.IsNullOrWhiteSpace(Instructions) || _reference.Trim().Length < 3))
+            {
+                _error = "Gunakan instruksi resmi dan isi referensi transaksi minimal 3 karakter.";
+                return;
+            }
             var result = await Api.PostAsync<PaymentRequest, PaymentDto>(
                 "/api/payment",
-                new PaymentRequest(Registration!, method, "konfirmasi-online"));
+                new PaymentRequest(_registration.Id, method, method == "cash" ? null : _reference.Trim()));
 
             if (result is null)
             {
-                _error = "Konfirmasi gagal. Silakan coba lagi.";
+                _error = "Pengajuan tidak dapat diproses. Muat ulang status; jika sudah ditolak atau referensi berbeda, hubungi admin.";
                 return;
             }
 
-            Nav.NavigateTo("/dashboard", forceLoad: true);
+            _payment = result;
         }
         finally
         {

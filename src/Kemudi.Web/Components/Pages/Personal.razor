@@ -4,6 +4,16 @@
 @inject ApiClient Api
 @inject NavigationManager Nav
 
+@if (_loading)
+{
+    <div class="loading">Memeriksa sesi...</div>
+}
+else if (!_signedIn)
+{
+    <div class="empty">Silakan <a href="/login">masuk</a> sebelum mendaftar kursus agar pendaftaran dan pembayaran terkait akun Anda.</div>
+}
+else
+{
 <div style="padding-top:1rem;">
     <div class="section-head">
         <div>
@@ -111,6 +121,7 @@
         </div>
     </div>
 </div>
+}
 
 @code {
     private string _name = "";
@@ -123,14 +134,20 @@
     private string _method = "transfer";
     private string? _error;
     private bool _busy;
+    private bool _loading = true;
+    private bool _signedIn;
 
     private List<MentorDto> _mentors = new();
     private List<CoursePackageDto> _packages = new();
 
     protected override async Task OnInitializedAsync()
     {
+        var profile = await Api.GetAsync<UserProfileDto>("/api/auth/me");
+        _signedIn = profile is not null;
+        if (!_signedIn) { _loading = false; return; }
         _mentors = await Api.GetAsync<List<MentorDto>>("/api/mentors") ?? new();
         _packages = await Api.GetAsync<List<CoursePackageDto>>("/api/courses") ?? new();
+        _loading = false;
     }
 
     private void GoBack() => Nav.NavigateTo("/kursus");
@@ -162,7 +179,7 @@
                 return;
             }
 
-            Nav.NavigateTo($"/kursus/payment?registration={result.Id}&method={_method}");
+            Nav.NavigateTo($"/kursus/payment?registration={result.Id}");
         }
         finally
         {

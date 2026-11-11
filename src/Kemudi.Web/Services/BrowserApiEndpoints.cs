@@ -17,6 +17,8 @@ public static class BrowserApiEndpoints
         });
         app.MapPost("/api/session/login", (HttpContext context, IAntiforgery csrf,
             IHttpClientFactory factory, LoginRequest body) => Authenticate(context, csrf, factory, "login", body));
+        app.MapPost("/api/session/admin-login", (HttpContext context, IAntiforgery csrf,
+            IHttpClientFactory factory, LoginRequest body) => Authenticate(context, csrf, factory, "admin-login", body));
         app.MapPost("/api/session/register", (HttpContext context, IAntiforgery csrf,
             IHttpClientFactory factory, RegisterRequest body) => Authenticate(context, csrf, factory, "register", body));
         app.MapPost("/api/session/logout", async (HttpContext context, IAntiforgery csrf) =>
@@ -49,14 +51,19 @@ public static class BrowserApiEndpoints
         try
         {
             using var client = factory.CreateClient("BrowserBackend");
-            using var response = await client.PostAsJsonAsync("/api/auth/" + action, body, context.RequestAborted);
+            var path = action == "admin-login" ? "/api/admin/auth/login" : "/api/auth/" + action;
+            using var response = await client.PostAsJsonAsync(path, body, context.RequestAborted);
             if (!response.IsSuccessStatusCode)
-                return Results.Json(new { error = action == "login" ? "Email atau password salah." : "Pendaftaran gagal. Periksa data atau gunakan email lain." }, statusCode: (int)response.StatusCode);
+                return Results.Json(new { error = action == "admin-login" && response.StatusCode == System.Net.HttpStatusCode.Forbidden
+                    ? "Akun ini tidak memiliki akses admin."
+                    : action == "register" ? "Pendaftaran gagal. Periksa data atau gunakan email lain." : "Email atau password salah." }, statusCode: (int)response.StatusCode);
             var auth = await response.Content.ReadFromJsonAsync<AuthResponse>(context.RequestAborted);
             if (auth is null) return Results.StatusCode(502);
             context.Response.Cookies.Append(ApiClient.TokenCookie, auth.Token, new CookieOptions
             {
-                HttpOnly = true, Secure = context.Request.IsHttps, SameSite = SameSiteMode.Lax,
+                HttpOnly = true,
+                Secure = context.Request.IsHttps || !context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment(),
+                SameSite = SameSiteMode.Lax,
                 Path = "/", Expires = new DateTimeOffset(DateTime.SpecifyKind(auth.ExpiresAt, DateTimeKind.Utc))
             });
             return Results.Ok(new { success = true });

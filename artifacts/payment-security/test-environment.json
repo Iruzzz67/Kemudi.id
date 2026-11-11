@@ -1,0 +1,9 @@
+{
+  "api": "http://127.0.0.1:5902",
+  "db": "C:\\Users\\user\\Kemudi.id\\artifacts\\payment-security\\test-69e9f85d8c30456687f04d0bda11a9fc.db",
+  "configuredPid": 2472,
+  "configuredWeb": "http://127.0.0.1:5905",
+  "webPid": 11796,
+  "apiPid": 18672,
+  "web": "http://127.0.0.1:5903"
+}

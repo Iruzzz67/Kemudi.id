@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using Kemudi.App.Data;
 using Kemudi.Domain.Entities;
@@ -66,12 +67,42 @@ await using var services = new ServiceCollection().AddLogging()
     .AddSingleton<ApiClient>().AddSingleton<AuthService>()
     .AddSingleton<NavigationManager, FixtureNavigation>()
     .BuildServiceProvider();
+Check(!services.GetRequiredService<AuthService>().IsAdmin,
+    "Admin-looking email and cookie do not imply a verified admin role");
+Check(await services.GetRequiredService<AuthService>().LoadAdminAsync(),
+    "Active backend admin profile enables admin UI access");
+foreach (var profile in new[] { (HttpStatusCode.Forbidden, true), (HttpStatusCode.OK, false), (HttpStatusCode.ServiceUnavailable, true) })
+{
+    using var profileClient = new HttpClient(new AdminProfileFixtureHandler(profile.Item1, profile.Item2))
+        { BaseAddress = new Uri("http://render.invalid") };
+    var auth = new AuthService(new ApiClient(profileClient, services.GetRequiredService<IHttpContextAccessor>()),
+        services.GetRequiredService<IHttpContextAccessor>());
+    Check(!await auth.LoadAdminAsync() && !auth.IsAdmin
+        && (profile.Item1 == HttpStatusCode.ServiceUnavailable ? auth.AdminAccessError is not null : auth.AdminAccessError is null),
+        $"Denied or inactive backend admin profile stays non-admin ({profile.Item1}, active={profile.Item2})");
+    if (profile.Item1 == HttpStatusCode.ServiceUnavailable)
+    {
+        await using var unavailableServices = new ServiceCollection().AddLogging().AddSingleton(auth)
+            .AddSingleton<NavigationManager, FixtureNavigation>().BuildServiceProvider();
+        await using var unavailableRenderer = new HtmlRenderer(unavailableServices, unavailableServices.GetRequiredService<ILoggerFactory>());
+        var unavailableHtml = await unavailableRenderer.Dispatcher.InvokeAsync(async () =>
+            (await unavailableRenderer.RenderComponentAsync<Kemudi.Web.Components.Layout.AdminLayout>(
+                ParameterView.FromDictionary(new Dictionary<string, object?>
+                {
+                    ["Body"] = (RenderFragment)(builder => builder.AddContent(0, "PROTECTED_TEST_CONTENT"))
+                }))).ToHtmlString());
+        Check(unavailableHtml.Contains("Layanan verifikasi admin belum tersedia") && !unavailableHtml.Contains("PROTECTED_TEST_CONTENT"),
+            "Admin outage renders an unavailable state without protected content or login redirect");
+    }
+}
 await using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
 var html = await renderer.Dispatcher.InvokeAsync(async () =>
     (await renderer.RenderComponentAsync<AdminKursus>(ParameterView.Empty)).ToHtmlString());
 Check(html.Contains("<span class=\"badge badge-green\">Aktif</span>")
     && !html.Contains("<AdminBadge", StringComparison.OrdinalIgnoreCase),
     "Admin course page renders the status component instead of an unknown HTML tag");
+failures += await PaymentSecurityTests.RunAsync();
+failures += await PaymentPageTests.RunAsync();
 Environment.ExitCode = failures == 0 ? 0 : 1;
 
 sealed class FixtureNavigation : NavigationManager
@@ -86,8 +117,19 @@ sealed class CourseFixtureHandler : HttpMessageHandler
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
         Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
         {
-            Content = new StringContent(request.RequestUri!.AbsolutePath.EndsWith("/packages")
+            Content = new StringContent(request.RequestUri!.AbsolutePath == "/api/admin/auth/me"
+                ? "{\"id\":\"render-admin\",\"name\":\"Fixture\",\"email\":\"fixture@example.test\",\"isActive\":true}"
+                : request.RequestUri.AbsolutePath.EndsWith("/packages")
                 ? "[{\"id\":\"00000000-0000-0000-0000-000000000002\",\"label\":\"Fixture\",\"status\":\"ACTIVE\"}]"
                 : "[]", System.Text.Encoding.UTF8, "application/json")
+        });
+}
+
+sealed class AdminProfileFixtureHandler(HttpStatusCode status, bool active) : HttpMessageHandler
+{
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+        Task.FromResult(new HttpResponseMessage(status)
+        {
+            Content = JsonContent.Create(new { id = "fixture-admin", name = "Fixture", email = "fixture@example.test", isActive = active })
         });
 }

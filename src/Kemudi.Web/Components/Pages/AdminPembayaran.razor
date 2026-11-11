@@ -8,7 +8,7 @@
 @inject NavigationManager Nav
 
 <h1 class="page-title">Verifikasi Pembayaran</h1>
-<p class="page-sub">Verifikasi bukti pembayaran sebelum mengubah status.</p>
+<p class="page-sub">Cocokkan dana yang benar-benar diterima dan nominalnya melalui rekening/provider resmi atau kuitansi tunai. Referensi pelanggan bukan bukti pelunasan.</p>
 
 @if (_error is not null)
 {
@@ -47,22 +47,32 @@
                         <tr>
                             <td>@p.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm", CultureInfo.GetCultureInfo("id-ID"))</td>
                             <td><strong>@p.RegistrantName</strong><br /><span class="muted">@p.RegistrantEmail</span></td>
-                            <td>@PaymentMethodLabel(p.Method)</td>
+                            <td>@PaymentMethodLabel(p.Method)<br /><span class="muted">Referensi: @(p.Reference ?? "—")</span></td>
                             <td>@FormatRp(p.Amount)</td>
                             <td><AdminBadge Value="@p.Status" /></td>
                             <td>
                                 <div class="admin-actions">
-                                    @if (p.Status != "paid")
+                                    @if (p.Status == "pending" && _verifying != p.Id)
                                     {
-                                        <button class="btn btn-success" disabled="@_busy" @onclick="@(() => SetStatus(p, "paid"))">Verifikasi</button>
+                                        <button class="btn btn-success" disabled="@_busy" @onclick="@(() => BeginVerification(p))">Verifikasi</button>
                                     }
-                                    @if (p.Status != "cancelled" && p.Status != "paid")
+                                    @if (p.Status == "pending" && _verifying == p.Id)
+                                    {
+                                        <div class="field">
+                                            <label for="@($"verification-{p.Id:N}")">Referensi penerimaan dana / kuitansi</label>
+                                            <input id="@($"verification-{p.Id:N}")" maxlength="128" @bind="_verificationReference" />
+                                            <label><input type="checkbox" @bind="_reconciled" /> Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.</label>
+                                            <button class="btn btn-success" disabled="@(_busy || !_reconciled || _verificationReference.Trim().Length < 3)" @onclick="@(() => SetStatus(p, "paid"))">Konfirmasi penerimaan dana</button>
+                                            <button class="btn btn-outline" disabled="@_busy" @onclick="@(() => _verifying = null)">Batal verifikasi</button>
+                                        </div>
+                                    }
+                                    @if (p.Status == "pending")
                                     {
                                         <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" disabled="@_busy" @onclick="@(() => SetStatus(p, "cancelled"))">Tolak</button>
                                     }
-                                    @if (p.Status == "paid")
+                                    @if (p.Status == "cancelled")
                                     {
-                                        <button class="btn btn-outline" disabled="@_busy" @onclick="@(() => SetStatus(p, "pending"))">Buka Kembali</button>
+                                        <button class="btn btn-outline" disabled="@_busy" @onclick="@(() => SetStatus(p, "pending"))">Buka pengajuan</button>
                                     }
                                 </div>
                             </td>
@@ -80,15 +90,34 @@
     private bool _busy;
     private string? _error;
     private string _statusFilter = "";
+    private Guid? _verifying;
+    private string _verificationReference = "";
+    private bool _reconciled;
+
+    private void BeginVerification(AdminPaymentDto payment)
+    {
+        _verifying = payment.Id;
+        _verificationReference = "";
+        _reconciled = false;
+    }
 
     private async Task SetStatus(AdminPaymentDto p, string status)
     {
         _busy = true;
         _error = null;
-        var result = await Api.PatchVoidAsync($"/api/admin/payments/{p.Id}", new { status });
-        if (!result.Success) _error = result.Error;
-        await Load();
-        _busy = false;
+        try
+        {
+            var result = await Api.PatchVoidAsync($"/api/admin/payments/{p.Id}",
+                new AdminPaymentUpdateRequest(status, status == "paid" ? _verificationReference.Trim() : null));
+            await Load();
+            if (!result.Success) _error = result.Error;
+            else _verifying = null;
+        }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException)
+        {
+            _error = "Status belum terkonfirmasi. Muat ulang dan periksa sebelum mencoba kembali.";
+        }
+        finally { _busy = false; }
     }
 
     private void OnFilter(ChangeEventArgs e)

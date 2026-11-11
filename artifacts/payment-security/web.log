@@ -1,0 +1,306 @@
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5903
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\user\Kemudi.id\src\Kemudi.Web
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/vehicles
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/vehicles
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 333.8416ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 346.6682ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.6221ms - 401
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.7847ms - 401
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 15.9103ms - 401
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 16.0438ms - 401
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 331.6445ms - 403
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 331.7682ms - 403
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 24.2891ms - 400
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 24.3941ms - 400
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 146.1565ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 146.3521ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/progress
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/progress
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 27.4846ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 27.593ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 9.9345ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 10.0281ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/progress
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/progress
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.0982ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.3968ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.1823ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.3136ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 6.4282ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 6.5384ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.6176ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.726ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.6185ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.7229ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.5868ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.6848ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/payment
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/payment
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 6.804ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 6.9126ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.5314ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.6736ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.0275ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.1092ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.4448ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.5634ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/b186e091-e26d-4fe5-9395-07b4b9d21006
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.0984ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.1885ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.2935ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.3964ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1.8745ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1.9379ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.3423ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.4387ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/6238f761-3a9a-492f-83fd-22d0e5dcb27b
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.5254ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.6002ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 2.3522ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 2.4461ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1.708ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1.7811ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/course-registration/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/course-registration/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.8851ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.0035ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/payment/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/payment/5a3beeb1-ac0a-4eed-9f8f-61f0f80e6074
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.41ms - 404
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.5024ms - 404
+warn: Microsoft.AspNetCore.Antiforgery.DefaultAntiforgery[8]
+      The 'Cache-Control' and 'Pragma' headers have been overridden and set to 'no-cache, no-store' and 'no-cache' respectively to prevent caching of this response. Any response that uses antiforgery should not be cached.
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[100]
+      Start processing HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[100]
+      Sending HTTP request POST http://127.0.0.1:5902/api/admin/auth/login
+info: System.Net.Http.HttpClient.BrowserBackend.ClientHandler[101]
+      Received HTTP response headers after 168.2783ms - 200
+info: System.Net.Http.HttpClient.BrowserBackend.LogicalHandler[101]
+      End processing HTTP request after 168.5148ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 41.5737ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 41.7955ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/dashboard
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/dashboard
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 132.1548ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 132.2594ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.4802ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.7081ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 5.6903ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 5.8717ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/dashboard
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/dashboard
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 8.5943ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 8.7387ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 28.4967ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 28.6103ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/auth/me
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.5374ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.6599ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET http://127.0.0.1:5902/api/admin/payments
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.149ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.2427ms - 200

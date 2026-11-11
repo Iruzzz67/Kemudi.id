@@ -169,7 +169,7 @@ public sealed record AdminRegistrationDto(
 
 public sealed record AdminRegistrationUpdateRequest(string Status); // pending | paid | rejected
 
-public sealed record AdminPaymentUpdateRequest(string Status); // pending | paid | cancelled
+public sealed record AdminPaymentUpdateRequest(string Status, string? VerificationReference = null); // pending | paid | cancelled
 
 // ===== Kursus =====
 

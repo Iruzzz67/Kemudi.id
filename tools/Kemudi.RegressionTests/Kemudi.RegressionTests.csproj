@@ -10,5 +10,6 @@
     <ProjectReference Include="../../src/Kemudi.App/Kemudi.App.csproj" />
     <ProjectReference Include="../../src/Kemudi.Infrastructure/Kemudi.Infrastructure.csproj" />
     <ProjectReference Include="../../src/Kemudi.Web/Kemudi.Web.csproj" />
+    <ProjectReference Include="../../src/Kemudi.Api/Kemudi.Api.csproj" />
   </ItemGroup>
 </Project>
