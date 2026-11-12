@@ -24,6 +24,7 @@ class InputManager {
 
     this._onKeyDown = (e) => {
       if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.repeat && !this.keys[e.code]) return; // Held keys must not re-arm after safety reset.
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
         e.preventDefault();
       }
@@ -107,3 +108,46 @@ class InputManager {
 }
 
 window.InputManager = InputManager;
+
+// Domain snapshots keep gamepad actions independent of keyboard event codes.
+(function(root) {
+  const actions = ['gearUp','gearDown','neutral','reverse','ignition','handbrake',
+    'lights','highBeam','hazard','signalLeft','signalRight','camera','mirror',
+    'seatUp','seatDown','seatbelt','helmet','jacket','gloves','shoes','pause','enterVehicle','selectDrive','selectReverse'];
+  class DomainInput {
+    constructor(frame) {
+      this.continuous = frame.continuous;
+      this.justPressed = frame.edges;
+      this.analog = frame.source === 'gamepad';
+      this.source = frame.source;
+    }
+    get throttle() { return this.continuous.throttle; }
+    get brakeAmount() { return this.continuous.brakeAmount; }
+    get steer() { return this.continuous.steer; }
+    get lookX() { return this.continuous.lookX || 0; }
+    get lookY() { return this.continuous.lookY || 0; }
+    get forward() { return this.throttle > 0; }
+    get backward() { return this.brakeAmount > 0; }
+    get brake() { return this.continuous.parkingBrake || false; }
+    get left() { return this.steer < 0; }
+    get right() { return this.steer > 0; }
+    get clutch() { return this.continuous.clutch; }
+    get horn() { return this.continuous.horn || !!this.justPressed.horn; }
+    static accumulateEdges(target, edges) {
+      for (const [action, pressed] of Object.entries(edges)) if (pressed) target[action]=true;
+    }
+    static keyboard(manager) {
+      const edges = Object.fromEntries(actions.map(name => [name, manager[name]]));
+      edges.horn = manager.horn;
+      return { continuous: { throttle: manager.forward ? 1 : 0,
+        brakeAmount: manager.backward ? 1 : 0, parkingBrake: manager.brake,
+        steer: manager.left ? -1 : manager.right ? 1 : 0,
+        clutch: manager.clutch, horn: manager.horn, walk: manager.forward ? 1 : manager.backward ? -1 : 0,
+        lookX: 0, lookY: 0 },
+        edges, meaningful: Object.values(edges).some(Boolean) ||
+          ['KeyW','KeyS','KeyA','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','KeyT'].some(k => manager.wasJustPressed(k)) };
+    }
+  }
+  for (const name of actions) Object.defineProperty(DomainInput.prototype, name, { get() { return !!this.justPressed[name]; } });
+  root.DomainInput = DomainInput;
+})(window);

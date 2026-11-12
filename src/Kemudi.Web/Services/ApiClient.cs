@@ -25,11 +25,15 @@ public sealed class ApiClient
         _httpContext.HttpContext?.Request.Cookies[TokenCookie];
 
     public async Task<T?> GetAsync<T>(string path, CancellationToken ct = default)
+        => (await GetWithStatusAsync<T>(path, ct)).Data;
+
+    public async Task<(System.Net.HttpStatusCode Status, T? Data)> GetWithStatusAsync<T>(
+        string path, CancellationToken ct = default)
     {
         using var request = CreateRequest(HttpMethod.Get, path);
         using var response = await _http.SendAsync(request, ct);
-        if (!response.IsSuccessStatusCode) return default;
-        return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct);
+        return (response.StatusCode, response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct) : default);
     }
 
     public async Task<TResult?> PostAsync<TBody, TResult>(

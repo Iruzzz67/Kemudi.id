@@ -44,7 +44,7 @@
   }
   // Continuous SAT for translation. Each rotating OBB is enclosed by its starting
   // orientation expanded by radius*angle; this may stop early, never sweep through.
-  function contactTime(a, b) {
+  function envelopeContactTime(a, b) {
     const da = a.active ? { x: a.target.x - a.position.x, y: a.target.y - a.position.y, z: a.target.z - a.position.z } : { x: 0, y: 0, z: 0 };
     const db = b.active ? { x: b.target.x - b.position.x, y: b.target.y - b.position.y, z: b.target.z - b.position.z } : { x: 0, y: 0, z: 0 };
     const angleA = a.active ? angleDelta(a.rotation, a.targetRotation) : 0;
@@ -74,6 +74,29 @@
       }
     }
     return exit <= EPSILON ? null : Math.max(0, enter);
+  }
+  // A whole-tick angular envelope can overlap a nearby wall even when every
+  // actual pose moves away. Refine only candidate hits into smaller conservative
+  // sweeps, never accepting a path merely because its endpoint is clear.
+  function contactTime(a, b, depth = 0) {
+    const candidate = envelopeContactTime(a, b);
+    if (candidate === null || depth >= 8) return candidate;
+    const rotating = [a, b].some(body => body.active
+      && Math.abs(angleDelta(body.rotation, body.targetRotation)) > EPSILON);
+    if (!rotating) return candidate;
+    const interval = (body, start, end) => {
+      if (!body.active) return body;
+      const delta = angleDelta(body.rotation, body.targetRotation);
+      const at = t => ({ x: body.position.x + (body.target.x - body.position.x) * t,
+        y: body.position.y + (body.target.y - body.position.y) * t,
+        z: body.position.z + (body.target.z - body.position.z) * t });
+      return { ...body, position: at(start), target: at(end),
+        rotation: body.rotation + delta * start, targetRotation: body.rotation + delta * end };
+    };
+    const first = contactTime(interval(a, 0, .5), interval(b, 0, .5), depth + 1);
+    if (first !== null) return first * .5;
+    const second = contactTime(interval(a, .5, 1), interval(b, .5, 1), depth + 1);
+    return second === null ? null : .5 + second * .5;
   }
   class CollisionWorld {
     constructor({ cellSize = 12 } = {}) {

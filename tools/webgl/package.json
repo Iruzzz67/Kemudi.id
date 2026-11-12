@@ -8,10 +8,18 @@
     "test:functions": "node functions.cjs",
     "test:intersection": "node intersection-tests.cjs && node intersection-browser.cjs",
     "test:unified": "node unified-tests.cjs && node unified-browser.cjs",
+    "test:road-seam": "node unified-tests.cjs && node road-seam-browser.cjs",
+    "test:handling": "node handling.cjs",
+    "test:handling:browser": "node handling-browser.cjs",
     "test:backend": "node backend-smoke.cjs && node result-errors.cjs",
+    "test:payments": "node payment-security.cjs",
     "test:syntax": "node syntax.cjs",
-    "test:realism": "node realism-state.cjs && node realism-collision.cjs && node realism-environment.cjs && node realism-lights.cjs && node realism-visual.cjs && node realism-traffic.cjs",
-    "test:realism:browser": "node realism-browser.cjs"
+    "test:realism": "node realism-state.cjs && node realism-collision.cjs && node realism-environment.cjs && node realism-lights.cjs && node realism-visual.cjs && node realism-traffic.cjs && node realism-lod.cjs",
+    "test:realism:browser": "node realism-browser.cjs",
+    "test:realism:iframe": "node realism-iframe.cjs",
+    "test:gamepad": "node gamepad-device.cjs && node gamepad-domain.cjs && node gamepad-ui.cjs",
+    "test:gamepad:browser": "node gamepad-browser.cjs",
+    "test:gamepad:look": "node gamepad-look-browser.cjs"
   },
   "devDependencies": { "playwright": "1.61.1" }
 }

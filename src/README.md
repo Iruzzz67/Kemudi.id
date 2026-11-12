@@ -31,8 +31,10 @@ dotnet run --project src/Kemudi.Web
 ```
 
 > Konfigurasi `Api:BaseUrl` di `src/Kemudi.Web/appsettings.json` mengarah ke
-> `http://localhost:5077`. Untuk production, ganti database ke PostgreSQL/SQL
-> Server di `ConnectionStrings:KemudiDb` dan set `Jwt:SecretKey` yang kuat.
+> `http://localhost:5077`. Backend saat ini memakai provider SQLite; mengganti
+> ke PostgreSQL/SQL Server memerlukan perubahan provider dan pengujian ulang
+> transaksi, bukan sekadar mengganti connection string. Untuk produksi, pasok
+> `Jwt:SecretKey` acak privat melalui secret manager; kunci development ditolak.
 
 ## Endpoint API
 
@@ -46,9 +48,11 @@ dotnet run --project src/Kemudi.Web
 | GET | `/api/courses`, `/api/courses/{slug}` | — |
 | GET | `/api/mentors`, `/api/mentors/{slug}` | — |
 | GET | `/api/vehicles` | — |
-| POST | `/api/course-registration` | opsional |
-| GET | `/api/course-registration/{id}` | — |
-| POST | `/api/payment` | — |
+| POST | `/api/course-registration` | JWT; terikat pemilik |
+| GET | `/api/course-registration/{id}` | JWT pemilik |
+| POST | `/api/payment` | JWT pemilik; hanya pending |
+| GET | `/api/payment/{registrationId}` | JWT pemilik |
+| PATCH | `/api/admin/payments/{id}` | JWT Admin; rekonsiliasi manual + audit |
 
 ## Status
 

@@ -50,6 +50,7 @@ for (const name of fs.readdirSync(source).filter(n => /\.(html|js|css)$/.test(n)
 copy('vendor');
 copy('models/city');
 if (fs.existsSync(path.join(source, 'systems'))) copy('systems');
+if (fs.existsSync(path.join(source, 'input'))) copy('input');
 fs.writeFileSync(path.join(output, 'build-manifest.json'), JSON.stringify({ runtime: 'Three.js r128 / WebGL', entry: 'index.html', files: roster }, null, 2));
 fs.copyFileSync(path.join(__dirname, 'README.md'), path.join(output, 'README.md'));
 fs.writeFileSync(path.join(output, 'README.txt'), 'Kemudi.id WebGL\nFrom the project root: npm.cmd --prefix tools/webgl start\nOr serve this exported folder over HTTP, for example:\npython -m http.server 8080 --directory Builds/WebGL\nOpen http://localhost:8080\nAll runtime scripts and models are included locally. This is the native browser simulation used by Kemudi.Web, not a Unity player build.\nControls: Enter enter vehicle, I ignition, Space handbrake, W gas, S brake, A/D steer, R reverse, C camera, P pause.\n');

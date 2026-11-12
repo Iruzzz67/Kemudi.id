@@ -1,0 +1,119 @@
+{
+  "started": "2026-11-11T08:57:52.091Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "explicit local origins and empty fresh QA database guards",
+      "result": "PASS"
+    },
+    {
+      "name": "register own owner, outsider and admin-fixture accounts through real API",
+      "result": "PASS"
+    },
+    {
+      "name": "anonymous registration/payment/read and invalid JWT are rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "registration ownership comes from JWT, not a submitted userId",
+      "result": "PASS"
+    },
+    {
+      "name": "cross-user registration/payment reads and writes return404",
+      "result": "PASS"
+    },
+    {
+      "name": "invalid methods/references fail and registered method cannot be overridden",
+      "result": "PASS"
+    },
+    {
+      "name": "ten concurrent customer requests create one pending payment at the trusted amount",
+      "result": "PASS"
+    },
+    {
+      "name": "altered retry is rejected without overwriting an existing submission",
+      "result": "PASS"
+    },
+    {
+      "name": "an existing payment remains hidden from another authenticated account",
+      "result": "PASS"
+    },
+    {
+      "name": "ordinary users cannot call admin verification endpoints",
+      "result": "PASS"
+    },
+    {
+      "name": "own isolated fixture gains Admin role and receives a genuine role JWT",
+      "result": "PASS"
+    },
+    {
+      "name": "admin settlement without reconciliation reference is rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "concurrent identical admin confirmations settle once with one audit and stable PaidAt",
+      "result": "PASS"
+    },
+    {
+      "name": "paid is terminal and registration endpoint cannot bypass settlement",
+      "result": "PASS"
+    },
+    {
+      "name": "legacy duplicate history blocks read, resubmission and automatic reconciliation",
+      "result": "PASS"
+    },
+    {
+      "name": "guest course enrollment requires login",
+      "result": "PASS"
+    },
+    {
+      "name": "admin-login gateway rejects missing and invalid CSRF tokens",
+      "result": "PASS"
+    },
+    {
+      "name": "regular-user admin login rejects cleanly without a Blazor circuit failure",
+      "result": "PASS"
+    },
+    {
+      "name": "customer login produces an HttpOnly session",
+      "result": "PASS"
+    },
+    {
+      "name": "cash UI ignores method query override and submits pending rather than Paid",
+      "result": "PASS"
+    },
+    {
+      "name": "unconfigured digital methods show no fake bank/QR data and cannot submit",
+      "result": "PASS"
+    },
+    {
+      "name": "genuine admin UI login creates HttpOnly cookie and opens verification panel",
+      "result": "PASS"
+    },
+    {
+      "name": "admin UI requires reference plus reconciliation checkbox before cash settlement",
+      "result": "PASS"
+    },
+    {
+      "name": "configured official instructions remain plain text and digital submission stays pending",
+      "result": "PASS"
+    },
+    {
+      "name": "disabled customer JWT and revoked Admin JWT stop authorizing immediately",
+      "result": "PASS"
+    },
+    {
+      "name": "browser flows produce no unhandled JavaScript/circuit errors",
+      "result": "PASS"
+    }
+  ],
+  "notRun": [
+    "Real payment provider/bank settlement, uploads/refunds and production deployment were not tested"
+  ],
+  "scope": "Loopback HTTP/browser and own fixtures in an explicitly fresh QA SQLite database; no provider/real payments",
+  "finished": "2026-11-11T08:58:16.446Z",
+  "summary": {
+    "pass": 26,
+    "fail": 0
+  }
+}

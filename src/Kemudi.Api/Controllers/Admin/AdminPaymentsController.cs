@@ -46,7 +46,9 @@ public sealed class AdminPaymentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] AdminPaymentUpdateRequest request)
     {
-        var status = request.Status.ToLowerInvariant() switch
+        var adminId = User.AdminId();
+        if (string.IsNullOrWhiteSpace(adminId)) return Unauthorized();
+        var status = request.Status?.Trim().ToLowerInvariant() switch
         {
             "pending" => PaymentStatus.Pending,
             "paid" => PaymentStatus.Paid,
@@ -56,13 +58,37 @@ public sealed class AdminPaymentsController : ControllerBase
         if (status is null)
             return BadRequest(new { error = "Status harus pending, paid, atau cancelled." });
 
+        var reference = request.VerificationReference?.Trim();
+        if (status == PaymentStatus.Paid && ((reference?.Length ?? 0) < 3 || reference!.Length > 128))
+            return BadRequest(new { error = "Referensi penerimaan dana yang sudah dicocokkan wajib diisi (3–128 karakter)." });
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var payment = await _db.Payments
             .Include(p => p.Registration)
             .FirstOrDefaultAsync(p => p.Id == id);
         if (payment is null) return NotFound(new { error = "Pembayaran tidak ditemukan." });
+        if (payment.Registration is null || payment.Amount <= 0 ||
+            payment.Method != payment.Registration.PaymentMethod ||
+            await _db.Payments.CountAsync(p => p.RegistrationId == payment.RegistrationId) != 1)
+            return Conflict(new { error = "Data pembayaran perlu direkonsiliasi sebelum verifikasi." });
+        if (payment.Status == PaymentStatus.Paid)
+        {
+            if (payment.Registration.Status != RegistrationStatus.Paid || payment.PaidAt is null)
+                return Conflict(new { error = "Status pelunasan tidak konsisten; lakukan rekonsiliasi terlebih dahulu." });
+            if (status == PaymentStatus.Paid && reference == payment.Reference)
+                return Ok(new { id, status = "paid" });
+            return Conflict(new { error = "Pembayaran lunas tidak dapat dibuka ulang. Koreksi/refund memerlukan proses terpisah." });
+        }
+        if (payment.Registration.Status == RegistrationStatus.Paid ||
+            (payment.Status == PaymentStatus.Cancelled && status == PaymentStatus.Paid))
+            return Conflict(new { error = "Status tidak sesuai; tinjau dan buka kembali pengajuan terlebih dahulu." });
+        if (payment.Status == status) return Ok(new { id, status = status.Value.ToString().ToLowerInvariant() });
 
+        var previousStatus = payment.Status;
+        var submittedReference = payment.Reference;
         payment.Status = status.Value;
         payment.PaidAt = status == PaymentStatus.Paid ? DateTime.UtcNow : null;
+        if (status == PaymentStatus.Paid) payment.Reference = reference;
 
         // Sinkronkan status pendaftaran dengan status pembayaran.
         if (payment.Registration is not null)
@@ -75,13 +101,24 @@ public sealed class AdminPaymentsController : ControllerBase
             };
         }
 
-        await _db.SaveChangesAsync();
-        await AdminHelpers.LogAsync(
-            _db, User,
-            status == PaymentStatus.Paid ? "payment.confirm"
+        // Settlement and its actor/reference audit must commit or roll back together.
+        _db.AuditLogs.Add(new AuditLog
+        {
+            AdminId = adminId,
+            AdminEmail = User.AdminEmail(),
+            Action = status == PaymentStatus.Paid ? "payment.confirm"
                 : status == PaymentStatus.Cancelled ? "payment.reject"
                 : "payment.reopen",
-            "payment", payment.Id.ToString(), new { status = status.Value.ToString() });
+            Target = "payment",
+            TargetId = payment.Id.ToString(),
+            Metadata = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                previousStatus = previousStatus.ToString(), status = status.Value.ToString(),
+                submittedReference, verificationReference = status == PaymentStatus.Paid ? reference : null
+            })
+        });
+        await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return Ok(new { id, status = status.Value.ToString().ToLowerInvariant() });
     }

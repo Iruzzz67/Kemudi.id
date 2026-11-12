@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "checks": [
+    "handling defaults and atomic validation are isolated per vehicle",
+    "MOTOR keyboard light responds faster, full lock and default remain compatible",
+    "MOTOR keyboard return speed is adjustable without crossing neutral",
+    "MOTOR keyboard speed limit, drivetrain and deferred motion safety remain",
+    "MOTOR analog light responds faster, full lock and default remain compatible",
+    "MOTOR analog return speed is adjustable without crossing neutral",
+    "MOTOR analog speed limit, drivetrain and deferred motion safety remain",
+    "MOBIL keyboard light responds faster, full lock and default remain compatible",
+    "MOBIL keyboard return speed is adjustable without crossing neutral",
+    "MOBIL keyboard speed limit, drivetrain and deferred motion safety remain",
+    "MOBIL analog light responds faster, full lock and default remain compatible",
+    "MOBIL analog return speed is adjustable without crossing neutral",
+    "MOBIL analog speed limit, drivetrain and deferred motion safety remain",
+    "TRUK keyboard light responds faster, full lock and default remain compatible",
+    "TRUK keyboard return speed is adjustable without crossing neutral",
+    "TRUK keyboard speed limit, drivetrain and deferred motion safety remain",
+    "TRUK analog light responds faster, full lock and default remain compatible",
+    "TRUK analog return speed is adjustable without crossing neutral",
+    "TRUK analog speed limit, drivetrain and deferred motion safety remain"
+  ]
+}

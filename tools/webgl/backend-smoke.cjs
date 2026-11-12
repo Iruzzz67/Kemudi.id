@@ -39,6 +39,9 @@ fs.mkdirSync(output, { recursive: true });
     check('Anonymous save rejected');
 
     await page.goto(web + '/register', { waitUntil: 'networkidle' });
+    // Prove Blazor is interactive before entering values into prerendered inputs.
+    await page.getByRole('button', { name: 'Daftar Sekarang', exact: true }).click();
+    await page.getByText('Nama, email valid, dan password minimal 6 karakter wajib diisi.', { exact: true }).waitFor();
     await page.getByLabel('Nama Lengkap').fill('WebGL Integration Test');
     await page.getByLabel('Email', { exact: true }).fill(email);
     await page.getByLabel('Password', { exact: true }).fill(password);
@@ -53,6 +56,8 @@ fs.mkdirSync(output, { recursive: true });
     await page.waitForURL(web + '/');
     assert.equal((await context.request.get(web + '/api/simulation/results')).status(), 401);
     await page.goto(web + '/login', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Masuk', exact: true }).click();
+    await page.locator('.error-box').waitFor();
     await page.getByLabel('Email', { exact: true }).fill(email);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Masuk', exact: true }).click();
@@ -96,8 +101,9 @@ fs.mkdirSync(output, { recursive: true });
     // Blazor can replace the prerendered iframe while its circuit hydrates.
     // FrameLocator reacquires the live frame instead of holding a detached one.
     const liveFrame = page.frameLocator('iframe');
-    await liveFrame.locator('#vehicle-select').waitFor({ state: 'visible', timeout: 90000 });
-    await liveFrame.locator('#vs-start').click();
+    // The website supplies autostart=1; wait for its real walking UI, not the
+    // intentionally hidden standalone vehicle selector.
+    await liveFrame.locator('#wh-enter').waitFor({ state: 'visible', timeout: 90000 });
     const frame = page.frames().find(f => f.url().includes('/simulation-3d/index.html'));
     assert.ok(frame, 'Embedded simulation frame');
     await frame.waitForFunction(() => window.kemudiSimulation.snapshot().phase === 'walking');
@@ -122,9 +128,39 @@ fs.mkdirSync(output, { recursive: true });
         await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
       } else await route.continue();
     });
-    await page.keyboard.down('KeyW');
-    await frame.waitForFunction(() => window.kemudiSimulation.snapshot().phase === 'finished', null, { timeout: 180000 });
-    await page.keyboard.up('KeyW');
+    // Follow the actual unified lane through keyboard input only. Holding W on
+    // the obsolete straight test map cannot navigate the connected curved road.
+    const held = new Set();
+    const setKey = async (key, down) => {
+      if (down === held.has(key)) return;
+      if (down) { await page.keyboard.down(key); held.add(key); }
+      else { await page.keyboard.up(key); held.delete(key); }
+    };
+    const deadline = Date.now() + (Number(process.env.BACKEND_DRIVE_TIMEOUT_MS) || 900000);
+    let driving;
+    try {
+      while (Date.now() < deadline) {
+        driving = await frame.evaluate(() => window.kemudiSimulation.snapshot());
+        report.lastDrivingState = driving;
+        if (driving.phase === 'finished') break;
+        assert.equal(driving.phase, 'driving', 'real drive must not pause or fail');
+        assert.ok(driving.navigationTarget, 'runtime must expose the actual route lookahead');
+        const dx = driving.navigationTarget[0] - driving.position[0];
+        const dz = driving.navigationTarget[2] - driving.position[2];
+        const desiredYaw = Math.atan2(-dx, -dz);
+        const error = Math.atan2(Math.sin(desiredYaw - driving.rotation), Math.cos(desiredYaw - driving.rotation));
+        const desiredSteer = Math.max(-.45, Math.min(.45, Math.atan(2 * 2.7 * Math.sin(error) / Math.max(1, Math.hypot(dx, dz)))));
+        await setKey('KeyA', desiredSteer > driving.steerAngle + .015);
+        await setKey('KeyD', desiredSteer < driving.steerAngle - .015);
+        await setKey('KeyW', driving.speed < 5.5);
+        await setKey('KeyS', driving.speed > 6.5);
+        await frame.waitForFunction(tick => window.kemudiSimulation.snapshot().clock.tick > tick
+          || window.kemudiSimulation.snapshot().phase !== 'driving', driving.clock.tick, { timeout: 30000 });
+      }
+      assert.equal(driving?.phase, 'finished', 'real route did not finish within bounded wall time; last snapshot is in report');
+    } finally {
+      for (const key of held) await page.keyboard.up(key);
+    }
     const retry = frame.getByRole('button', { name: 'Coba simpan lagi', exact: true });
     await retry.waitFor({ state: 'visible' });
     assert.equal((await history()).filter(r => r.id === captured.attemptId).length, 1);
@@ -151,7 +187,7 @@ fs.mkdirSync(output, { recursive: true });
     await page.keyboard.press('Enter');
     await frame.waitForFunction(() => window.kemudiSimulation.snapshot().phase === 'driving');
     // Inject a pedestrian contact to deterministically cover the failure event handler.
-    await frame.evaluate(() => { PedestrianManager.prototype.checkCollision = () => true; });
+    await frame.evaluate(() => { PedestrianSystem.prototype.checkCollision = () => true; });
     await frame.waitForFunction(() => document.querySelector('#failed-screen .result-save')?.dataset.attemptId);
     rows = await history();
     const failed = rows.find(r => r.vehicleType === 'MOTOR');

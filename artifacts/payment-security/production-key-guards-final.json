@@ -1,0 +1,12 @@
+[
+    {
+        "exitCode":  -532462766,
+        "case":  "missing-key",
+        "rejected":  true
+    },
+    {
+        "exitCode":  -532462766,
+        "case":  "public-development-key",
+        "rejected":  true
+    }
+]

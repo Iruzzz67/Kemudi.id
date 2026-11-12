@@ -4,11 +4,23 @@ const THREE=require(path.join(source,'vendor/three.min.js'));
 const data=JSON.parse(fs.readFileSync(path.join(source,'models/city/colliders.json')));
 THREE.GLTFLoader=class {load(url,success){success({scene:new THREE.Group()});}};
 const ctx={THREE,window:{},fetch:async()=>({ok:true,json:async()=>structuredClone(data)})};vm.createContext(ctx);
-for(const file of ['intersection.js','long-road.js','city-track.js']){vm.runInContext(fs.readFileSync(path.join(source,file),'utf8'),ctx);Object.assign(ctx,ctx.window);}
+for(const file of ['vehicle.js','intersection.js','long-road.js','city-track.js']){vm.runInContext(fs.readFileSync(path.join(source,file),'utf8'),ctx);Object.assign(ctx,ctx.window);}
 (async()=>{
  const track=new ctx.window.CityTrack(new THREE.Scene());await track.build();const checks=[];
  assert.equal(track.intersections.length,2);assert.equal(track.pedestrianZones.length,0);
  assert.equal(track.intersections[1].controller.current.id,'START_ALL_RED');checks.push('two safe junctions in one world; pedestrian crossings disabled');
+ // The two road regions overlap by 5 m, shorter than the actual truck footprint.
+ // Every pose across their join must remain in the connected playable area.
+ for(const type of ['MOTOR','MOBIL','TRUK'])for(const x of [-1.75,1.75])for(const rotation of [0,.1,-.1,Math.PI,Math.PI+.1,Math.PI-.1]){
+   const v={position:new THREE.Vector3(x,.09,0),rotation,config:ctx.window.VEHICLE_CONFIGS[type]};
+   for(let z=-20;z>=-37;z-=.125){v.position.z=z;assert.equal(track.collisionAt(v),null,`${type} road join x=${x} z=${z} yaw=${rotation}`);}
+ }
+ checks.push('all actual vehicle footprints cross the housing/north-road join in both lanes and directions');
+ const guard={position:new THREE.Vector3(),rotation:0,config:ctx.window.VEHICLE_CONFIGS.TRUK};
+ for(const [x,z] of [[22,0],[-27,0],[0,37],[10,-50],[7.5,-30.5],[-7.5,-30.5]]){
+   guard.position.set(x,.09,z);assert.equal(track.collisionAt(guard),'Batas area',`external boundary remains solid x=${x} z=${z}`);
+ }
+ checks.push('external edges and uncovered seam corners remain blocked for the full truck footprint');
  const road=track.longRoad;
  assert.ok(road.samples[0].point.distanceTo(new THREE.Vector3(0,.09,-140))<1e-6);
  assert.ok(road.samples.at(-1).point.distanceTo(new THREE.Vector3(0,.09,-340))<1e-6);

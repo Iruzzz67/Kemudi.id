@@ -85,6 +85,7 @@ class Vehicle {
     this.suspensionPitch = 0;
     this.braking = false;
     this.roadGripFactor = 1;
+    this.setHandling();
 
     // Transmission
     this.gear = 0;         // 0=neutral, 1-N = forward, R = reverse
@@ -343,22 +344,25 @@ class Vehicle {
     this.clutchPressed = input.clutch;
 
     // Acceleration / braking
+    const amount = value => Number.isFinite(value) ? THREE.MathUtils.clamp(value, 0, 1) : 0;
+    const brakeAmount = input.analog ? amount(input.brakeAmount) : (input.brake || input.backward ? 1 : 0);
+    const throttle = input.analog ? (brakeAmount > 0 ? 0 : amount(input.throttle)) : (input.forward ? 1 : 0);
     let accel = 0;
     if (this.transmission === 'automatic') {
       if (input.reverse && Math.abs(this.speed) < .5) this.gear = this.gear === -1 ? 1 : -1;
       if (this.gear !== -1) this._updateAutomaticTransmission();
     } else result = this._updateManualTransmission(input);
-    if (this.engineOn && !this.handbrakeOn && !input.clutch && this.gear !== 0 && input.forward) {
-      accel = this.config.acceleration * (this.gear === -1 ? -.6 : 1);
+    if (this.engineOn && !this.handbrakeOn && !input.clutch && this.gear !== 0 && throttle > 0) {
+      accel = this.config.acceleration * (this.gear === -1 ? -.6 : 1) * throttle;
     }
 
     // Braking (Space)
-    if (input.brake || input.backward) {
+    if (brakeAmount > 0) {
       if (this.speed > 0) {
-        this.speed -= this.config.braking * this.roadGripFactor * dt;
+        this.speed -= this.config.braking * this.roadGripFactor * brakeAmount * dt;
         if (this.speed < 0) this.speed = 0;
       } else if (this.speed < 0) {
-        this.speed += this.config.braking * this.roadGripFactor * dt;
+        this.speed += this.config.braking * this.roadGripFactor * brakeAmount * dt;
         if (this.speed > 0) this.speed = 0;
       }
     }
@@ -391,28 +395,7 @@ class Vehicle {
     // RPM
     this._updateRPM(input);
 
-    // Toggles
-    if (input.seatbelt) this.seatbeltOn = !this.seatbeltOn;
-    if (input.lights) this.lightsOn = !this.lightsOn;
-    if (input.highBeam) this.highBeamOn = !this.highBeamOn;
-    if (input.hazard) this.hazardOn = !this.hazardOn;
-    if (input.signalLeft) { this.signalLeft = !this.signalLeft; this.signalRight = false; }
-    if (input.signalRight) { this.signalRight = !this.signalRight; this.signalLeft = false; }
-    if (input.horn) { /* handled by audio */ }
-
-    // Motor safety
-    if (this.type === 'MOTOR') {
-      if (input.helmet) this.helmetOn = !this.helmetOn;
-      if (input.jacket) this.jacketOn = !this.jacketOn;
-      if (input.gloves) this.glovesOn = !this.glovesOn;
-      if (input.shoes) this.shoesOn = !this.shoesOn;
-    }
-
-    // Seat height
-    if (input.seatUp) this.seatHeight = Math.min(this.seatHeight + 0.015, 0.15);
-    if (input.seatDown) this.seatHeight = Math.max(this.seatHeight - 0.015, -0.15);
-    if (input.seatUp || input.seatDown) this.seatAdjusted = true;
-    if (input.mirror) { this.mirrorChecked = true; this.mirrorYaw = 1.1; }
+    this.applyActions(input);
     this.mirrorYaw = Math.max(0, this.mirrorYaw - dt);
     this.signalTime += dt;
 
@@ -430,6 +413,40 @@ class Vehicle {
 
     if (!this._planningMotion) this._updateMeshPosition(dt);
     return result;
+  }
+
+  // Shared by paused action-menu and normal driving; never advances motion/time.
+  applyActions(input) {
+    for (const name of ['seatbelt','lights','highBeam','hazard'])
+      if (input[name]) this[name + 'On'] = !this[name + 'On'];
+    if (input.signalLeft) { this.signalLeft = !this.signalLeft; this.signalRight = false; }
+    if (input.signalRight) { this.signalRight = !this.signalRight; this.signalLeft = false; }
+    if (this.type === 'MOTOR') for (const name of ['helmet','jacket','gloves','shoes'])
+      if (input[name]) this[name + 'On'] = !this[name + 'On'];
+    if (input.seatUp) this.seatHeight = Math.min(this.seatHeight + .015, .15);
+    if (input.seatDown) this.seatHeight = Math.max(this.seatHeight - .015, -.15);
+    if (input.seatUp || input.seatDown) this.seatAdjusted = true;
+    if (input.mirror) { this.mirrorChecked = true; this.mirrorYaw = 1.1; }
+  }
+
+  requestDriveDirection(direction, brakeAmount) {
+    if (this.transmission !== 'automatic' || ![-1,1].includes(direction)) return {accepted:false,reason:'Pilih gigi manual dengan kopling.'};
+    if (Math.abs(this.speed) > .5 / 3.6 || !(brakeAmount > .1))
+      return {accepted:false,reason:'Berhenti dan tahan rem sebelum memilih maju/mundur.'};
+    // The held brake removes residual sub-threshold roll before changing direction;
+    // otherwise the automatic gearbox would infer reverse again from negative speed.
+    this.speed = 0;
+    this.gear = direction;
+    return {accepted:true};
+  }
+
+  requestGearShift(direction, clutch) {
+    if (this.transmission !== 'manual' || !clutch) return {accepted:false,reason:'Tahan kopling L3 untuk berpindah gigi manual.'};
+    const previous = this.clutchPressed;
+    this.clutchPressed = true;
+    this._updateManualTransmission({gearUp:direction > 0,gearDown:direction < 0});
+    this.clutchPressed = previous;
+    return {accepted:true};
   }
 
   /** Advance controls/dynamics, but leave authoritative pose and visual root untouched. */
@@ -534,18 +551,32 @@ class Vehicle {
     }
   }
 
-  _updateSteering(input, dt) {
-    const steerRate = 2.5;
-    const returnRate = 4.0;
+  setHandling({ steeringWeight = 50, steeringReturn = 1 } = {}) {
+    if (!Number.isFinite(steeringWeight) || steeringWeight < 0 || steeringWeight > 100
+      || !Number.isFinite(steeringReturn) || steeringReturn < .5 || steeringReturn > 2)
+      throw new Error('Pengaturan handling tidak valid.');
+    this.handling = Object.freeze({ steeringWeight, steeringReturn });
+    return this.handling;
+  }
 
-    if (input.left) {
+  _updateSteering(input, dt) {
+    // Weight changes response speed, never full-lock range or vehicle grip.
+    const response = 2 ** ((50 - this.handling.steeringWeight) / 50);
+    const steerRate = 2.5 * response;
+    const returnRate = 4.0 * this.handling.steeringReturn;
+
+    if (input.analog) {
+      const steer = Number.isFinite(input.steer) ? THREE.MathUtils.clamp(input.steer, -1, 1) : 0;
+      const centering = steer === 0 ? this.handling.steeringReturn : 1;
+      this.steerAngle = THREE.MathUtils.lerp(this.steerAngle, -steer, Math.min(1, dt * response * centering / .09));
+    } else if (input.left) {
       this.steerAngle += steerRate * dt;
     } else if (input.right) {
       this.steerAngle -= steerRate * dt;
     } else {
       // Return to center
       if (Math.abs(this.steerAngle) < 0.05) this.steerAngle = 0;
-      else this.steerAngle -= Math.sign(this.steerAngle) * returnRate * dt;
+      else this.steerAngle -= Math.sign(this.steerAngle) * Math.min(Math.abs(this.steerAngle), returnRate * dt);
     }
 
     // Speed-dependent steering reduction

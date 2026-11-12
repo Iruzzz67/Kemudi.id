@@ -26,6 +26,9 @@
   let phase = PHASES.SELECT;
   let renderer, scene, camera;
   let track, vehicle, input, hud, walkingHud, audio;
+  let keyboard, gamepadSettings, gamepadAdapter, gamepadRouter, gamepadUI, gamepadSample, gamepadFrame;
+  let phaseBeforePause = PHASES.DRIVING, menuOpenedFrom;
+  let disposed = false;
   let pauseScreen, finishedScreen, failedScreen, selectScreen;
   let pedestrians;
   let clock;
@@ -33,13 +36,15 @@
   let transmission = 'automatic';
   let muted = false;
   let cameraMode = 0; // 0=TPV, 1=FPV, 2=TopDown
+  const cameraLook = { yaw: 0, pitch: 0 };
+  let cameraLookActive = false;
   let starting = false;
   let lastCollisionTime = -Infinity;
   let mapName = 'unified';
   let ready = false;
   let attemptId;
   const simulation = new SimulationState();
-  let collisionWorld, environment, traffic, lights, horns, cockpit;
+  let collisionWorld, environment, traffic, lights, horns, cockpit, trafficLOD;
   const characters = new Map();
   let instruments, accumulator = 0, bufferedEdges = {};
 
@@ -131,7 +136,8 @@
     clock = new THREE.Clock();
 
     // Input
-    input = new InputManager();
+    keyboard = new InputManager();
+    input = keyboard;
 
     // Audio
     audio = new SimAudio();
@@ -161,6 +167,7 @@
     pedestrians = new PedestrianSystem(scene, track, collisionWorld);
     traffic = new TrafficSystem(scene, track, collisionWorld, simulation);
     await traffic.init();
+    trafficLOD = new TrafficVisualLOD(scene);
     for (const actor of traffic.getVehicles()) attachActorVisuals(actor);
 
     // HUD
@@ -182,6 +189,7 @@
     selectScreen.selectedVehicle = vehicleType;
     selectScreen.selectedTransmission = transmission;
     selectScreen._render();
+    installGamepad();
     installEnvironmentControls();
     loadingBar.style.width = '100%';
     const autoStart = params.get('autostart') === '1';
@@ -197,8 +205,9 @@
       } catch { hud.showWarning('Layar penuh tidak tersedia di browser ini.'); }
       document.getElementById('sim-canvas').focus();
     });
-    window.addEventListener('blur', () => {
-      if (phase === PHASES.DRIVING) { phase = PHASES.PAUSED; audio.silence(); pauseScreen.show(); }
+    window.addEventListener('blur', () => pauseSimulation('Fokus simulator hilang.'));
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pauseSimulation('Tab disembunyikan.');
     });
 
     // Resize
@@ -221,6 +230,7 @@
     finishedScreen.hide(); failedScreen.hide(); audio.silence();
     cockpit?.setMode('TPV');
     accumulator = 0; bufferedEdges = {};
+    gamepadRouter?.reset();
     selectScreen.show();
   }
 
@@ -230,6 +240,66 @@
     const character = CharacterSystem.createCharacter(role, characters.size);
     character.mountToVehicle(actor);
     characters.set(actor.id, character);
+    trafficLOD.registerVehicle(actor, character);
+  }
+
+  function inputContext() {
+    if (gamepadUI?.isOpen) return 'MENU';
+    return ({select:'MENU',walking:'ON_FOOT',driving:'DRIVING',paused:'PAUSED',finished:'RESULT',failed:'RESULT'})[phase] || 'MENU';
+  }
+
+  function installGamepad() {
+    gamepadSettings = new GamepadSettings();
+    gamepadAdapter = new GamepadAdapter({settings:gamepadSettings});
+    gamepadRouter = new GamepadInputRouter();
+    gamepadUI = new GamepadUI({
+      onOpen() {
+        menuOpenedFrom = phase;
+        pauseSimulation('Menu aksi kendaraan terbuka.');
+        pauseScreen.hide(); gamepadRouter.reset(); accumulator=0; bufferedEdges={};
+      },
+      onClose() {
+        if(disposed) return;
+        gamepadRouter.reset(); accumulator=0; bufferedEdges={};
+        if (menuOpenedFrom === PHASES.PAUSED) pauseScreen.show();
+        else if (phase === PHASES.PAUSED) resumeSimulation();
+        document.getElementById('sim-canvas').focus();
+      },
+      onAction(name) {
+        if (!vehicle || phaseBeforePause !== PHASES.DRIVING) return;
+        const command = {[name]:true};
+        if (name==='gearUp'||name==='gearDown') {
+          const answer=vehicle.requestGearShift(name==='gearUp'?1:-1, !!gamepadSample?.continuous.clutch || gamepadSettings.value.clutchAssist);
+          if (!answer.accepted) hud.showWarning(answer.reason);
+        } else {
+          applyDriverActions(command);
+          vehicle.applyActions(command);
+        }
+        instruments=InstrumentSystem.snapshotFromVehicle(vehicle,environment.getState());
+        lights.update(0,environment.getState(),simulation.getVehicles(),vehicle.position);
+        cockpit?.update(0,vehicle,instruments,cameraLook); hud.update(vehicle,instruments);
+      },
+      onSettings(patch) {
+        try { if(patch.reset) gamepadSettings.reset(); else gamepadSettings.update(patch); }
+        catch(error) { hud.showWarning(error.message); return false; }
+        vehicle?.setHandling(gamepadSettings.value);
+        gamepadAdapter.reset('settings'); gamepadRouter.reset();
+      },
+      onDevice(index) { gamepadAdapter.select(index);gamepadRouter.reset(); }
+    });
+    window.addEventListener('pagehide', event => {
+      if(event.persisted) { pauseSimulation('Halaman dijeda.');return; }
+      disposed=true; gamepadAdapter.dispose();gamepadUI.dispose();keyboard.destroy();audio.silence();
+    });
+  }
+
+  function pauseSimulation(reason) {
+    gamepadRouter?.reset(); accumulator=0; bufferedEdges={};
+    keyboard?._onBlur();
+    if (phase===PHASES.DRIVING || phase===PHASES.WALKING || phase===PHASES.SELECT) {
+      phaseBeforePause=phase; phase=PHASES.PAUSED; audio.silence(); pauseScreen.show();
+      if(reason) hud.showWarning(reason + ' Lepaskan trigger/analog sebelum melanjutkan.');
+    }
   }
 
   function installEnvironmentControls() {
@@ -279,6 +349,7 @@
     vehicle = new Vehicle(scene, vehicleType, transmission, ratio => {
       document.getElementById('loading-bar-inner').style.width = Math.round(ratio * 100) + '%';
     });
+    vehicle.setHandling(gamepadSettings.value);
     try { await vehicle.ready; }
     catch (error) { starting = false; showError(error); return; }
 
@@ -315,6 +386,7 @@
     walkingHud.setShowEnterButton(false);
     hud.hide();
     cameraMode = 0;
+    cameraLook.yaw = 0; cameraLook.pitch = 0; cameraLookActive = false;
 
     // Camera follows walking character
     camera.position.set(walkingPosition.x, walkingPosition.y + 1.5, walkingPosition.z + 4);
@@ -326,22 +398,56 @@
 
   // === Animation Loop ===
   function animate() {
+    if(disposed) return;
     requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), .25);
-    input.update();
-    Object.assign(bufferedEdges, input.justPressed);
-    if (input.wasJustPressed('F2')) track.toggleDebug(vehicle?.position || walkingPosition);
+    keyboard.update();
+    if ((document.hidden || !document.hasFocus()) && (phase===PHASES.DRIVING || phase===PHASES.WALKING))
+      pauseSimulation('Fokus simulator hilang.');
+    gamepadSample=gamepadAdapter.poll(dt);
+    if (gamepadSample.lost && (phase===PHASES.DRIVING || phase===PHASES.WALKING)) pauseSimulation('Controller terputus atau berubah.');
+    gamepadFrame=gamepadRouter.update(DomainInput.keyboard(keyboard),gamepadSample,{
+      context:inputContext(),dt,now:performance.now(),focused:!document.hidden && document.hasFocus()
+    });
+    if(gamepadFrame.source==='gamepad') {
+      const e=gamepadFrame.edges,c=gamepadFrame.continuous;
+      if(transmission==='automatic') {
+        e.selectDrive=!!e.gearUp;e.selectReverse=!!e.gearDown;
+        delete e.gearUp;delete e.gearDown;
+      } else if(gamepadSettings.value.clutchAssist && (e.gearUp||e.gearDown||vehicle?.speed<.5&&!c.throttle)) c.clutch=true;
+      if(phase===PHASES.WALKING) {
+        c.throttle=Math.max(c.throttle,Math.max(0,c.walk||0));
+        c.brakeAmount=Math.max(c.brakeAmount,Math.max(0,-(c.walk||0)));
+      }
+    }
+    gamepadUI.update({status:gamepadSample.status,message:gamepadSample.message,
+      source:gamepadFrame.source,device:gamepadSample.device,devices:gamepadSample.devices,
+      neutralGate:gamepadFrame.neutralGate,phase,vehicleType,transmission,settings:gamepadSettings.value});
+    const toggledMenu=!!gamepadFrame.edges.menu;
+    if(toggledMenu) gamepadUI.isOpen?gamepadUI.close():gamepadUI.open();
+    if(gamepadFrame.edges.pause && gamepadUI.isOpen) {
+      menuOpenedFrom=PHASES.PAUSED; gamepadUI.close(); pauseScreen.show();
+      delete gamepadFrame.edges.pause; // Consume here; never resume again in the same frame.
+    }
+    if(gamepadUI.isOpen && !toggledMenu) gamepadUI.handle(gamepadFrame.navigation);
+    else if(gamepadFrame.source==='gamepad' && ['MENU','RESULT'].includes(inputContext())) {
+      const container=phase===PHASES.SELECT?selectScreen.element:phase===PHASES.FINISHED?finishedScreen.element:failedScreen.element;
+      if(container) gamepadUI.handlePage(gamepadFrame.navigation,container);
+    }
+    input=new DomainInput(gamepadFrame);
+    DomainInput.accumulateEdges(bufferedEdges, input.justPressed);
+    if (keyboard.wasJustPressed('F2')) track.toggleDebug(vehicle?.position || walkingPosition);
     if (phase === PHASES.PAUSED) {
-      if (input.pause) { pauseScreen.hide(); resumeSimulation(); }
+      if (input.pause && !gamepadUI.isOpen) { pauseScreen.hide(); resumeSimulation(); }
       bufferedEdges = {}; accumulator = 0;
-    } else if (phase === PHASES.DRIVING && input.pause) {
-      phase = PHASES.PAUSED; audio.silence(); pauseScreen.show();
+    } else if ((phase === PHASES.DRIVING || phase===PHASES.WALKING) && input.pause) {
+      pauseSimulation();
       bufferedEdges = {}; accumulator = 0;
     } else {
       accumulator = Math.min(accumulator + dt, simulation.clock.fixedDt * 5);
     }
     let stepped = 0;
-    while (accumulator + 1e-10 >= simulation.clock.fixedDt && phase !== PHASES.PAUSED) {
+    while (accumulator + 1e-10 >= simulation.clock.fixedDt && phase !== PHASES.PAUSED && !gamepadUI.isOpen) {
       input.justPressed = bufferedEdges; bufferedEdges = {};
       const fixedDt = simulation.clock.fixedDt;
       simulation.step();
@@ -353,13 +459,23 @@
         pedestrians.update(fixedDt, simulation.getVehicles());
       }
       if (phase === PHASES.WALKING) { updateWalking(fixedDt); resolveMotion(fixedDt); }
-      else if (phase === PHASES.DRIVING) updateDriving(fixedDt);
+      else if (phase === PHASES.DRIVING) {
+        if(gamepadRouter.gated) {
+          // Neutral re-arm halts only the player. AI, signals and environment
+          // still tick after an explicit resume; no implicit manual clutch drop.
+          vehicle.speed=0;vehicle.braking=true;
+          vehicle._updateRPM({forward:false});audio.updateEngine(vehicle.rpm,vehicle.engineOn);
+          resolveMotion(fixedDt);
+        } else updateDriving(fixedDt);
+      }
       else if (phase === PHASES.SELECT) resolveMotion(fixedDt);
       updateActorVisuals(fixedDt);
       accumulator -= fixedDt; stepped += fixedDt;
     }
     environment.update(stepped, camera, { cockpit: phase === PHASES.DRIVING && CAMERA_MODES[cameraMode] === 'FPV', vehicleType });
     document.getElementById('environment-controls').hidden = ![PHASES.SELECT, PHASES.PAUSED].includes(phase);
+    // Render-only visibility: bodies remain registered and planning even when culled.
+    trafficLOD.update(camera.position);
     renderer.render(scene, camera);
   }
 
@@ -386,9 +502,9 @@
     if (vehicle && phase === PHASES.DRIVING) {
       instruments = InstrumentSystem.snapshotFromVehicle(vehicle, environment.getState());
       vehicle.instrumentSnapshot = instruments;
-      cockpit.setMode(CAMERA_MODES[cameraMode]);
       updateCamera(dt);
-      cockpit.update(dt, vehicle, instruments);
+      cockpit.setMode(CAMERA_MODES[cameraMode]);
+      cockpit.update(dt, vehicle, instruments, cameraLook);
       hud.update(vehicle, instruments);
     }
   }
@@ -448,24 +564,18 @@
     }, 1500);
   }
 
-  // === Driving Phase ===
-  function updateDriving(dt) {
-    // Pause
-    if (input.pause) {
-      phase = PHASES.PAUSED;
-      audio.silence();
-      pauseScreen.show();
-      return;
-    }
-
+  function applyDriverActions(actions) {
     // Camera toggle
-    if (input.camera) {
+    if (actions.camera) {
       cameraMode = (cameraMode + 1) % CAMERA_MODES.length;
+      cameraLook.yaw = 0; cameraLook.pitch = 0;
+      // An explicit mode change wins over a stick already held this tick.
+      cameraLookActive = !!(input?.lookX || input?.lookY);
       hud.setCameraMode(CAMERA_MODES[cameraMode]);
     }
 
     // Ignition
-    if (input.ignition) {
+    if (actions.ignition) {
       if (!vehicle.engineOn && vehicle.enginePhase !== 'STARTING') {
         vehicle.startEngine();
         audio.resume();
@@ -482,14 +592,31 @@
     }
 
     // Handbrake toggle
-    if (input.handbrake && vehicle.engineOn) {
+    if (actions.handbrake && vehicle.engineOn) {
       vehicle.handbrakeOn = !vehicle.handbrakeOn;
     }
 
     // Horn
-    if (input.horn) {
+    if (actions.horn) {
       horns.trigger(vehicle, simulation.clock.elapsed);
     }
+
+    if (actions.selectDrive || actions.selectReverse) {
+      const answer = vehicle.requestDriveDirection(actions.selectReverse ? -1 : 1,
+        gamepadSample?.continuous.brakeAmount || 0);
+      if (!answer.accepted) hud.showWarning(answer.reason);
+    }
+  }
+
+  // === Driving Phase ===
+  function updateDriving(dt) {
+    // Pause
+    if (input.pause) {
+      pauseSimulation();
+      return;
+    }
+
+    applyDriverActions(input);
 
     // Update vehicle physics
     const before = vehicle.position.clone();
@@ -600,10 +727,16 @@
   // Read-only diagnostics used to verify the actual renderer and driving state.
   window.kemudiSimulation = Object.freeze({ snapshot: () => ({
     ready, phase, map: mapName, vehicle: vehicle?.type, loaded: vehicle?.modelLoaded,
+    equipment: vehicle && {seatbelt:vehicle.seatbeltOn,helmet:vehicle.helmetOn,
+      jacket:vehicle.jacketOn,gloves:vehicle.glovesOn,shoes:vehicle.shoesOn},
+    gamepad: gamepadFrame && {source:gamepadFrame.source,status:gamepadSample?.status,
+      neutralGate:gamepadFrame.neutralGate,continuous:{...gamepadFrame.continuous},
+      selectedIndex:gamepadSample?.device?.index,menuOpen:gamepadUI?.isOpen},
     intersection: track?.intersection?.snapshot(),
     intersections: track?.intersections?.map(j=>j.snapshot()),
     position: vehicle?.position.toArray(), speed: vehicle?.speed, gear: vehicle?.gear,
     rotation: vehicle?.rotation, steerAngle: vehicle?.steerAngle,
+    handling: vehicle && { ...vehicle.handling },
     navigationTarget: vehicle && traffic?.routes.spineNorth.sample(traffic.routes.spineNorth.project(vehicle.position) + 6).position.toArray(),
     engine: vehicle?.engineOn, handbrake: vehicle?.handbrakeOn,
     seatAdjusted: vehicle?.seatAdjusted, mirrorChecked: vehicle?.mirrorChecked,
@@ -613,12 +746,15 @@
       indicators: vehicle.indicators.map(l => ({ name: l.name, intensity: l.material.emissiveIntensity })),
       hazard: vehicle.hazardOn, left: vehicle.signalLeft, right: vehicle.signalRight,
     },
-    camera: CAMERA_MODES[cameraMode], wheels: vehicle?.wheels.map(w => ({ name: w.mesh.name, spin: w.mesh.rotation.x, steer: w.pivot.rotation.y })),
+    camera: CAMERA_MODES[cameraMode], cameraLook: { ...cameraLook },
+    cameraPose: camera && {position:camera.position.toArray(),direction:camera.getWorldDirection(new THREE.Vector3()).toArray()},
+    wheels: vehicle?.wheels.map(w => ({ name: w.mesh.name, spin: w.mesh.rotation.x, steer: w.pivot.rotation.y })),
     clock: { ...simulation.clock }, environment: environment?.getState(),
     instruments, cockpit: cockpit?.snapshot?.(),
     traffic: traffic?.getVehicles().map(v => ({ id: v.id, type: v.type, active: v.active, loaded: v.modelLoaded, groupVisible: v.group.visible, position: v.position.toArray(), rotation: v.rotation, speed: v.speed, braking: v.braking, reason: v.stopReason, lights: v.lightState })),
     pedestrians: pedestrians?.getActiveAgents().map(p => ({ id: p.id, position: (p.position || p.group.position).toArray(), crossing: p.crossing })),
     resources: { geometries: renderer?.info.memory.geometries, textures: renderer?.info.memory.textures },
+    trafficLOD: trafficLOD?.snapshot(),
     characters: { count: characters.size, mountedIds: [...characters.keys()], playerRole: characters.get('player')?.group.name, headVisible: characters.get('player')?.head.visible },
     exteriorVisible: vehicle?.model?.visible,
     audio: { state: audio?.ctx?.state, activeHornVoices: audio?.activeHornVoices, lastPlayerHorn: horns?.lastPlayed.get('player') },
@@ -630,8 +766,19 @@
   function updateCamera(dt) {
     if (!vehicle) return;
 
+    const lookActive = input.analog && !gamepadRouter.gated && !!(input.lookX || input.lookY);
+    if (lookActive && !cameraLookActive && cameraMode !== 1) {
+      cameraMode = 1;
+      cameraLook.yaw = 0; cameraLook.pitch = 0;
+      hud.setCameraMode('FPV');
+    }
+    cameraLookActive = lookActive;
+    if (lookActive && cameraMode === 1) {
+      // Fixed-tick angular velocity: right/down stick means right/down view.
+      cameraLook.yaw = THREE.MathUtils.clamp(cameraLook.yaw - input.lookX * 1.8 * dt, -Math.PI * 5/9, Math.PI * 5/9);
+      cameraLook.pitch = THREE.MathUtils.clamp(cameraLook.pitch - input.lookY * 1.3 * dt, -Math.PI * 11/36, Math.PI * 11/36);
+    }
     const vehPos = vehicle.position;
-    const vehRot = vehicle.rotation;
     const forward = vehicle.getForwardDirection();
 
     switch (CAMERA_MODES[cameraMode]) {
@@ -651,12 +798,7 @@
         break;
       }
       case 'FPV': {
-        // First-person from driver seat
-        const seatPos = vehicle.getDriverSeatPosition();
-        camera.position.copy(seatPos);
-        const lookDir = forward.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0),
-          vehicle.mirrorYaw > 0 ? Math.PI * .75 * Math.sin(Math.PI * vehicle.mirrorYaw / 1.1) : 0).multiplyScalar(10);
-        camera.lookAt(seatPos.clone().add(lookDir));
+        // CockpitSystem applies driver-eye position, look and mirror together.
         break;
       }
       case 'TopDown': {
@@ -673,7 +815,8 @@
   // === Pause ===
   function resumeSimulation() {
     if (phase === PHASES.PAUSED) {
-      phase = PHASES.DRIVING;
+      phase = phaseBeforePause;
+      gamepadRouter?.reset();
       accumulator = 0; bufferedEdges = {};
       clock.getDelta();
       audio.resume();

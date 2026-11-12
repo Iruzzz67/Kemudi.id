@@ -54,7 +54,7 @@ public sealed class AdminRegistrationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] AdminRegistrationUpdateRequest request)
     {
-        var status = request.Status.ToLowerInvariant() switch
+        var status = request.Status?.Trim().ToLowerInvariant() switch
         {
             "pending" => RegistrationStatus.Pending,
             "paid" => RegistrationStatus.Paid,
@@ -63,39 +63,21 @@ public sealed class AdminRegistrationsController : ControllerBase
         };
         if (status is null)
             return BadRequest(new { error = "Status harus pending, paid, atau rejected." });
+        if (status == RegistrationStatus.Paid)
+            return Conflict(new { error = "Verifikasi penerimaan dana melalui panel pembayaran, bukan status pendaftaran." });
 
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var registration = await _db.CourseRegistrations
             .Include(r => r.CoursePackage)
             .FirstOrDefaultAsync(r => r.Id == id);
         if (registration is null) return NotFound(new { error = "Pendaftaran tidak ditemukan." });
+        if (await _db.Payments.AnyAsync(p => p.RegistrationId == id))
+            return Conflict(new { error = "Pendaftaran memiliki catatan pembayaran; ubah status melalui panel pembayaran." });
 
         registration.Status = status.Value;
 
-        // Saat dikonfirmasi, catat pembayaran berhasil (untuk hitungan revenue).
-        if (status == RegistrationStatus.Paid)
-        {
-            var payment = await _db.Payments
-                .OrderByDescending(p => p.CreatedAt)
-                .FirstOrDefaultAsync(p => p.RegistrationId == registration.Id);
-            if (payment is null)
-            {
-                _db.Payments.Add(new Payment
-                {
-                    RegistrationId = registration.Id,
-                    Method = registration.PaymentMethod,
-                    Status = PaymentStatus.Paid,
-                    Amount = registration.CoursePackage?.Price ?? 0,
-                    PaidAt = DateTime.UtcNow
-                });
-            }
-            else if (payment.Status != PaymentStatus.Paid)
-            {
-                payment.Status = PaymentStatus.Paid;
-                payment.PaidAt = DateTime.UtcNow;
-            }
-        }
-
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
         await AdminHelpers.LogAsync(
             _db, User,
             status == RegistrationStatus.Paid ? "registration.confirm"

@@ -1,8 +1,10 @@
 using System.Text;
+using System.Security.Claims;
 using Kemudi.Infrastructure;
 using Kemudi.Infrastructure.Auth;
 using Kemudi.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -48,6 +50,9 @@ builder.Services.AddSwaggerGen(options =>
 // Autentikasi JWT
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
           ?? new JwtOptions();
+if (Encoding.UTF8.GetByteCount(jwt.SecretKey) < 32 ||
+    (!builder.Environment.IsDevelopment() && jwt.SecretKey.StartsWith("KEMUDI-DEV-", StringComparison.Ordinal)))
+    throw new InvalidOperationException("Konfigurasikan Jwt:SecretKey privat minimal 32 byte; kunci development tidak boleh dipakai di produksi.");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -62,6 +67,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(jwt.SecretKey)),
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromMinutes(1)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var users = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+                var id = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = id is null ? null : await users.FindByIdAsync(id);
+                if (user is null || !user.IsActive ||
+                    (context.Principal!.IsInRole("Admin") && !await users.IsInRoleAsync(user, "Admin")))
+                    context.Fail("Akun atau akses admin tidak lagi aktif.");
+            }
         };
     });
 builder.Services.AddAuthorization();

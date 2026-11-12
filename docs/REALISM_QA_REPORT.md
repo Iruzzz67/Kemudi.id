@@ -1,5 +1,80 @@
 # Realism QA report
 
+## Payment hardening continuation — 2026-11-11
+
+- Bounded payment/auth/UI patch PASS:50C# checks,26HTTP/browser checks, rebuild
+  warning-as-error0warnings/0errors; source/admin review final APPROVE.
+- Existing result gateway recovery4checks, functions6 dan syntax61PASS. Tidak
+  mengubah simulator/physics/input/results contract atau mengulang fullmatrix.
+- Anonymous/cross-owner payment access ditolak; customer submission tetap Pending;
+ 10concurrent submissions satu record;5admin confirmations satu audit/PaidAt.
+  CSRF, legitimateAdminUI, ordinary-user403, active/role revocation, digitaldefault
+  unavailable dan escapedconfiguredinstructions diuji di DBbaru terisolasi.
+- Awalbrowser22PASS/1FAIL dipertahankan: pointertrace menunjukkan form di tabel
+  bergeser26px sebelum mouseup; bukan backendsettlement yang gagal. Form dipisah,
+  serverUIguard ditambah; singleclick finalsettlement dan reload PASS tanpa retry.
+- Lookup409/503/invalidresponse kini memblokir transfer ulang; adminoutage tidak
+  menyamar sebagai loginerror; paidlegacyinconsistent409. Ketiganya memiliki tes.
+- Bukti: `artifacts/payment-security/`, kontrak/report `docs/PAYMENT_SECURITY.md`.
+  PreviewWeb5903/API5902 aktif; configuredQA5905 sudah dihentikan. Uji provider/
+  bank nyata, datahistoris, refund/upload dan deploymentTLS/secret NOT RUN.
+  Tidak mengklaim production certification atau menyelesaikan gap perjalanan
+  simulator/iframe/hardware pada laporan sebelumnya.
+
+## QA fitur dan perbaikan warning — 2026-11-11
+
+- Full solution .NET rebuild `-warnaserror` PASS0warning/0error; tiga penyebab
+  13warning diperbaiki, tanpa suppression. Dua regresi awal FAIL, final10PASS;
+  review independen APPROVE untuk diff warning/test, bukan seluruh produk.
+- PASS build42files/7.176.563bytes, syntax60, functions6, realism lengkap
+  (collision11/traffic15groups), handling19, gamepad device/domain/UI, unified7.
+- Browser PASS full realism6cases49checks (initial+paused12environment matrix),
+  full synthetic gamepad6standalonecases69checks, smoke3automatic vehicles,
+  intersection, legacy aliases, road seamTRUK5, handling MOBIL/automatic10.
+- Website60PASS/7FAIL dari67checks;3focused probes menambah/menguatkan temuan.
+  Pembayaran anonymous paid/duplicate dan circuit admin login adalah risiko
+  penting, belum diperbaiki. Batas API authorization user403 tetap lulus.
+- Backend awal gagal register-hydration; tes menunggu required-field response
+  sebelum mengisi input, bukan menghilangkan assertion. Ulang6checks auth/CSRF/
+  validation/concurrent idempotency/isolation PASS; drive180s FAIL masih driving
+  (clock12,58s/z=-20,35m). Downstream full real journey belum terverifikasi.
+- Build fix Web5893/API5892 HTTP200. Result recovery4checks PASS. Tes terpisah
+  payload hasil sintetis melalui real gateway/database: lost response→503→retry
+  tanpa duplikasi, completed/failed, dashboard reload3checks PASS; bukan real drive.
+- IframeTRUK/manual pada5893 FAIL automation: wait driving timeout; probe lain
+  mendeteksi frame detached saat hydration, lalu canvas click timeout. Penyebab
+  belum dipastikan. Standalone matrix bukan pengganti penerimaan iframe.
+- NOT RUN: authorized admin CRUD/settings, provider settlement, hardware,
+  audio/visual manusia, hardware FPS/stability baru. Full look browser dibatalkan
+  setelah assertion parsial, tidak dianggap PASS; lima handling cases lainnya
+  NOT RUN. Status rilis tetap NEEDS ATTENTION.
+- Arsip/report/commands: `artifacts/feature-qa-2026-11-11/REPORT.md`, subdirektori
+  website/simulator, `dotnet-build.log`, `warnings-before/after/final.log`,
+  `backend-smoke-retry.log`, `gateway-results-report.json`. Cache NuGet lokal
+  dipakai setelah akses online gagal; tidak mengklaim online vulnerability audit.
+
+## Road-seam truck fix — 2026-11-05
+
+- Screenshot pengguna dan pure-source reproduction mengonfirmasi false boundary
+  di antara housing z>=-33 dan north corridor z<=-28. Straight TRUK pada
+  x=-1.75,z=-30.5 mendapat Batas area meski tidak ada collider fisik.
+- CityTrack.inNorth kini mencakup central corridor sampai z33; tambahan area
+  berada seluruhnya dalam original region. Full-footprint, static objects,
+  AI collision dan batas luar tetap; main/input/physics/results tidak diubah.
+- Regression FAIL sebelum fix (TRUK z=-30.125), PASS sesudahnya: unified7checks,
+  termasuk4.932pose actual MOTOR/MOBIL/TRUK, dua lajur, dua arah/small yaw, serta
+  enam probe luar/corner yang tetap ditolak. Bukti artifacts/unified/unit-report.json.
+- PASS functions6, realism (collision11groups/traffic15groups dan modul lainnya),
+  syntax58files, build42files/7.173.580byte. Reviewer APPROVE pada dua file fix/test.
+- Command browser terarah: npm.cmd --prefix tools/webgl run test:road-seam
+  (server8080 aktif). Hasil driving disimpan terpisah di
+  artifacts/realism/road-seam-browser-report.json: PASS exit0,5checks. Truk
+  dimuat dari spawn24m, masuk/mesin/sabuk/rem tangan melalui keyboard normal,
+  mengemudi melewati z<-38 tanpa pindah lajur/tambah penalti, lalu rem hingga
+  berhenti. Tidak ada mutasi vehicle/clock/position di test. Screenshot:
+  artifacts/realism/road-seam-truk-automatic.png. Full browser6case/iframe/
+  backend/hardware tidak diulang; bukan acceptance rilis lengkap.
+
 Date: 2026-11-03. A8 test-engineer lane. **Status: focused integration PASS; full matrix and release gates pending.**
 
 ## Evidence policy
@@ -55,4 +130,35 @@ Reports are written even on failure to `artifacts/realism/browser-report.json`; 
 
 ## Known boundaries
 
+### Latest preview continuation — 2026-11-04
+
+- Turns/pre-turn signaling now implemented through runtime route adapters (trailing E/W AI); no replacement signal controller or bypass of collision. Focused regression fixed red-held cross-road queue starvation while retaining occupied-junction yield. Independent review APPROVE.
+- Expanded traffic suite: 15 groups, 120 simulation seconds full-world; all four turning actors complete after signal/pedestrian cycles. Early60s snapshot alone was insufficient; test now asserts completed turns, not initial approach advance.
+- Website iframe **PASS** on isolated Web5891/API5890: real TRUK/manual loaded, entered driving,16 active loaded AI/LOD registration; `artifacts/realism/iframe-report.json`.
+- Gateway recovery **PASS**,4 checks; auth/CSRF/concurrent idempotent/isolation checks **PASS**,6. Full backend drive diagnostic **FAIL/time budget**,45m/11.5 simulation seconds in120s wall; downstream finish/save/retry/dashboard unverified, not skipped-as-pass. Test now follows real autostart and road navigation instead of obsolete selection/straight-line assumptions.
+- Night/heavy-rain300s wall stability **PASS**,57 samples, tick55→3690/no overlap or pageerrors. Evidence `stability-report-2026-11-04.json`, `stability-samples.json`. This run preceded final non-RED predicate repair; no claim final-build300s rerun or hardware FPS/leak certification.
+- Build latest35 files/7,133,723 bytes; syntax46 authored JS files PASS. Six-case browser matrix above is earlier evidence, not rerun on turns. Human visual/audio, controlled performance and browser wall-escape/LOD-boundary cases remain pending. **Release NOT COMPLETE; local preview ready for user testing.**
+
+### Continuation review — 2026-11-04
+
+- Render-only `TrafficVisualLOD` connected to entry script, AI character mount, and pre-render camera-distance update; AI physics registration is unchanged. LOD test is now part of `test:realism`; browser asserts all 16 AI registered, excluding player. Independent review approves this bounded integration, not release.
+- Safety review reproduced a false-positive rotation envelope freezing safe steering away from a nearby wall. Added regression failed before repair; bounded conservative subdivision repair passes 11 collision groups and 12 traffic groups. Extremely tight cases may still stop conservatively; no endpoint-only shortcut.
+- **Open functional gap:** AI commit resets both signals false and current intersection routes are straight-through. Pre-turn AI indicators and turning routes remain unimplemented; existing tests do not prove that acceptance item.
+- Full browser matrix, final .NET build, website/backend and sustained stability evidence must be checked in `REALISM_SESSION_LOG.md`; earlier evidence above is dated 3 November, not automatically revalidated.
+
+#### Fresh continuation results
+
+- Six-case static browser matrix: **PASS**, exit 0, `artifacts/realism/browser-report-2026-11-04.json` (UTC 02:10:49–02:44:50). All 16 AI registered in render LOD, with actual group visibility checked nearby; 49 named case checks passed. Initial/paused 4×3 environment switching passed. MOBIL pages loaded before the collision refinement rebuild; later vehicle cases loaded after it. Steering-away refinement is proven by unit regression/review, not a dedicated browser wall-escape scenario.
+- Fresh final JS suite: **PASS**, syntax 45 authored files, 11 collision groups, 12 traffic groups, state/environment/lights/horn/visual/LOD. Existing functions/intersection/unified pure regressions **PASS**.
+- WebGL build: **PASS**, 35 files / 7,130,849 bytes. .NET alternate-output build: **PASS**, 19 warnings / 0 errors; log `artifacts/realism/dotnet-build-2026-11-04.log`. Default build encountered files locked by existing server processes; those were not killed.
+- LOD final snapshots: 529–602 draw calls, all 16 physics actors active. Not an A/B benchmark, FPS measurement or long-duration leak proof.
+- **Still pending:** website iframe/backend results, 5–10 minute stability, controlled FPS, human visual/audio review, browser LOD boundary/wall-escape scenarios and functional AI turns/pre-turn signaling. Release is **NOT COMPLETE**.
+
 Character/cockpit geometry is original procedural fallback, not final GLB artwork. Main and feature modules remain owned by their implementing lanes; A8 reports bugs and does not silently patch production code. Codebase-memory coverage was checked for the five existing runtime/test paths relied upon and returned metadata_match/no_recorded_issue (best effort); source reads were used directly for actual contracts.
+
+## Browser QA terbatas — 10 November 2026
+- Website5891/API5890 dijalankan dengan database uji terisolasi; smoke MCP Playwright.
+- PASS build default .NET --no-restore (exit0), syntax60, functions6, realism suite; browser halaman publik/detail materi/auth, mobile kursus, iframe mobil otomatis masuk→mesin→gas→rem→pause.
+- Temuan: query mentor diabaikan, ringkasan kursus menampilkan literal null-coalescing, pesan login kosong menyesatkan, label form kursus tidak terhubung ke input.
+- Tidak mengubah source aplikasi. Bukti dan batas: artifacts/browser-qa-2026-11-10/REPORT.md.
+- Fullmatrix kendaraan, finish/save/dashboard, pembayaran/admin/hardware/audio/performance NOT RUN. Bukan acceptance rilis.

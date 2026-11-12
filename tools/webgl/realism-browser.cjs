@@ -7,6 +7,10 @@ const base = process.env.SIM_URL || 'http://127.0.0.1:8080/';
 const output = path.resolve(__dirname, '../../artifacts/realism');
 fs.mkdirSync(output, { recursive: true });
 const report = { started: new Date().toISOString(), passed: false, cases: [], checks: [], gaps: [] };
+function saveReport() {
+  report.updatedAt = new Date().toISOString();
+  fs.writeFileSync(path.join(output, 'browser-report.json'), JSON.stringify(report, null, 2));
+}
 const dimensions = { MOTOR: { width: 1.02, length: 2.26 }, MOBIL: { width: 2.31, length: 4.65 }, TRUK: { width: 2.88, length: 6.47 } };
 const snapshot = page => page.evaluate(() => window.kemudiSimulation.snapshot());
 function check(name, fn) { fn(); report.checks.push(name); console.log('PASS', name); }
@@ -50,6 +54,7 @@ async function testCase(browser, type, transmission, matrix) {
   page.on('response', r => { if (r.status() >= 400 && !r.url().endsWith('/favicon.ico')) missing.push({ url: r.url(), status: r.status() }); });
   const caseReport = { type, transmission, checks: [], passed: false };
   report.cases.push(caseReport);
+  saveReport(); // Preserve the current case even if a long browser run is interrupted.
   const caseCheck = (name, fn) => { check(`${type}/${transmission}: ${name}`, fn); caseReport.checks.push(name); };
   try {
     const url = new URL(base); url.searchParams.set('vehicle', type); url.searchParams.set('transmission', transmission);
@@ -67,6 +72,8 @@ async function testCase(browser, type, transmission, matrix) {
     caseCheck('actual three-type AI models, safe spawn and unified crossings', () => {
       assert.equal(walking.vehicle, type); assert.equal(walking.loaded, true);
       assert.equal(walking.traffic.length, 16);
+      assert.equal(walking.trafficLOD.registered, 16, 'render LOD must register AI only, not the player');
+      assert.equal(walking.trafficLOD.near + walking.trafficLOD.proxy + walking.trafficLOD.culled, 16);
       assert.ok(walking.traffic.every(v => v.active && v.loaded), 'all sixteen actors must be safely spawned actual loaded models, not NO_SAFE_SPAWN placeholders');
       const near = walking.traffic.filter(v => Math.hypot(v.position[0] - walking.position[0], v.position[2] - walking.position[2]) < 40);
       assert.ok(near.every(v => v.groupVisible), 'nearby actors remain rendered; distant rendering LOD may be culled');
@@ -197,7 +204,7 @@ async function testCase(browser, type, transmission, matrix) {
     caseReport.errors = errors; caseReport.failed = failed; caseReport.missing = missing;
     await page.screenshot({ path: path.join(output, `${type.toLowerCase()}-${transmission}-failure.png`) }).catch(() => {});
     throw error;
-  } finally { await page.close(); }
+  } finally { saveReport(); await page.close(); }
 }
 async function iframeSmoke(browser) {
   if (!process.env.WEB_URL) { report.gaps.push('Website iframe smoke not requested: set WEB_URL to a local website'); return; }
@@ -260,7 +267,7 @@ async function stability(browser, seconds) {
     report.passed = true;
   } finally {
     report.finished = new Date().toISOString();
-    fs.writeFileSync(path.join(output, 'browser-report.json'), JSON.stringify(report, null, 2));
+    saveReport();
     await browser.close();
   }
 })().catch(error => { console.error(error); process.exitCode = 1; });

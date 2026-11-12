@@ -1,0 +1,43 @@
+{
+  "events": [
+    "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+  ],
+  "snapshots": [
+    {
+      "stage": "before-click",
+      "buttonCount": 1,
+      "disabled": false,
+      "error": [],
+      "row": "11 Nov 2026, 15.15\tDiagnostic Cash 9b7bc2\npayment-diagnostic-62fb4ebd-cf28-49fe-9b31-93ee01c8c185@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-first-click",
+      "buttonCount": 1,
+      "disabled": false,
+      "error": [],
+      "row": "11 Nov 2026, 15.15\tDiagnostic Cash 9b7bc2\npayment-diagnostic-62fb4ebd-cf28-49fe-9b31-93ee01c8c185@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-second-click",
+      "buttonCount": 0,
+      "disabled": null,
+      "error": [],
+      "row": "11 Nov 2026, 15.15\tDiagnostic Cash 9b7bc2\npayment-diagnostic-62fb4ebd-cf28-49fe-9b31-93ee01c8c185@example.test\tBayar di Tempat\nReferensi: diagnostic-cash-receipt\tRp 350.000\tDikonfirmasi\t",
+      "payment": {
+        "status": "paid",
+        "paidAt": "2026-11-11T08:15:59.1205775"
+      },
+      "blazorError": false
+    }
+  ]
+}

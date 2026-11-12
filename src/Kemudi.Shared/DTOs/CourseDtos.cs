@@ -77,4 +77,4 @@ public sealed record PaymentDto(
     string Status,
     string? Reference,
     decimal Amount,
-    DateTime PaidAt);
+    DateTime? PaidAt);

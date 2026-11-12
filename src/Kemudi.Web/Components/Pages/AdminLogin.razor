@@ -2,6 +2,7 @@
 @using Kemudi.Web.Services
 @inject AuthService Auth
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <div class="admin-login-wrap">
     <div class="admin-login-brand">Kemudi<span>.id</span></div>
@@ -14,13 +15,13 @@
         }
 
         <div class="field">
-            <label>Email</label>
-            <input type="email" @bind="_email" placeholder="admin@kemudi.id" />
+            <label for="admin-login-email">Email</label>
+            <input id="admin-login-email" type="email" autocomplete="username" @bind="_email" placeholder="admin@kemudi.id" />
         </div>
 
         <div class="field">
-            <label>Password</label>
-            <input type="password" @bind="_password" />
+            <label for="admin-login-password">Password</label>
+            <input id="admin-login-password" type="password" autocomplete="current-password" @bind="_password" />
         </div>
 
         <button class="btn btn-primary" disabled="@_busy" @onclick="LoginAsync">
@@ -39,11 +40,12 @@
     private string? _error;
     private bool _busy;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Admin yang sudah login langsung diarahkan ke dashboard.
-        if (Auth.IsAuthenticated && Auth.IsAdmin)
+        if (await Auth.LoadAdminAsync())
             Nav.NavigateTo("/admin/dashboard", forceLoad: true);
+        else if (Auth.AdminAccessError is not null)
+            _error = Auth.AdminAccessError;
     }
 
     private async Task LoginAsync()
@@ -52,11 +54,19 @@
         _error = null;
         try
         {
-            var result = await Auth.LoginAdminAsync(_email, _password);
-            if (result.Success)
+            if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+            {
+                _error = "Email dan password wajib diisi.";
+                return;
+            }
+            await using var session = await JS.InvokeAsync<IJSObjectReference>("import", "/js/session-client.js");
+            _error = await session.InvokeAsync<string?>("submit", "admin-login", new { email = _email, password = _password });
+            if (_error is null)
                 Nav.NavigateTo("/admin/dashboard", forceLoad: true);
-            else
-                _error = result.Error;
+        }
+        catch (JSException)
+        {
+            _error = "Layanan login belum dapat dihubungi. Coba lagi.";
         }
         finally
         {

@@ -76,7 +76,7 @@
     straight(south, finalFrame.point.x + lane, finalFrame.point.z, endZ);
     const spineNorth = new RoutePath('unified:northbound', north);
     const spineSouth = new RoutePath('unified:southbound', south.reverse());
-    const routes = [spineNorth, spineSouth], byApproach = new Map();
+    const routes = [spineNorth, spineSouth], byApproach = new Map(), turns = new Map();
     for (const junction of junctions) {
       const d = junction.definition;
       for (const approach of d.approaches) {
@@ -93,10 +93,29 @@
         const stopPoint = d.point(approach, -d.stopDistance - d.config.buffer);
         route.gates.push({ junction, approach, s: route.project(stopPoint) });
         byApproach.set(d.config.id + ':' + approach.id, route);
+        for (const direction of ['left', 'right']) {
+          const forward = approach.left.clone().multiplyScalar(direction === 'left' ? 1 : -1);
+          const outgoing = d.approaches.find(a => a.forward.dot(forward) < -.99);
+          const start = d.point(approach, -d.config.laneWidth);
+          const end = d.point(outgoing, -d.config.laneWidth, -1);
+          const delta = end.clone().sub(start);
+          const cross = (a, b) => a.x * b.z - a.z * b.x;
+          const control = start.clone().addScaledVector(approach.forward, cross(delta, forward) / cross(approach.forward, forward));
+          const points = [d.point(approach, -approach.armLength + 4), start];
+          for (let i = 1; i <= 64; i++) {
+            const t = i / 64;
+            points.push(start.clone().multiplyScalar((1 - t) ** 2).addScaledVector(control, 2 * t * (1 - t)).addScaledVector(end, t * t));
+          }
+          points.push(d.point(outgoing, -outgoing.armLength + 4, -1));
+          const turnRoute = new RoutePath(d.config.id + ':' + approach.id + ':' + direction, points);
+          turnRoute.turn = { direction, start: turnRoute.project(start), end: turnRoute.project(end) };
+          turnRoute.gates.push({ junction, approach, s: turnRoute.project(stopPoint) });
+          turns.set(turnRoute.id, turnRoute);
+        }
       }
     }
     routes.forEach(route => route.gates.sort((a, b) => a.s - b.s));
-    return { routes, byApproach, spineNorth, spineSouth, crossings: crossings(track), up: UP };
+    return { routes, byApproach, turns, spineNorth, spineSouth, crossings: crossings(track), up: UP };
   }
   root.TrafficRoutes = { RoutePath, build, crossings };
 })(window);

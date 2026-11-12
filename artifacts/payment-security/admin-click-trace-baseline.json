@@ -1,0 +1,97 @@
+{
+  "events": [
+    "Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED"
+  ],
+  "snapshots": [
+    {
+      "stage": "before-click",
+      "buttonCount": 1,
+      "disabled": true,
+      "error": [],
+      "row": "11 Nov 2026, 15.17\tDiagnostic Cash 73d7f9\npayment-diagnostic-56f5ad04-1575-4a14-818e-325304b14ec5@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-first-click",
+      "buttonCount": 1,
+      "disabled": false,
+      "error": [],
+      "row": "11 Nov 2026, 15.17\tDiagnostic Cash 73d7f9\npayment-diagnostic-56f5ad04-1575-4a14-818e-325304b14ec5@example.test\tBayar di Tempat\nReferensi: —\tRp 350.000\tPending\t\nReferensi penerimaan dana / kuitansi\n Saya sudah mencocokkan penerimaan dana dan nominal di atas pada sumber resmi.\nKonfirmasi penerimaan dana Batal verifikasi\nTolak",
+      "payment": {
+        "status": "pending",
+        "paidAt": null
+      },
+      "blazorError": false
+    },
+    {
+      "stage": "after-second-click",
+      "buttonCount": 0,
+      "disabled": null,
+      "error": [],
+      "row": "11 Nov 2026, 15.17\tDiagnostic Cash 73d7f9\npayment-diagnostic-56f5ad04-1575-4a14-818e-325304b14ec5@example.test\tBayar di Tempat\nReferensi: diagnostic-cash-receipt\tRp 350.000\tDikonfirmasi\t",
+      "payment": {
+        "status": "paid",
+        "paidAt": "2026-11-11T08:18:00.6912052"
+      },
+      "blazorError": false
+    }
+  ],
+  "clickTrace": [
+    {
+      "type": "pointerdown",
+      "target": "INPUT",
+      "checked": false,
+      "time": 873.6000000014901
+    },
+    {
+      "type": "pointerup",
+      "target": "INPUT",
+      "checked": false,
+      "time": 873.8000000007451
+    },
+    {
+      "type": "click",
+      "target": "INPUT",
+      "checked": true,
+      "time": 873.9000000022352
+    },
+    {
+      "type": "change",
+      "target": "INPUT",
+      "checked": true,
+      "time": 874
+    },
+    {
+      "type": "pointerdown",
+      "target": "BUTTON",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "time": 957.1000000014901
+    },
+    {
+      "type": "pointerdown",
+      "target": "BUTTON",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "time": 2538.300000000745
+    },
+    {
+      "type": "pointerup",
+      "target": "BUTTON",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "time": 2538.300000000745
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "button": "Konfirmasi penerimaan dana",
+      "disabled": false,
+      "time": 2538.400000002235
+    }
+  ]
+}

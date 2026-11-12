@@ -77,11 +77,8 @@ else
                             <td><AdminBadge Value="@r.Status" /></td>
                             <td>
                                 <div class="admin-actions">
-                                    @if (r.Status != "paid")
-                                    {
-                                        <button class="btn btn-success" disabled="@_busy" @onclick="@(() => SetStatus(r, "paid"))">Konfirmasi</button>
-                                    }
-                                    @if (r.Status != "rejected")
+                                    <a class="btn btn-outline" href="/admin/pembayaran">Verifikasi pembayaran</a>
+                                    @if (r.Status != "rejected" && r.Status != "paid")
                                     {
                                         <button class="btn btn-outline" style="color:#dc2626;border-color:#fecaca" disabled="@_busy" @onclick="@(() => SetStatus(r, "rejected"))">Tolak</button>
                                     }

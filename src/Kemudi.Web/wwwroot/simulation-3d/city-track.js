@@ -88,7 +88,10 @@ class CityTrack {
     const halfZ = (length * cos + width * sin) * .46;
     const p = vehicle.position;
     const inOriginal = p.x - halfX >= -25 && p.x + halfX <= 17 && p.z - halfZ >= -33 && p.z + halfZ <= 33;
-    const inNorth = p.x - halfX >= -8 && p.x + halfX <= 8 && p.z - halfZ >= -144 && p.z + halfZ <= -28;
+    // Merge the central corridor through the original area. The old 5 m overlap
+    // was shorter than a truck footprint, creating a false wall at the join.
+    // This extension stays inside inOriginal; external limits remain unchanged.
+    const inNorth = p.x - halfX >= -8 && p.x + halfX <= 8 && p.z - halfZ >= -144 && p.z + halfZ <= 33;
     const inCross = p.x - halfX >= -64 && p.x + halfX <= 64 && p.z - halfZ >= -88 && p.z + halfZ <= -72;
     const inLongRoad = this.longRoad && this.longRoad.distance(p) + Math.max(halfX,halfZ) < 8;
     const inSecond = p.x-halfX>=-8 && p.x+halfX<=8 && p.z-halfZ>=-464 && p.z+halfZ<=-335;

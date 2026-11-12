@@ -1,0 +1,42 @@
+﻿{
+    "passed":  [
+                   "npm.cmd --prefix tools/webgl run build (42 files, 7176563 bytes)",
+                   "npm.cmd --prefix tools/webgl run test:syntax (60 files)",
+                   "npm.cmd --prefix tools/webgl run test:functions (6 checks)",
+                   "npm.cmd --prefix tools/webgl run test:realism (all modules; collision11, traffic15)",
+                   "npm.cmd --prefix tools/webgl run test:gamepad (device/domain/UI)",
+                   "npm.cmd --prefix tools/webgl run test:handling (19 groups)",
+                   "node tools/webgl/intersection-tests.cjs",
+                   "node tools/webgl/unified-tests.cjs (7 checks)",
+                   "npm.cmd --prefix tools/webgl test (MOBIL/MOTOR/TRUK automatic)",
+                   "node tools/webgl/intersection-browser.cjs",
+                   "node tools/webgl/unified-browser.cjs (two legacy alias cases)",
+                   "node tools/webgl/road-seam-browser.cjs (TRUK automatic5checks)",
+                   "node tools/webgl/realism-browser.cjs (full6cases,49named checks, initial+paused12environment combinations; exit0)",
+                   "node tools/webgl/gamepad-browser.cjs (full6standalone cases,69checks,exit0)",
+                   "node tools/webgl/handling-browser.cjs (MOBIL/automatic focused10checks,exit0)"
+               ],
+    "scope":  "Existing simulator automated suites; no production or test source edits",
+    "inProgress":  [
+
+                   ],
+    "ownedServer":  {
+                        "session":  80413,
+                        "url":  "http://127.0.0.1:8080/"
+                    },
+    "notRun":  [
+                   "Full gamepad-look matrix: CANCELLED by agent after partial MOBIL/automatic assertions at parent bounded-scope request; partial log is not a passed case",
+                   "Handling browser other5combinations NOT RUN",
+                   "Physical USB/Bluetooth controllers NOT RUN",
+                   "Human audio and visual acceptance NOT RUN",
+                   "Controlled hardware FPS benchmark NOT RUN",
+                   "Five-minute sustained stability rerun NOT RUN",
+                   "Website iframe/browser/backend owned by main, not claimed here"
+               ],
+    "date":  "2026-11-11",
+    "notes":  [
+                  "PowerShell logs format npm stderr notice as NativeCommandError; individual script exit codes checked and all listed passed scripts exit0.",
+                  "Standalone browser tests do not prove backend result persistence or website auth. Main owns those tests.",
+                  "Browser suites run sequentially; concurrent main backend and C# builds caused substantial host contention. No performance/FPS conclusions drawn."
+              ]
+}

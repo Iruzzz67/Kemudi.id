@@ -38,15 +38,19 @@
         </main>
     </div>
 }
+else if (Auth.AdminAccessError is not null)
+{
+    <div class="error-box" role="alert">@Auth.AdminAccessError <a href="@Nav.Uri">Muat ulang</a></div>
+}
 else
 {
     <div class="loading" style="padding:4rem 0">Memeriksa akses admin...</div>
 }
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (!Auth.IsAuthenticated || !Auth.IsAdmin)
+        if (!await Auth.LoadAdminAsync() && Auth.AdminAccessError is null)
             Nav.NavigateTo("/admin/login", forceLoad: true);
     }
 }

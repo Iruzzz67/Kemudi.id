@@ -1,0 +1,53 @@
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "MigrationId", "ProductVersion"
+      FROM "__EFMigrationsHistory"
+      ORDER BY "MigrationId";
+info: Microsoft.EntityFrameworkCore.Migrations[20405]
+      No migrations were applied. The database is already up to date.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5890
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\user\Kemudi.id\src\Kemudi.Api
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "c"."Slug", "c0"."VehicleType", "c"."Label", "c"."Level", "c"."Price", "c"."Sessions", "c"."SessionDurationMin", "c"."Description", "c"."Includes"
+      FROM "CoursePackages" AS "c"
+      INNER JOIN "Courses" AS "c0" ON "c"."CourseId" = "c0"."Id"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "m"."Id", "m"."Achievements", "m"."AvatarColor", "m"."Bio", "m"."Certifications", "m"."ExperienceYears", "m"."Initials", "m"."Name", "m"."Phone", "m"."Rating", "m"."Slug", "m"."Status", "m"."StudentsTrained", "m"."TestimonialsJson", "m"."Title", "m"."VehicleTypes"
+      FROM "Mentors" AS "m"
+      ORDER BY "m"."Name"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "v"."Id", "v"."Acceleration", "v"."Braking", "v"."CameraDistance", "v"."CameraHeight", "v"."Color", "v"."Description", "v"."Friction", "v"."GearCount", "v"."GearRatios", "v"."Height", "v"."Label", "v"."LeanAmount", "v"."Length", "v"."MaxSpeed", "v"."MaxSteerAngle", "v"."ReverseMaxSpeed", "v"."SteerRate", "v"."TireGrip", "v"."Type", "v"."Wheelbase", "v"."Width"
+      FROM "Vehicles" AS "v"

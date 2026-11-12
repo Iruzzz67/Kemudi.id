@@ -1,0 +1,58 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "🚗 Kemudi.id" [ref=e5] [cursor=pointer]:
+        - /url: ""
+        - generic [ref=e6]: 🚗
+        - strong [ref=e7]: Kemudi.id
+      - navigation [ref=e8]:
+        - link "Beranda" [ref=e9] [cursor=pointer]:
+          - /url: ""
+        - link "Simulasi" [ref=e10] [cursor=pointer]:
+          - /url: simulasi
+        - link "Kursus" [ref=e11] [cursor=pointer]:
+          - /url: kursus
+        - link "Materi" [ref=e12] [cursor=pointer]:
+          - /url: materi
+        - link "Masuk" [ref=e13] [cursor=pointer]:
+          - /url: login
+        - link "Daftar" [ref=e14] [cursor=pointer]:
+          - /url: register
+  - main [ref=e15]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]: 🚗
+        - heading "Masuk" [level=1] [ref=e21]
+        - paragraph [ref=e22]: Lanjutkan latihan dan pantau progresmu di dashboard.
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Email
+          - textbox "Email" [ref=e27]:
+            - /placeholder: nama@email.com
+        - generic [ref=e28]:
+          - generic [ref=e29]: Password
+          - textbox "Password" [ref=e30]:
+            - /placeholder: ••••••••
+        - button "Masuk" [ref=e31] [cursor=pointer]
+        - paragraph [ref=e32]:
+          - text: Belum punya akun?
+          - link "Daftar" [ref=e33] [cursor=pointer]:
+            - /url: register
+  - contentinfo [ref=e34]:
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]: 🚗
+            - strong [ref=e40]: Kemudi.id
+          - paragraph [ref=e41]: Belajar mengemudi dengan aman sebelum turun ke jalan. Platform kursus & simulasi 3D interaktif.
+        - generic [ref=e42]:
+          - link "Simulasi" [ref=e43] [cursor=pointer]:
+            - /url: simulasi
+          - link "Kursus" [ref=e44] [cursor=pointer]:
+            - /url: kursus
+          - link "Materi" [ref=e45] [cursor=pointer]:
+            - /url: materi
+          - link "Masuk" [ref=e46] [cursor=pointer]:
+            - /url: login
+      - generic [ref=e47]: © 2026 Kemudi.id — Belajar Mengemudi, Sebelum Turun ke Jalan

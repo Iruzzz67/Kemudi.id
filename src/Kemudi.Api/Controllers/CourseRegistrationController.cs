@@ -11,6 +11,7 @@ namespace Kemudi.Api.Controllers;
 
 [ApiController]
 [Route("api/course-registration")]
+[Authorize]
 public sealed class CourseRegistrationController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -18,16 +19,16 @@ public sealed class CourseRegistrationController : ControllerBase
     public CourseRegistrationController(AppDbContext db) => _db = db;
 
     /// <summary>
-    /// Mendaftarkan kursus. User boleh anonim (UX aplikasi lama), tetapi bila
-    /// membawa token JWT, userId otomatis dikaitkan.
+    /// Mendaftarkan kursus milik identitas JWT yang tervalidasi.
     /// </summary>
     [HttpPost]
-    [AllowAnonymous]
     [ProducesResponseType(typeof(CourseRegistrationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Register([FromBody] CourseRegistrationRequest request)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         if (string.IsNullOrWhiteSpace(request.Name) ||
             string.IsNullOrWhiteSpace(request.Email) ||
             string.IsNullOrWhiteSpace(request.NIK) ||
@@ -44,18 +45,19 @@ public sealed class CourseRegistrationController : ControllerBase
             .FirstOrDefaultAsync(m => m.Slug == request.MentorId);
         if (mentor is null) return NotFound(new { error = "Mentor tidak ditemukan." });
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var paymentMethod = request.PaymentMethod.ToLowerInvariant() switch
+        var paymentMethod = request.PaymentMethod?.Trim().ToLowerInvariant() switch
         {
+            "transfer" => PaymentMethod.Transfer,
             "e-wallet" => PaymentMethod.EWallet,
             "cash" => PaymentMethod.Cash,
-            _ => PaymentMethod.Transfer
+            _ => (PaymentMethod?)null
         };
+        if (paymentMethod is null)
+            return BadRequest(new { error = "Metode pembayaran tidak valid." });
 
         var registration = new CourseRegistration
         {
-            UserId = userId ?? string.Empty,
+            UserId = userId,
             CoursePackageId = package.Id,
             MentorId = mentor.Id,
             Name = request.Name,
@@ -64,7 +66,7 @@ public sealed class CourseRegistrationController : ControllerBase
             NIK = request.NIK,
             Address = request.Address,
             Status = RegistrationStatus.Pending,
-            PaymentMethod = paymentMethod,
+            PaymentMethod = paymentMethod.Value,
             StartDate = paymentMethod == PaymentMethod.Cash
                 ? DateTime.UtcNow.AddDays(3)
                 : DateTime.UtcNow.AddDays(7)
@@ -73,7 +75,7 @@ public sealed class CourseRegistrationController : ControllerBase
         _db.CourseRegistrations.Add(registration);
         await _db.SaveChangesAsync();
 
-        return Ok(ToDto(registration, package.Price, paymentMethod));
+        return Ok(ToDto(registration, package.Price, paymentMethod.Value));
     }
 
     /// <summary>Melihat detail pendaftaran berdasarkan id.</summary>
@@ -82,9 +84,11 @@ public sealed class CourseRegistrationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         var registration = await _db.CourseRegistrations.AsNoTracking()
             .Include(r => r.CoursePackage)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
 
         if (registration is null) return NotFound(new { error = "Pendaftaran tidak ditemukan." });
 

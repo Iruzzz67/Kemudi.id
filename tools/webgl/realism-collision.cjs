@@ -72,6 +72,22 @@ check('rotation sweeps are conservative and a clear rotation succeeds', () => {
   world.unregisterBody('b');
   assert.equal(world.resolve([proposed(a, 0, 0, Math.PI / 2)], .1).get('a').rotation, Math.PI / 2);
 });
+check('steering away near a wall clears the conservative rotation envelope without tunneling', () => {
+  for (const side of [-1, 1]) {
+    const world = new CollisionWorld(), a = actor('a', 'MOBIL', 0, 0);
+    world.registerBody('a', a, { width: 2, length: 4, height: 2 });
+    world.registerStaticBox('wall', { x: side > 0 ? 1.02 : -2, y: 0, z: -20 },
+      { x: side > 0 ? 2 : -1.02, y: 3, z: 20 });
+    const away = world.resolve([proposed(a, -.1 * side, -.1, -.01 * side)], .1).get('a');
+    assert.equal(away.blocked, false, 'a clear steering-away sweep must not freeze at its start');
+    assert.ok(Math.abs(away.position.x + .1 * side) < 1e-9);
+    const into = world.resolve([proposed(a, .1 * side, -.1, .01 * side)], .1).get('a');
+    assert.equal(into.blocked, true, 'refinement must retain contact while steering into the wall');
+    assert.ok(Math.abs(into.position.x) < .02);
+    const rotate = world.resolve([proposed(a, 0, 0, Math.PI * side)], .1).get('a');
+    assert.equal(rotate.blocked, true, 'a free final pose must not hide collision during rotation');
+  }
+});
 check('static wall sweep, spawn validation, release and vertical clearance', () => {
   const world = new CollisionWorld(), a = actor('a', 'MOTOR', 0, 10);
   world.registerBody('a', a);
