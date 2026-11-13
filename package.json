@@ -1,0 +1,14 @@
+{
+  "name": "kemudi-id-ai-studio-preview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node preview for the existing Three.js simulator in Google AI Studio. Blazor and ASP.NET Core remain separate.",
+  "scripts": {
+    "dev": "node tools/webgl/build.cjs && node ai-studio-preview.cjs",
+    "start": "node tools/webgl/build.cjs && node ai-studio-preview.cjs",
+    "build": "node tools/webgl/build.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
